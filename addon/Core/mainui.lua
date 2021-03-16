@@ -663,7 +663,7 @@ CreateMainButton(mainsettings, 62, 22, "Core", -31, 30, function()
 	ni.functions.webrequest("https://api.github.com/repos/darhanger/ni/commits", nil, false, function(code, body)
 		if code == 200 then
 			local t = ni.utils.json.decode(body);
-			if t[2]["sha"] ~= "d0acfec24a747d2d47fb70da82cbd76f1655f2ee" then
+			if t[2]["sha"] ~= "d5261c40ee78e5d912b60e7d877b466edbd56f7b" then
 				ni.functions.open("https://github.com/darhanger/ni/archive/main.zip")
 			else
 				message("Up to date on core");
@@ -676,7 +676,7 @@ CreateMainButton(mainsettings, 62, 22, "Release", 31, 30, function()
 	ni.functions.webrequest("https://api.github.com/repos/darhanger/ni/releases", nil, false, function(code, body)
 		if code == 200 then
 			local t = ni.utils.json.decode(body);
-			if t[2]["tag_name"] ~= "v0.0.52" then
+			if t[2]["tag_name"] ~= "v0.0.53" then
 				ni.functions.open(t[1]["assets"][1]["browser_download_url"])
 			else
 				message("Up to date on releases");
