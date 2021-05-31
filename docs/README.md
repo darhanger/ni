@@ -16,11 +16,11 @@ Profile Framework for World of Warcraft and its older expansions.
 
 </div>
 
-##  <img src="https://github.com/darhanger/darhanger/blob/main/Assets/PC.gif" width="30px"> How to?
+##  How to?
 
 See the [Quick start](https://darhanger.github.io/ni/#/getting-started/quickstart) guide for more details.
 
-##  <img src="https://github.com/darhanger/darhanger/blob/main/Assets/coin.gif" width="30px"> Features
+##  Features
 
 ⚡️ Wrapper for Protected Lua Functions<br>
 ⚡️ Anti Warden<br>
@@ -32,21 +32,21 @@ See the [Quick start](https://darhanger.github.io/ni/#/getting-started/quickstar
 ⚡️ Time to Die Calculations<br>
 ⚡️ Framework for Top Tier PvE/PvP Profiles<br>
 
-## <img src="https://github.com/darhanger/darhanger/blob/main/Assets/Designer.gif" width="30px"> Program Developer
+## Program Developer
 
 - **[Scott](https://github.com/scizzydo) or Scott#1180**
 
-## <img src="https://github.com/darhanger/darhanger/blob/main/Assets/Designer.gif" width="30px"> Lead Administrator
+## Lead Administrator
 
 - **[brajevicm](https://github.com/brajevicm)**
 
-## <img src="https://github.com/darhanger/darhanger/blob/main/Assets/Developer.gif" width="30px"> Contributers
+## Contributers
 
 - **[DarhangeR](https://github.com/DarhangeR)**
 - **[Dimonsky](https://github.com/Dimonskynew)**
 - **[NuokHB](https://github.com/NuokHB/ni/tree/master/addon/Rotations)**
 - **[Brecherbernd](https://github.com/Brecherbernd/Doomsday)**
 
-## <img src="https://github.com/darhanger/darhanger/blob/main/Assets/Hi.gif" width="30px"> Community 
+## Community 
 
 Users and the development team are usually in the [![Discord Server](https://img.shields.io/badge/Discord-7289DA?style=flat-squaree&logo=discord&logoColor=white)](https://discord.gg/xBFKJc6QRr)
