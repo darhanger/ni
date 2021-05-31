@@ -8,7 +8,8 @@
 [![Discord Server](https://img.shields.io/badge/Discord-7289DA?style=flat-squaree&logo=discord&logoColor=white)](https://discord.gg/xBFKJc6QRr)
 [![License](https://img.shields.io/github/license/darhanger/ni?style=flat-square)](https://github.com/darhanger/ni/releases) 
 [![Last Release](https://img.shields.io/github/v/release/darhanger/ni?style=flat-square)](https://github.com/darhanger/ni)
-[![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni/total?style=flat-square)](https://github.com/darhanger/ni/releases)  
+[![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni/total?style=flat-square)](https://github.com/darhanger/ni/releases)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=E5ULM2VAQHE9N&source=url)
 
 <img src="https://darhanger.github.io/ni/_media/ni.png" alt="Logo of ni" width="256"/>
 
