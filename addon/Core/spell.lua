@@ -266,8 +266,7 @@ spell.castatqueue = function(...)
 	end
 end
 spell.stopcasting = function()
-    ni.functions.callprotected(MoveForwardStart)
-    ni.delayfor(0.05, function() ni.functions.callprotected(MoveForwardStop) end )    
+    ni.functions.stopcasting() 
 end
 spell.stopchanneling = function()
     ni.functions.callprotected(MoveForwardStart)
