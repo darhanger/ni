@@ -266,11 +266,12 @@ spell.castatqueue = function(...)
 	end
 end
 spell.stopcasting = function()
-	ni.functions.stopcasting()
+    ni.functions.callprotected(MoveForwardStart)
+    ni.delayfor(0.05, function() ni.functions.callprotected(MoveForwardStop) end )    
 end
 spell.stopchanneling = function()
-	StrafeLeftStart()
-	StrafeLeftStop()
+    ni.functions.callprotected(MoveForwardStart)
+    ni.delayfor(0.05, function() ni.functions.callprotected(MoveForwardStop) end )    
 end
 spell.valid = function(t, spellid, facing, los, friendly)
 	friendly = true and friendly or false
