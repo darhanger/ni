@@ -1,5 +1,148 @@
 local main_ui = {};
 
+local Localization = {
+	Assistant = "Rotation Assistant",
+	Primary = "Select your primary rotation:",
+	Secondary = "Select your secondary rotation:",
+	Generic = "Select your generic rotation:",
+	None = "None",
+	Resource = "Resource Tracking Toggles",
+	All = "All",
+	Reload = "Reload after changing",
+	Global = "toggle or global",
+	GUI = "GUI Toggle:",
+	PrimaryKey = "Primary Toggle:",
+	SecondaryKey = "Secondary Toggle:",
+	Generic = "Generic Toggle:",
+	Interrupt = "Interrupt Toggle:",
+	Follow = "Follow Unit & Toggle:",
+	GlobalDev = "Global variable:",
+	Dev = "Dev Tools:",
+	ReloadDev = "Reload",
+	Console = "Console",
+	Contact = "Contact:",
+	Rotation = "Rotation Settings",
+	MainSettings = "Main Settings",
+	ResourceTrack = "Resource Track",
+	CreatureTrack = "Creature Track",
+	Close = "Close",
+	Lockpicking = "Lockpicking",
+	Herbs = "Herbs",
+	Minerals = "Minerals",
+	DisarmTrap = "Disarm Trap",
+	Open = "Open",
+	Treasure = "Treasure",
+	CloseTrack = "Close",
+	ArmTrap = "Arm Trap",
+	QuickOpen = "Quick Open",
+	CalcifiedElvenGems = "Calcified Elven Gems",
+	QuickClose = "Quick Close",
+	OpenTinkering = "Open Tinkering",
+	OpenKneeling = "Open Kneeling",
+	OpenAttacking = "Open Attacking",
+	Gahzridian = "Gahzridian",
+	Blasting = "Blasting",
+	PvPOpen = "PvP Open",
+	PvPClose = "PvP Close",
+	Fishing = "Fishing",
+	Inscription = "Inscription",
+	OpenFromVehicle = "Open From Vehicle",
+	CreatureTrackingToggles = "Creature Tracking Toggles",
+	Beasts = "Beasts",
+	Dragons = "Dragons",
+	Demons = "Demons",
+	Elementals = "Elementals",
+	Giants = "Giants",
+	Undead = "Undead",
+	Humanoids = "Humanoids",
+	Critters = "Critters",
+	Machines = "Machines",
+	Slimes = "Uncategorized",
+	Totem = "Totem",
+	NonCombatPet = "Non Combat Pet",
+	GasCloud = "Gas Cloud",
+	Latency = "Latency ("..ni.vars.latency.." ms)",
+	AreaofEffectToggle = "Area of Effect Toggle:",
+	PauseRotationModifier = "Pause Rotation Modifier:",
+	CDToggle = "CD Toggle:",
+	CustomToggle = "Custom Toggle:",
+	MainTankOverride = "Main Tank Override:",
+	Enabled = "Enabled:",
+	OffTankOverride = "Off Tank Override:",
+	IsMelee = "Is Melee:",
+}
+if (GetLocale() == "ruRU") then
+	Localization.Assistant = "Помощник для Ротации"
+	Localization.Primary = "Выберите свою основную ротацию:"
+	Localization.Secondary = "Выберите второстепенную ротацию:"
+	Localization.Generic = "Выберите свою общую ротацию:"
+	Localization.None = "Нету"
+	Localization.Resource = "Отслеживания ресурсов"
+	Localization.All = "Всех"
+	Localization.Reload = "Перезагрузитe после изменения"
+	Localization.Global = "кнопки или глобальной"
+	Localization.GUI = "Кнопка меню:"
+	Localization.PrimaryKey = "Кнопка для основной:"
+	Localization.SecondaryKey = "Кнопка для второстепенной:"
+	Localization.Generic = "Кнопка для общей:"
+	Localization.Interrupt = "Кнопка для прерывания:"
+	Localization.Follow = "Авто-Следование и кнопка:"
+	Localization.GlobalDev = "Глобальная переменная:"
+	Localization.Dev = "Опции разработчика:"
+	Localization.ReloadDev = "Перезагрузка"
+	Localization.Console = "Консоль"
+	Localization.Contact = "Контакты:"
+	Localization.Rotation = "Настройки Ротаций"
+	Localization.MainSettings = "Настройки"
+	Localization.ResourceTrack = "Поиск Ресурсов"
+	Localization.CreatureTrack = "Поиск НПЦ"
+	Localization.Close = "Закрыть"
+	Localization.Lockpicking = "Вскрытие замков"
+	Localization.Herbs = "Травы"
+	Localization.Minerals = "Минералы"
+	Localization.DisarmTrap = "Обезв. Ловушки"
+	Localization.Open = "Открываемые"
+	Localization.Treasure = "Сокровища"
+	Localization.CloseTrack = "Закрытые"
+	Localization.ArmTrap = "Заряж. Ловушки"
+	Localization.QuickOpen = "Быстрое открытие"
+	Localization.CalcifiedElvenGems = "Эльфийский камень"
+	Localization.QuickClose = "Быстрое закрытие"
+	Localization.OpenTinkering = "Откр. ремеслом"
+	Localization.OpenKneeling = "Открытие /kneel"
+	Localization.OpenAttacking = "Открытие атакой"
+	Localization.Gahzridian = "Газ'рилл"
+	Localization.Blasting = "Взрываемое"
+	Localization.PvPOpen = "Открытие в PvP"	
+	Localization.PvPClose = "Закрытие в PvP"
+	Localization.Fishing = "Рыбная ловля"
+	Localization.Inscription = "Начертание"
+	Localization.OpenFromVehicle = "Открытие с транс."
+	Localization.CreatureTrackingToggles = "Поиск НПЦ"
+	Localization.Beasts = "Звери"
+	Localization.Dragons = "Драконы"
+	Localization.Demons = "Демоны"
+	Localization.Elementals = "Элементали"
+	Localization.Giants = "Великаны"
+	Localization.Undead = "Нежить"
+	Localization.Humanoids = "Гуманоиды"
+	Localization.Critters = "Существа"
+	Localization.Machines = "Механизмы"
+	Localization.Slimes = "Разное"
+	Localization.Totem = "Тотемы"
+	Localization.NonCombatPet = "Спутник"
+	Localization.GasCloud = "Облако газа"
+	Localization.Latency = "Задержка ("..ni.vars.latency.." мс)"
+	Localization.AreaofEffectToggle = "Кнопка включения АоЕ:"
+	Localization.PauseRotationModifier = "Кнопка для паузы ротации:"
+	Localization.CDToggle = "Кнопка включения КД:"
+	Localization.CustomToggle = "Настраиваемая Кнопка:"
+	Localization.MainTankOverride = "Имя главного танка:"
+	Localization.Enabled = "Включить:"
+	Localization.OffTankOverride = "Имя второго танка:"
+	Localization.IsMelee = "Ближний бой:"
+end
+
 local ui = {
 	icon = {
 		x = 75.70,
@@ -57,7 +200,7 @@ frame:SetScript("OnDragStop", function()
 	ni.vars.ui.main.y = offset_y;
 	frame:StopMovingOrSizing();
 end);
-frame:SetWidth(260);
+frame:SetWidth(320);
 frame:SetHeight(230);
 frame:SetBackdrop(backdrop);
 frame:SetPoint(ni.vars.ui.main.point, WorldFrame, ni.vars.ui.main.relativePoint, ni.vars.ui.main.x, ni.vars.ui.main.y);
@@ -79,26 +222,26 @@ local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)
 	return text;
 end
 
-local title = CreateText(frame, "Rotation Assistant", 0, -5, 0.2, 0.7, 1, 1);
-local primary_text = CreateText(frame, "Select your primary rotation:", 0, -18, 0.1, 0.5, 0.8, 1);
-local secondary_text = CreateText(frame, "Select your secondary rotation:", 0, -63, 0.1, 0.5, 0.8, 1);
-local generic_text = CreateText(frame, "Select your generic rotation:", 0, -108, 0.1, 0.5, 0.8, 1);
+local title = CreateText(frame, Localization.Assistant, 0, -5, 0.2, 0.7, 1, 1);
+local primary_text = CreateText(frame, Localization.Primary, 0, -18, 0.1, 0.5, 0.8, 1);
+local secondary_text = CreateText(frame, Localization.Secondary, 0, -63, 0.1, 0.5, 0.8, 1);
+local generic_text = CreateText(frame, Localization.Generic, 0, -108, 0.1, 0.5, 0.8, 1);
 
 local function GetFilename(file)
 	return file:match("^.*\\(.*).lua$") or file:match("^.*\\(.*).enc$") or file:match("^.*\\(.*).out$") or file
 end
 
 local profiles = ni.functions.getprofilesfor(select(2, UnitClass("player"))) or { };
-tinsert(profiles, 1, "None");
+tinsert(profiles, 1, Localization.None);
 local generic_profiles = ni.functions.getprofilesfor("Generic") or { };
-tinsert(generic_profiles, 1, "None");
+tinsert(generic_profiles, 1, Localization.None);
 
 local ddm_name = ni.utils.GenerateRandomName();
 local dropdownmenu = CreateFrame("frame", ddm_name, frame, "UIDropDownMenuTemplate");
 dropdownmenu:ClearAllPoints();
 dropdownmenu:SetPoint("TOP", 0, -36);
 dropdownmenu:Show();
-local primary = "None";
+local primary = Localization.None;
 local primaryIndex = 1;
 UIDropDownMenu_Initialize(dropdownmenu, function(self, level)
 	local info = UIDropDownMenu_CreateInfo();
@@ -133,7 +276,7 @@ local dropdownmenu2 = CreateFrame("frame", ddm2_name, frame, "UIDropDownMenuTemp
 dropdownmenu2:ClearAllPoints();
 dropdownmenu2:SetPoint("TOP", 0, -81);
 dropdownmenu2:Show();
-local secondary = "None";
+local secondary = Localization.None;
 local secondaryIndex = 1;
 UIDropDownMenu_Initialize(dropdownmenu2, function(self, level)
 	local info = UIDropDownMenu_CreateInfo();
@@ -168,7 +311,7 @@ local dropdownmenu3 = CreateFrame("frame", ddm3_name, frame, "UIDropDownMenuTemp
 dropdownmenu3:ClearAllPoints();
 dropdownmenu3:SetPoint("TOP", 0, -126);
 dropdownmenu3:Show();
-local generic = "None";
+local generic = Localization.None;
 local genericIndex = 1;
 UIDropDownMenu_Initialize(dropdownmenu3, function(self, level)
 	local info = UIDropDownMenu_CreateInfo();
@@ -193,16 +336,16 @@ UIDropDownMenu_Initialize(dropdownmenu3, function(self, level)
 	end
 end)
 UIDropDownMenu_SetWidth(dropdownmenu3, 150);
-UIDropDownMenu_SetButtonWidth(dropdownmenu3, 174);
+UIDropDownMenu_SetButtonWidth(dropdownmenu3, 215);
 UIDropDownMenu_JustifyText(dropdownmenu3, "CENTER");	
 UIDropDownMenu_SetSelectedID(dropdownmenu3, genericIndex);
 UIDropDownMenu_SetText(dropdownmenu3, generic);
 
 local mainsettings = CreateFrame("frame", nil, frame);
 mainsettings:ClearAllPoints();
-mainsettings:SetWidth(180);
-mainsettings:SetHeight(440);
-mainsettings:SetPoint("TOPRIGHT", frame, 175, 0);
+mainsettings:SetWidth(220);
+mainsettings:SetHeight(460);
+mainsettings:SetPoint("TOPRIGHT", frame, 215, 0);
 mainsettings:SetBackdrop(backdrop);
 mainsettings:EnableMouse(true);
 mainsettings:SetBackdropColor(0,0,0,1);
@@ -220,7 +363,7 @@ settings:Hide();
 
 local resourcesettings = CreateFrame("frame", nil, frame);
 resourcesettings:ClearAllPoints();
-resourcesettings:SetWidth(260);
+resourcesettings:SetWidth(320);
 resourcesettings:SetHeight(280);
 resourcesettings:SetPoint("BOTTOM", frame, 0, -275);
 resourcesettings:SetBackdrop(backdrop);
@@ -230,7 +373,7 @@ resourcesettings:Hide();
 
 local creaturesettings = CreateFrame("frame", nil, frame);
 creaturesettings:ClearAllPoints();
-creaturesettings:SetWidth(260);
+creaturesettings:SetWidth(320);
 creaturesettings:SetHeight(200);
 creaturesettings:SetPoint("BOTTOM", frame, 0, -195);
 creaturesettings:SetBackdrop(backdrop);
@@ -249,21 +392,21 @@ local function CreateMainButton(frame, width, height, text, offset_x, offset_y, 
 	return button;
 end
 
-CreateMainButton(frame, 125, 22, "Rotation Settings", -63, 51, function()
+CreateMainButton(frame, 137, 22, Localization.Rotation, -68, 51, function()
 	if settings:IsShown() then
 		settings:Hide();
 	else
 		settings:Show();
 	end
 end);
-CreateMainButton(frame, 125, 22, "Main Settings", 63, 51, function()
+CreateMainButton(frame, 137, 22, Localization.MainSettings, 68, 51, function()
 	if mainsettings:IsShown() then
 		mainsettings:Hide();
 	else
 		mainsettings:Show();
 	end
 end);
-CreateMainButton(frame, 125, 22, "Resource Track", -63, 28, function()
+CreateMainButton(frame, 137, 22, Localization.ResourceTrack, -68, 28, function()
 	if resourcesettings:IsShown() then
 		resourcesettings:Hide();
 	else
@@ -273,7 +416,7 @@ CreateMainButton(frame, 125, 22, "Resource Track", -63, 28, function()
 		resourcesettings:Show();
 	end
 end);
-CreateMainButton(frame, 125, 22, "Creature Track", 63, 28, function()
+CreateMainButton(frame, 137, 22, Localization.CreatureTrack, 68, 28, function()
 	if creaturesettings:IsShown() then
 		creaturesettings:Hide();
 	else
@@ -283,7 +426,7 @@ CreateMainButton(frame, 125, 22, "Creature Track", 63, 28, function()
 		creaturesettings:Show();
 	end
 end);
-CreateMainButton(frame, 62, 22, "Close", 0, 5, function()
+CreateMainButton(frame, 62, 22, Localization.Close, 0, 5, function()
 	if frame:IsShown() then
 		frame:Hide();
 	end
@@ -310,7 +453,7 @@ local function CreateKeyDropDown(frame, keys, offset_x, offset_y, var)
 	dropdown:ClearAllPoints();
 	dropdown:SetPoint("TOP", frame, offset_x, offset_y);
 	dropdown:Show();
-	local set = "None";
+	local set = Localization.None;
 	local setIndex = 1;
 	UIDropDownMenu_Initialize(dropdown, function(self, level)
 		local info = UIDropDownMenu_CreateInfo();
@@ -398,7 +541,7 @@ function bitwise.clearbit(x, p)
 end
 
 --Resource tracking menu
-CreateText(resourcesettings, "Resource Tracking Toggles", 0, -5, 0.2, 0.7, 1, 1);
+CreateText(resourcesettings, Localization.Resource, 0, -5, 0.2, 0.7, 1, 1);
 local currentresources = 0;
 local boxes = {
 	resource_none,
@@ -448,15 +591,15 @@ local function checkbox_clicked(self)
 	update_boxes(currentresources);
 end
 
-CreateDropDownText(resourcesettings, "None", 8, -27, "LEFT")
-boxes.resource_none = CreateCheckBox(resourcesettings, -104, -25, currentresources == 0, function(self)
+CreateDropDownText(resourcesettings, Localization.None, -15, -27, "LEFT")
+boxes.resource_none = CreateCheckBox(resourcesettings, -130, -25, currentresources == 0, function(self)
 	if self:GetChecked() then
 		currentresources = 0;
 	end
 	update_boxes(currentresources);
 end, 0);
-CreateDropDownText(resourcesettings, "All", 8, -47, "LEFT")
-boxes.resource_all = CreateCheckBox(resourcesettings, -104, -45, currentresources == -1, function(self)
+CreateDropDownText(resourcesettings, Localization.All, -15, -47, "LEFT")
+boxes.resource_all = CreateCheckBox(resourcesettings, -130, -45, currentresources == -1, function(self)
 	if self:GetChecked() then
 		currentresources = -1;
 	else
@@ -464,51 +607,51 @@ boxes.resource_all = CreateCheckBox(resourcesettings, -104, -45, currentresource
 	end
 	update_boxes(currentresources);
 end, -1);
-CreateDropDownText(resourcesettings, "Lockpicking", 8, -67, "LEFT")
-boxes.resource_lockpicking = CreateCheckBox(resourcesettings, -104, -65, bitwise.hasbit(currentresources, 0x1), checkbox_clicked, 0x1);
-CreateDropDownText(resourcesettings, "Herbs", 8, -87, "LEFT")
-boxes.resource_herbs = CreateCheckBox(resourcesettings, -104, -85, bitwise.hasbit(currentresources, 0x2), checkbox_clicked, 0x2);
-CreateDropDownText(resourcesettings, "Minerals", 8, -107, "LEFT")
-boxes.resource_minerals = CreateCheckBox(resourcesettings, -104, -105, bitwise.hasbit(currentresources, 0x4), checkbox_clicked, 0x4);
-CreateDropDownText(resourcesettings, "Disarm Trap", 8, -127, "LEFT")
-boxes.resource_disarmtrap = CreateCheckBox(resourcesettings, -104, -125, bitwise.hasbit(currentresources, 0x8), checkbox_clicked, 0x8);
-CreateDropDownText(resourcesettings, "Open", 8, -147, "LEFT")
-boxes.resource_open = CreateCheckBox(resourcesettings, -104, -145, bitwise.hasbit(currentresources, 0x10), checkbox_clicked, 0x10);
-CreateDropDownText(resourcesettings, "Treasure", 8, -167, "LEFT")
-boxes.resource_treasure = CreateCheckBox(resourcesettings, -104, -165, bitwise.hasbit(currentresources, 0x20), checkbox_clicked, 0x20);
-CreateDropDownText(resourcesettings, "Close", 8, -187, "LEFT")
-boxes.resource_close = CreateCheckBox(resourcesettings, -104, -185, bitwise.hasbit(currentresources, 0x80), checkbox_clicked, 0x80);
-CreateDropDownText(resourcesettings, "Arm Trap", 8, -207, "LEFT")
-boxes.resource_armtrap = CreateCheckBox(resourcesettings, -104, -205, bitwise.hasbit(currentresources, 0x100), checkbox_clicked, 0x100);
-CreateDropDownText(resourcesettings, "Quick Open", 8, -227, "LEFT")
-boxes.resource_quickopen = CreateCheckBox(resourcesettings, -104, -225, bitwise.hasbit(currentresources, 0x200), checkbox_clicked, 0x200);
-CreateDropDownText(resourcesettings, "Calcified Elven Gems", 8, -247, "LEFT")
-boxes.resource_calcifiedelvengems = CreateCheckBox(resourcesettings, -104, -245, bitwise.hasbit(currentresources, 0x40), checkbox_clicked, 0x40);
-CreateDropDownText(resourcesettings, "Quick Close", 110, -27, "LEFT")
-boxes.resource_quickclose = CreateCheckBox(resourcesettings, -2, -25, bitwise.hasbit(currentresources, 0x400), checkbox_clicked, 0x400);
-CreateDropDownText(resourcesettings, "Open Tinkering", 110, -47, "LEFT")
-boxes.resource_opentinkering = CreateCheckBox(resourcesettings, -2, -45, bitwise.hasbit(currentresources, 0x800), checkbox_clicked, 0x800);
-CreateDropDownText(resourcesettings, "Open Kneeling", 110, -67, "LEFT")
-boxes.resource_openkneeling = CreateCheckBox(resourcesettings, -2, -65, bitwise.hasbit(currentresources, 0x1000), checkbox_clicked, 0x1000);
-CreateDropDownText(resourcesettings, "Open Attacking", 110, -87, "LEFT")
-boxes.resource_openattacking = CreateCheckBox(resourcesettings, -2, -85, bitwise.hasbit(currentresources, 0x2000), checkbox_clicked, 0x2000);
-CreateDropDownText(resourcesettings, "Gahzridian", 110, -107, "LEFT")
-boxes.resource_gahzridian = CreateCheckBox(resourcesettings, -2, -105, bitwise.hasbit(currentresources, 0x4000), checkbox_clicked, 0x4000);
-CreateDropDownText(resourcesettings, "Blasting", 110, -127, "LEFT")
-boxes.resource_blasting = CreateCheckBox(resourcesettings, -2, -125, bitwise.hasbit(currentresources, 0x8000), checkbox_clicked, 0x8000);
-CreateDropDownText(resourcesettings, "PvP Open", 110, -147, "LEFT")
-boxes.resource_pvpopen = CreateCheckBox(resourcesettings, -2, -145, bitwise.hasbit(currentresources, 0x10000), checkbox_clicked, 0x10000);
-CreateDropDownText(resourcesettings, "PvP Close", 110, -167, "LEFT")
-boxes.resource_pvpclose = CreateCheckBox(resourcesettings, -2, -165, bitwise.hasbit(currentresources, 0x20000), checkbox_clicked, 0x20000);
-CreateDropDownText(resourcesettings, "Fishing", 110, -187, "LEFT")
-boxes.resource_fishing = CreateCheckBox(resourcesettings, -2, -185, bitwise.hasbit(currentresources, 0x40000), checkbox_clicked, 0x40000);
-CreateDropDownText(resourcesettings, "Inscription", 110, -207, "LEFT")
-boxes.resource_inscription = CreateCheckBox(resourcesettings, -2, -205, bitwise.hasbit(currentresources, 0x80000), checkbox_clicked, 0x80000);
-CreateDropDownText(resourcesettings, "Open From Vehicle", 110, -227, "LEFT")
-boxes.resource_openfromvehicle = CreateCheckBox(resourcesettings, -2, -225, bitwise.hasbit(currentresources, 0x100000), checkbox_clicked, 0x100000);
+CreateDropDownText(resourcesettings, Localization.Lockpicking, -15, -67, "LEFT")
+boxes.resource_lockpicking = CreateCheckBox(resourcesettings, -130, -65, bitwise.hasbit(currentresources, 0x1), checkbox_clicked, 0x1);
+CreateDropDownText(resourcesettings, Localization.Herbs, -15, -87, "LEFT")
+boxes.resource_herbs = CreateCheckBox(resourcesettings, -130, -85, bitwise.hasbit(currentresources, 0x2), checkbox_clicked, 0x2);
+CreateDropDownText(resourcesettings, Localization.Minerals, -15, -107, "LEFT")
+boxes.resource_minerals = CreateCheckBox(resourcesettings, -130, -105, bitwise.hasbit(currentresources, 0x4), checkbox_clicked, 0x4);
+CreateDropDownText(resourcesettings, Localization.DisarmTrap, -15, -127, "LEFT")
+boxes.resource_disarmtrap = CreateCheckBox(resourcesettings, -130, -125, bitwise.hasbit(currentresources, 0x8), checkbox_clicked, 0x8);
+CreateDropDownText(resourcesettings, Localization.Open, -15, -147, "LEFT")
+boxes.resource_open = CreateCheckBox(resourcesettings, -130, -145, bitwise.hasbit(currentresources, 0x10), checkbox_clicked, 0x10);
+CreateDropDownText(resourcesettings, Localization.Treasure, -15, -167, "LEFT")
+boxes.resource_treasure = CreateCheckBox(resourcesettings, -130, -165, bitwise.hasbit(currentresources, 0x20), checkbox_clicked, 0x20);
+CreateDropDownText(resourcesettings, Localization.CloseTrack, -15, -187, "LEFT")
+boxes.resource_close = CreateCheckBox(resourcesettings, -130, -185, bitwise.hasbit(currentresources, 0x80), checkbox_clicked, 0x80);
+CreateDropDownText(resourcesettings, Localization.ArmTrap, -15, -207, "LEFT")
+boxes.resource_armtrap = CreateCheckBox(resourcesettings, -130, -205, bitwise.hasbit(currentresources, 0x100), checkbox_clicked, 0x100);
+CreateDropDownText(resourcesettings, Localization.QuickOpen, -15, -227, "LEFT")
+boxes.resource_quickopen = CreateCheckBox(resourcesettings, -130, -225, bitwise.hasbit(currentresources, 0x200), checkbox_clicked, 0x200);
+CreateDropDownText(resourcesettings, Localization.CalcifiedElvenGems, -15, -247, "LEFT")
+boxes.resource_calcifiedelvengems = CreateCheckBox(resourcesettings, -130, -245, bitwise.hasbit(currentresources, 0x40), checkbox_clicked, 0x40);
+CreateDropDownText(resourcesettings, Localization.QuickClose, 130, -27, "LEFT")
+boxes.resource_quickclose = CreateCheckBox(resourcesettings, 15, -25, bitwise.hasbit(currentresources, 0x400), checkbox_clicked, 0x400);
+CreateDropDownText(resourcesettings, Localization.OpenTinkering, 130, -47, "LEFT")
+boxes.resource_opentinkering = CreateCheckBox(resourcesettings, 15, -45, bitwise.hasbit(currentresources, 0x800), checkbox_clicked, 0x800);
+CreateDropDownText(resourcesettings, Localization.OpenKneeling, 130, -67, "LEFT")
+boxes.resource_openkneeling = CreateCheckBox(resourcesettings, 15, -65, bitwise.hasbit(currentresources, 0x1000), checkbox_clicked, 0x1000);
+CreateDropDownText(resourcesettings, Localization.OpenAttacking, 130, -87, "LEFT")
+boxes.resource_openattacking = CreateCheckBox(resourcesettings, 15, -85, bitwise.hasbit(currentresources, 0x2000), checkbox_clicked, 0x2000);
+CreateDropDownText(resourcesettings, Localization.Gahzridian, 130, -107, "LEFT")
+boxes.resource_gahzridian = CreateCheckBox(resourcesettings, 15, -105, bitwise.hasbit(currentresources, 0x4000), checkbox_clicked, 0x4000);
+CreateDropDownText(resourcesettings, Localization.Blasting, 130, -127, "LEFT")
+boxes.resource_blasting = CreateCheckBox(resourcesettings, 15, -125, bitwise.hasbit(currentresources, 0x8000), checkbox_clicked, 0x8000);
+CreateDropDownText(resourcesettings, Localization.PvPOpen, 130, -147, "LEFT")
+boxes.resource_pvpopen = CreateCheckBox(resourcesettings, 15, -145, bitwise.hasbit(currentresources, 0x10000), checkbox_clicked, 0x10000);
+CreateDropDownText(resourcesettings, Localization.PvPClose, 130, -167, "LEFT")
+boxes.resource_pvpclose = CreateCheckBox(resourcesettings, 15, -165, bitwise.hasbit(currentresources, 0x20000), checkbox_clicked, 0x20000);
+CreateDropDownText(resourcesettings, Localization.Fishing, 130, -187, "LEFT")
+boxes.resource_fishing = CreateCheckBox(resourcesettings, 15, -185, bitwise.hasbit(currentresources, 0x40000), checkbox_clicked, 0x40000);
+CreateDropDownText(resourcesettings, Localization.Inscription, 130, -207, "LEFT")
+boxes.resource_inscription = CreateCheckBox(resourcesettings, 15, -205, bitwise.hasbit(currentresources, 0x80000), checkbox_clicked, 0x80000);
+CreateDropDownText(resourcesettings, Localization.OpenFromVehicle, 130, -227, "LEFT")
+boxes.resource_openfromvehicle = CreateCheckBox(resourcesettings, 15, -225, bitwise.hasbit(currentresources, 0x100000), checkbox_clicked, 0x100000);
 
 --Creature tracking menu
-CreateText(creaturesettings, "Creature Tracking Toggles", 0, -5, 0.2, 0.7, 1, 1);
+CreateText(creaturesettings, Localization.CreatureTrackingToggles, 0, -5, 0.2, 0.7, 1, 1);
 local cboxes = {
 	none,
 	beasts,
@@ -549,14 +692,14 @@ local function checkbox_clickedc(self)
 	end
 	update_cboxes(currentcreatures);
 end
-CreateDropDownText(creaturesettings, "None", 8, -27, "LEFT")
+CreateDropDownText(creaturesettings, Localization.None, 8, -27, "LEFT")
 cboxes.none = CreateCheckBox(creaturesettings, -104, -25, currentcreatures == 0, function(self)
 	if self:GetChecked() then
 		currentcreatures = 0;
 	end
 	update_cboxes(currentcreatures);
 end, 0);
-CreateDropDownText(creaturesettings, "All", 8, -47, "LEFT")
+CreateDropDownText(creaturesettings, Localization.All, 8, -47, "LEFT")
 cboxes.all = CreateCheckBox(creaturesettings, -104, -45, currentcreatures == -1, function(self)
 	if self:GetChecked() then
 		currentcreatures = -1;
@@ -565,36 +708,36 @@ cboxes.all = CreateCheckBox(creaturesettings, -104, -45, currentcreatures == -1,
 	end
 	update_cboxes(currentcreatures);
 end, -1);
-CreateDropDownText(creaturesettings, "Beasts", 8, -67, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Beasts, 8, -67, "LEFT")
 cboxes.beasts = CreateCheckBox(creaturesettings, -104, -65, bitwise.hasbit(currentcreatures, 0x1), checkbox_clickedc, 0x1);
-CreateDropDownText(creaturesettings, "Dragons", 8, -87, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Dragons, 8, -87, "LEFT")
 cboxes.dragons = CreateCheckBox(creaturesettings, -104, -85, bitwise.hasbit(currentcreatures, 0x2), checkbox_clickedc, 0x2);
-CreateDropDownText(creaturesettings, "Demons", 8, -107, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Demons, 8, -107, "LEFT")
 cboxes.demons = CreateCheckBox(creaturesettings, -104, -105, bitwise.hasbit(currentcreatures, 0x4), checkbox_clickedc, 0x4);
-CreateDropDownText(creaturesettings, "Elementals", 8, -127, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Elementals, 8, -127, "LEFT")
 cboxes.elementals = CreateCheckBox(creaturesettings, -104, -125, bitwise.hasbit(currentcreatures, 0x8), checkbox_clickedc, 0x8);
-CreateDropDownText(creaturesettings, "Giants", 8, -147, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Giants, 8, -147, "LEFT")
 cboxes.giants = CreateCheckBox(creaturesettings, -104, -145, bitwise.hasbit(currentcreatures, 0x10), checkbox_clickedc, 0x10);
-CreateDropDownText(creaturesettings, "Undead", 8, -167, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Undead, 8, -167, "LEFT")
 cboxes.undead = CreateCheckBox(creaturesettings, -104, -165, bitwise.hasbit(currentcreatures, 0x20), checkbox_clickedc, 0x20);
-CreateDropDownText(creaturesettings, "Humanoids", 110, -27, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Humanoids, 110, -27, "LEFT")
 cboxes.humanoids = CreateCheckBox(creaturesettings, -2, -25, bitwise.hasbit(currentcreatures, 0x40), checkbox_clickedc, 0x40);
-CreateDropDownText(creaturesettings, "Critters", 110, -47, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Critters, 110, -47, "LEFT")
 cboxes.critters = CreateCheckBox(creaturesettings, -2, -45, bitwise.hasbit(currentcreatures, 0x80), checkbox_clickedc, 0x80);
-CreateDropDownText(creaturesettings, "Machines", 110, -67, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Machines, 110, -67, "LEFT")
 cboxes.machines = CreateCheckBox(creaturesettings, -2, -65, bitwise.hasbit(currentcreatures, 0x100), checkbox_clickedc, 0x100);
-CreateDropDownText(creaturesettings, "Slimes", 110, -87, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Slimes, 110, -87, "LEFT")
 cboxes.slimes = CreateCheckBox(creaturesettings, -2, -85, bitwise.hasbit(currentcreatures, 0x200), checkbox_clickedc, 0x200);
-CreateDropDownText(creaturesettings, "Totem", 110, -107, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Totem, 110, -107, "LEFT")
 cboxes.totem = CreateCheckBox(creaturesettings, -2, -105, bitwise.hasbit(currentcreatures, 0x400), checkbox_clickedc, 0x400);
-CreateDropDownText(creaturesettings, "Non Combat Pet", 110, -127, "LEFT")
+CreateDropDownText(creaturesettings, Localization.NonCombatPet, 110, -127, "LEFT")
 cboxes.noncombatpet = CreateCheckBox(creaturesettings, -2, -125, bitwise.hasbit(currentcreatures, 0x800), checkbox_clickedc, 0x800);
-CreateDropDownText(creaturesettings, "Gas Cloud", 110, -147, "LEFT")
+CreateDropDownText(creaturesettings, Localization.GasCloud, 110, -147, "LEFT")
 cboxes.gascloud = CreateCheckBox(creaturesettings, -2, -145, bitwise.hasbit(currentcreatures, 0x1000), checkbox_clickedc, 0x1000);
 
 --Main Settings drop downs
 local keys = {
-	"None",
+	Localization.None,
 	"F1",
 	"F2",
 	"F3",
@@ -608,29 +751,29 @@ local keys = {
 	"F11",
 	"F12"
 }
-CreateText(mainsettings, "Reload after changing", 0, -5, 0.8, 0.1, 0.1, 1);
-CreateText(mainsettings, "toggle or global", 0, -20, 0.8, 0.1, 0.1, 1);
+CreateText(mainsettings, Localization.Reload, 0, -5, 0.8, 0.1, 0.1, 1);
+CreateText(mainsettings, Localization.Global, 0, -20, 0.8, 0.1, 0.1, 1);
 
-CreateDropDownText(mainsettings, "GUI Toggle:", 0, -40);
+CreateDropDownText(mainsettings, Localization.GUI, 0, -40);
 CreateKeyDropDown(mainsettings, keys, 0, -60, "gui");
 
-CreateDropDownText(mainsettings, "Primary Toggle:", 0, -85);
+CreateDropDownText(mainsettings, Localization.PrimaryKey, 0, -85);
 CreateKeyDropDown(mainsettings, keys, 0, -105, "primary");
 
-CreateDropDownText(mainsettings, "Secondary Toggle:", 0, -130);
+CreateDropDownText(mainsettings, Localization.SecondaryKey, 0, -130);
 CreateKeyDropDown(mainsettings, keys, 0, -150, "secondary");
 
-CreateDropDownText(mainsettings, "Generic Toggle:", 0, -175);
+CreateDropDownText(mainsettings, Localization.Generic, 0, -175);
 CreateKeyDropDown(mainsettings, keys, 0, -195, "generic");
 
-CreateDropDownText(mainsettings, "Interrupt Toggle:", 0, -220);
+CreateDropDownText(mainsettings, Localization.Interrupt, 0, -220);
 CreateKeyDropDown(mainsettings, keys, 0, -240, "interrupt");
 
-CreateDropDownText(mainsettings, "Follow Unit & Toggle:", 0, -265);
+CreateDropDownText(mainsettings, Localization.Follow, 0, -265);
 CreateEditBox(mainsettings, 0, -282, "follow");
 CreateKeyDropDown(mainsettings, keys, 0, -305, "follow");
 
-CreateDropDownText(mainsettings, "Global variable:", 0, -330);
+CreateDropDownText(mainsettings, Localization.GlobalDev, 0, -330);
 local globaledit = CreateFrame("EditBox", nil, mainsettings);
 globaledit:SetHeight(20)
 globaledit:SetWidth(124);
@@ -658,56 +801,52 @@ end);
 globaledit:SetText(ni.vars.global or "");
 globaledit:Show();
 
-CreateText(mainsettings, "Check for Updates:", 0, -370, 0.8, 0.1, 0.1, 1);
-CreateMainButton(mainsettings, 62, 22, "Core", -31, 30, function()
-	ni.functions.webrequest("https://api.github.com/repos/darhanger/ni/commits", nil, false, function(code, body)
-		if code == 200 then
-			local t = ni.utils.json.decode(body);
-			if t[2]["sha"] ~= "d5261c40ee78e5d912b60e7d877b466edbd56f7b" then
-				ni.functions.open("https://github.com/darhanger/ni/archive/main.zip")
-			else
-				message("Up to date on core");
-			end
-		end 
-	end);
-end);
-
-CreateMainButton(mainsettings, 62, 22, "Release", 31, 30, function()
-	ni.functions.webrequest("https://api.github.com/repos/darhanger/ni/releases", nil, false, function(code, body)
-		if code == 200 then
-			local t = ni.utils.json.decode(body);
-			if t[2]["tag_name"] ~= "v0.0.53" then
-				ni.functions.open(t[1]["assets"][1]["browser_download_url"])
-			else
-				message("Up to date on releases");
-			end
-		end 
-	end);
-end);
+CreateText(mainsettings, Localization.Dev, 0, -370, 0.8, 0.1, 0.1, 1);
 
 local reloadbutton = CreateFrame("BUTTON", nil, mainsettings, "UIPanelButtonTemplate");
-reloadbutton:SetWidth(62);
+reloadbutton:SetWidth(96);
 reloadbutton:SetHeight(22);
-reloadbutton:SetText("Reload");
-reloadbutton:SetPoint("BOTTOMLEFT", mainsettings, 28, 5);
+reloadbutton:SetText(Localization.ReloadDev);
+reloadbutton:SetPoint("BOTTOMLEFT", mainsettings, 15, 48);
 reloadbutton:SetAlpha(1);
 reloadbutton:SetScript("OnClick", function()
 	ReloadUI();
 end);
 
 local consolebutton = CreateFrame("BUTTON", nil, mainsettings, "UIPanelButtonTemplate");
-consolebutton:SetWidth(62);
+consolebutton:SetWidth(90);
 consolebutton:SetHeight(22);
-consolebutton:SetText("Console");
-consolebutton:SetPoint("BOTTOMRIGHT", mainsettings, -28, 5);
+consolebutton:SetText(Localization.Console);
+consolebutton:SetPoint("BOTTOMRIGHT", mainsettings, -15, 48);
 consolebutton:SetAlpha(1);
 consolebutton:SetScript("OnClick", function()
 	ni.functions.toggleconsole();
 end);
 
+CreateText(mainsettings, Localization.Contact, 0, -410, 0.8, 0.1, 0.1, 1);
+
+local consolebutton = CreateFrame("BUTTON", nil, mainsettings, "UIPanelButtonTemplate");
+consolebutton:SetWidth(82);
+consolebutton:SetHeight(22);
+consolebutton:SetText("Dimonskiy");
+consolebutton:SetPoint("BOTTOMRIGHT", mainsettings, -26, 9);
+consolebutton:SetAlpha(1);
+consolebutton:SetScript("OnClick", function()
+	ni.functions.open("https://discord.com/users/649003031391633438") 
+end);
+
+local consolebutton = CreateFrame("BUTTON", nil, mainsettings, "UIPanelButtonTemplate");
+consolebutton:SetWidth(82);
+consolebutton:SetHeight(22);
+consolebutton:SetText("DarhangeR");
+consolebutton:SetPoint("BOTTOMLEFT", mainsettings, 26, 9);
+consolebutton:SetAlpha(1);
+consolebutton:SetScript("OnClick", function()
+	ni.functions.open("https://discord.com/users/250267265285488641") 
+end);
 --Rotation Settings drop downs
 local mods = {
-	"None",
+	Localization.None,
 	"Left Alt",
 	"Left Control",
 	"Left Shift",
@@ -726,29 +865,29 @@ slider:SetValueStep(5);
 slider:SetValue(ni.vars.latency);
 _G[latency_name.."Low"]:SetText(20);
 _G[latency_name.."High"]:SetText(2000);
-_G[latency_name.."Text"]:SetText("Latency ("..ni.vars.latency.." ms)");
+_G[latency_name.."Text"]:SetText(Localization.Latency);
 slider:SetScript("OnValueChanged", function(self, value)
 	_G[latency_name.."Text"]:SetText("Latency ("..value.." ms)");	
 	ni.vars.latency = value;
 end);
 
-CreateDropDownText(settings, "Area of Effect Toggle:", 0, -40);
+CreateDropDownText(settings, Localization.AreaofEffectToggle, 0, -40);
 CreateKeyDropDown(settings, mods, 0, -60, "aoe");
 
-CreateDropDownText(settings, "Pause Rotation Modifier:", 0, -85);
+CreateDropDownText(settings, Localization.PauseRotationModifier, 0, -85);
 CreateKeyDropDown(settings, mods, 0, -105, "pause");
 
-CreateDropDownText(settings, "CD Toggle:", 0, -130);
+CreateDropDownText(settings, Localization.CDToggle, 0, -130);
 CreateKeyDropDown(settings, mods, 0, -150, "cd");
 
-CreateDropDownText(settings, "Custom Toggle:", 0, -175);
+CreateDropDownText(settings, Localization.CustomToggle, 0, -175);
 CreateKeyDropDown(settings, mods, 0, -195, "custom");
 
-CreateDropDownText(settings, "Main Tank Override:", 0, -220);
+CreateDropDownText(settings, Localization.MainTankOverride, 0, -220);
 CreateEditBox(settings, 0, -238, "mainTank");
 
-CreateDropDownText(settings, "Enabled:", -10, -258);
-CreateCheckBox(settings, 28, -256, ni.vars.units.mainTankEnabled, function(self)
+CreateDropDownText(settings, Localization.Enabled, -10, -258);
+CreateCheckBox(settings, 35, -256, ni.vars.units.mainTankEnabled, function(self)
 	if self:GetChecked() then
 		ni.vars.units.mainTankEnabled = true;
 	else
@@ -756,11 +895,11 @@ CreateCheckBox(settings, 28, -256, ni.vars.units.mainTankEnabled, function(self)
 	end
 end);
 
-CreateDropDownText(settings, "Off Tank Override:", 0, -276);
+CreateDropDownText(settings, Localization.OffTankOverride, 0, -276);
 CreateEditBox(settings, 0, -294, "offTank");
 
-CreateDropDownText(settings, "Enabled:", -10, -314);
-CreateCheckBox(settings, 28, -312, ni.vars.units.offTankEnabled, function(self)
+CreateDropDownText(settings, Localization.Enabled, -10, -314);
+CreateCheckBox(settings, 35, -312, ni.vars.units.offTankEnabled, function(self)
 	if self:GetChecked() then
 		ni.vars.units.offTankEnabled = true;
 	else
@@ -769,14 +908,14 @@ CreateCheckBox(settings, 28, -312, ni.vars.units.offTankEnabled, function(self)
 end);
 
 
-CreateCheckBox(settings, 30, -334, ni.vars.combat.melee, function(self)
+CreateCheckBox(settings, 45, -334, ni.vars.combat.melee, function(self)
 	if self:GetChecked() then
 		ni.vars.combat.melee = true;
 	else
 		ni.vars.combat.melee = false;
 	end
 end);
-CreateDropDownText(settings, "Is Melee:", -10, -336); 
+CreateDropDownText(settings, Localization.IsMelee, -10, -336); 
 
 local mmb_name = ni.utils.GenerateRandomName();
 main_ui.minimap_icon = CreateFrame("Button", mmb_name, Minimap);
@@ -814,7 +953,7 @@ mm:SetScript("OnMouseUp", function(self)
 end);
 
 local function SetClick(key, frame, button)
-	if key == "None" or key == nil then
+	if key == Localization.None or key == nil then
 		return;
 	end
 	SetBindingClick(key, frame, button);
