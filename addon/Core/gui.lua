@@ -30,7 +30,7 @@ local function ApplyLayout()
 	GUI:SetPoint("TOP", UIParent, "TOP", 0, distance);
 end
 local function PopOut(self, ...)
-	self.PopTimer = 0.15;
+	self.PopTimer = 0.5;
 	self.PopDirection = 1;
 end
 local function PopBack(self, ...)

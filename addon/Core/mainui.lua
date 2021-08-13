@@ -191,14 +191,14 @@ frame:SetMovable(true);
 frame:EnableMouse(true);
 frame:SetFrameStrata("HIGH");
 frame:RegisterForDrag("LeftButton");
-frame:SetScript("OnDragStart", frame.StartMoving);
-frame:SetScript("OnDragStop", function()
-	local point, _, relativePoint, offset_x, offset_y = frame:GetPoint();
-	ni.vars.ui.main.point = point;
-	ni.vars.ui.main.relativePoint = relativePoint;
-	ni.vars.ui.main.x = offset_x;
-	ni.vars.ui.main.y = offset_y;
-	frame:StopMovingOrSizing();
+frame:SetScript("OnMouseDown", function(self) self:StartMoving() end);
+frame:SetScript("OnMouseUp", function()
+    local point, _, relativePoint, offset_x, offset_y = frame:GetPoint();
+    ni.vars.ui.main.point = point;
+    ni.vars.ui.main.relativePoint = relativePoint;
+    ni.vars.ui.main.x = offset_x;
+    ni.vars.ui.main.y = offset_y;
+    frame:StopMovingOrSizing();
 end);
 frame:SetWidth(320);
 frame:SetHeight(230);

@@ -1,18 +1,18 @@
 local vars = {
-	latency = 220,
+	latency = 170,
 	interrupt = "all",
 	debug = false,
 	customtarget = "player",
 	hotkeys = {
-		aoe = "Left Alt",
-		cd = "Left Control",
-		pause = "Left Shift",
+		aoe = "None",
+		cd = "None",
+		pause = "None",
 		custom = "None",
 		primary = "F1",
 		secondary = "F2",
 		generic = "F3",
-		interrupt = "F4",
-		follow = "F5",
+		interrupt = "None",
+		follow = "None",
 		gui = "F10"
 	},
 	profiles = {

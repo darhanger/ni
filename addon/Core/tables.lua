@@ -1015,7 +1015,9 @@ local tables = {
 		shaman = {
 			dispel = {"Disease", "Poison", "Curse"}
 		},
-		warlock = {},
+		warlock = {
+			dispel = {"Magic"}
+		},		
 		warrior = {}
 	},
 	dr = {

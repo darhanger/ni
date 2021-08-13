@@ -36,6 +36,7 @@ ni = ni or {
 		objectfacing = %%ObjectFacing%%,
 		resetlasthardwareaction = %%ResetLastHardwareAction%%,
 		callprotected = %%CallProtected%%,
+		webrequest = %%WebRequest%%,
 		getrandomnamefor = %%GetRandomNameFor%%,
 		loadcontent = %%LoadContent%%,
 		savecontent = %%SaveContent%%,
@@ -46,10 +47,10 @@ ni = ni or {
 		getdescriptor = %%GetDescriptor%%,
 		setcreaturetracking = %%SetCreatureTracking%%,
 		setresourcetracking = %%SetResourceTracking%%,
-		webrequest = %%WebRequest%%,
+		readdistance = %%WebRequest%%,
 		open = %%Open%%,
 		read = %%Read%%,
-		toggleconsole = %%ToggleConsole%%
+		toggleconsole = %%ToggleConsole%%,
 	}
 }
 if not ni.loaded then
@@ -61,9 +62,13 @@ if not ni.loaded then
 	The functions table needs to be populated with each of the functions you want. I.E.:
 	local functions = { "CastSpellByName", "CastSpellByID", "JumpOrAscendStart" }
 	]]--
-	local append = "Safe";
+	local append = "JKasdASjneq"; -- Change to any word / symbols. Измените на любые слова / символы; ;
 	-- Add the functions you want to use here
-	local functions = { }
+	local functions = { "MoveForwardStop", "MoveForwardStart", "PetPassiveMode", "ToggleSpellAutocast", "TargetNearestEnemy",
+	"StrafeLeftStart", "StrafeRightStart", "AttackTarget", "AssistUnit", "CancelShapeshiftForm", "CastShapeshiftForm",
+	"CastSpell", "CastSpellByName", "ClearTarget", "PetAttack", "TargetNearestFriend", "TargetNearestEnemy", 
+	"TargetLastTarget", "TargetLastEnemy", "SpellStopCasting", "SpellStopTargeting", "CastSpellByID",
+	}
 	-- End section to add to
 	if #functions > 0 then
 		for k, v in pairs(functions) do
@@ -72,6 +77,14 @@ if not ni.loaded then
 			end
 		end
 	end
+	local frame = CreateFrame("frame")
+	frame:SetScript("OnUpdate",function(self)
+		local func = IsLinuxClient()
+		if func then
+			ni.castdest = func
+			self:Hide()
+		end
+	end)
 	local loaded_files = { };
 	local function pack(...)
 		local n = select('#', ...)
