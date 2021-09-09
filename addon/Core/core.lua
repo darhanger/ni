@@ -62,7 +62,17 @@ if not ni.loaded then
 	The functions table needs to be populated with each of the functions you want. I.E.:
 	local functions = { "CastSpellByName", "CastSpellByID", "JumpOrAscendStart" }
 	]]--
-	local append = "JKasdASjneq"; -- Change to any word / symbols. Измените на любые слова / символы; ;
+	math.randomseed(time())
+	local function RandomVariable(length)
+                local res = ""
+                for i = 1, length do
+                        res = res .. string.char(math.random(97, 122))
+                end
+                return res
+        end
+	
+	local append = "SAFE"; -- Change to any word / symbols. Измените на любые слова / символы; ;
+	if append == "SAFE" then append = RandomVariable(20) end
 	-- Add the functions you want to use here
 	local functions = { "MoveForwardStop", "MoveForwardStart", "PetPassiveMode", "ToggleSpellAutocast", "TargetNearestEnemy",
 	"StrafeLeftStart", "StrafeRightStart", "AttackTarget", "AssistUnit", "CancelShapeshiftForm", "CastShapeshiftForm",
@@ -130,13 +140,6 @@ if not ni.loaded then
 		return content and json.decode(content) or { };
 	end;
 	local generated_names = { };
-	local function RandomVariable(length)
-		local res = ""
-		for i = 1, length do
-			res = res .. string.char(math.random(97, 122))
-		end
-		return res
-	end
 	ni.utils.GenerateRandomName = function()
 		local name = RandomVariable(20);
 		while tContains(generated_names, name) do
