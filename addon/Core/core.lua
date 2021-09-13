@@ -62,7 +62,6 @@ if not ni.loaded then
 	The functions table needs to be populated with each of the functions you want. I.E.:
 	local functions = { "CastSpellByName", "CastSpellByID", "JumpOrAscendStart" }
 	]]--
-	math.randomseed(time())
 	local function RandomVariable(length)
                 local res = ""
                 for i = 1, length do
