@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, redundant-value
 ni = ni or { 
 	functions = {
 		moveto = %%MoveTo%%,
@@ -53,7 +54,9 @@ ni = ni or {
 		toggleconsole = %%ToggleConsole%%,
 	}
 }
-if not ni.loaded then
+
+local function addProtectedFunctions(randomFunc)
+
 	--[[ 
 	This is the section for making your own protected functions in game...
 
@@ -62,16 +65,9 @@ if not ni.loaded then
 	The functions table needs to be populated with each of the functions you want. I.E.:
 	local functions = { "CastSpellByName", "CastSpellByID", "JumpOrAscendStart" }
 	]]--
-	local function RandomVariable(length)
-                local res = ""
-                for i = 1, length do
-                        res = res .. string.char(math.random(97, 122))
-                end
-                return res
-        end
-	
+
 	local append = "SAFE"; -- Change to any word / symbols. Измените на любые слова / символы; ;
-	if append == "SAFE" then append = RandomVariable(20) end
+	if append == "SAFE" then append = randomFunc(20) end
 	-- Add the functions you want to use here
 	local functions = { "MoveForwardStop", "MoveForwardStart", "PetPassiveMode", "ToggleSpellAutocast", "TargetNearestEnemy",
 	"StrafeLeftStart", "StrafeRightStart", "AttackTarget", "AssistUnit", "CancelShapeshiftForm", "CastShapeshiftForm",
@@ -86,6 +82,9 @@ if not ni.loaded then
 			end
 		end
 	end
+end
+
+if not ni.loaded then
 	local frame = CreateFrame("frame")
 	frame:SetScript("OnUpdate",function(self)
 		local func = IsLinuxClient()
@@ -138,15 +137,7 @@ if not ni.loaded then
 		local content = ni.functions.loadcontent(dir.."addon\\Settings\\"..filename);
 		return content and json.decode(content) or { };
 	end;
-	local generated_names = { };
-	ni.utils.GenerateRandomName = function()
-		local name = RandomVariable(20);
-		while tContains(generated_names, name) do
-			name = RandomVariable(20);
-		end
-		table.insert(generated_names, name);
-		return name;
-	end
+
 	ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = require(dir.."addon\\core\\frames.lua");
 	ni.spell = require(dir.."addon\\core\\spell.lua");
 	ni.power = require(dir.."addon\\core\\power.lua");
@@ -159,7 +150,30 @@ if not ni.loaded then
 	ni.stopcastingtracker = require(dir.."addon\\core\\stopcastingtracker.lua");
 	ni.ttd = require(dir.."addon\\core\\timetodie.lua");
 	ni.GUI = require(dir.."addon\\core\\gui.lua");
+	local strongrand = require(dir.."addon\\core\\mwcrand.lua");
+	ni.strongrand = strongrand
+
+	local function RandomVariable(length)
+                local res = ""
+                for i = 1, length do
+                        res = res .. string.char(strongrand.generate(97, 122))
+                end
+                return res
+    	end
+
+	local generated_names = { };
+
+	ni.utils.GenerateRandomName = function()
+		local name = RandomVariable(20);
+		while tContains(generated_names, name) do
+			name = RandomVariable(20);
+		end
+		table.insert(generated_names, name);
+		return name;
+	end
+
 	ni.main = require(dir.."addon\\core\\mainui.lua");
+
 	ni.showstatus = function(str, enabled)
 		if enabled then
 			ni.frames.floatingtext:message("\124cff00ff00" .. str)
@@ -278,6 +292,9 @@ if not ni.loaded then
 	end
 	ni.frames.main:SetScript("OnUpdate", ni.frames.OnUpdate);
 	ni.frames.main:SetScript("OnEvent", ni.frames.OnEvent);
+
+	addProtectedFunctions(RandomVariable)
+
 	if ni.vars["global"] then
 		_G[ni.vars["global"]] = ni;
 	end
