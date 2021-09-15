@@ -1,5 +1,5 @@
----@diagnostic disable: undefined-global, redundant-value
 ni = ni or { 
+    -- secureload = %%SecureLoad%%,
 	functions = {
 		moveto = %%MoveTo%%,
 		clickat = %%ClickAt%%,
@@ -56,7 +56,6 @@ ni = ni or {
 }
 
 local function addProtectedFunctions(randomFunc)
-
 	--[[ 
 	This is the section for making your own protected functions in game...
 

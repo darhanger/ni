@@ -637,8 +637,8 @@ local function CreateMenuFrame(frame, t, settings, callback)
 	local Frame = CreateFrame("frame", nil, frame);
 	Frame:SetBackdrop({
 		bgFile = "Interface/Buttons/WHITE8X8",
-		edgeFile = "Interface/Buttons/WHITE8X8",
-		edgeSize = 1,
+		edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",
+		edgeSize = 12,
 	});
 	Frame:SetPoint("TOP", frame, "BOTTOM");
     Frame:SetBackdropColor(0,0,0,1);
@@ -1105,9 +1105,9 @@ GUI:SetFrameLevel(0);
 GUI:SetWidth(main_width);
 GUI:SetHeight(main_height);
 GUI:EnableMouse(true);
-GUI:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
-				edgeFile = "Interface/Tooltips/UI-Tooltip-Border", 
-				tile = true, tileSize = 16, edgeSize = 16, 
+GUI:SetBackdrop({bgFile = "Interface/DialogFrame/UI-DialogBox-Background",  
+				edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",
+				tile = true, tileSize = 16, edgeSize = 14, 
 				insets = { left = 4, right = 4, top = 4, bottom = 4 }});
 GUI:SetBackdropColor(0,0,0,1);
 GUI:SetPoint("TOP", UIParent, "TOP", 0, main_y);
