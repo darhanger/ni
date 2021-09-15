@@ -20,14 +20,6 @@ local togglemod, cdtogglemod, customtogglemod = 0, 0, 0
 local function AddDelay(t)
 	ni.vars.profiles.delay = t;
 end
-local Localization = {
-	Enabled = "\124cff00ff00Enabled",
-	Disabled = "\124cffff0000Disabled",
-}
-if (GetLocale() == "ruRU") then
-	Localization.Enabled = "\124cff00ff00Включено"
-	Localization.Disabled = "\124cffff0000Выключено"
-end
 
 local rotation = {
 	started = false,
@@ -103,8 +95,8 @@ local rotation = {
 				cdtogglemod = GetTime()
 				ni.vars.combat.cd = not ni.vars.combat.cd;
 				if ni.vars.combat.aoe or ni.vars.combat.cd then
-					local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;
-					local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
+					local aoe_str = ni.vars.combat.aoe and "\124cff00ff00Enabled" or "\124cffff0000Disabled";
+					local cd_str = ni.vars.combat.cd and "\124cff00ff00Enabled" or "\124cffff0000Disabled";
 					ni.frames.notification:message("\124cffFFC300AoE: "..aoe_str.." \124cffFFC300CD: "..cd_str);
 				elseif not ni.vars.combat.aoe and not ni.vars.combat.cd then
 					ni.frames.notification:Hide();
@@ -146,8 +138,8 @@ local rotation = {
 			togglemod = GetTime()
 			ni.vars.combat.aoe = not ni.vars.combat.aoe;
 			if ni.vars.combat.aoe or ni.vars.combat.cd then
-				local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;
-				local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
+				local aoe_str = ni.vars.combat.aoe and "\124cff00ff00Enabled" or "\124cffff0000Disabled";
+				local cd_str = ni.vars.combat.cd and "\124cff00ff00Enabled" or "\124cffff0000Disabled";
 				ni.frames.notification:message("\124cffFFC300AoE: "..aoe_str.." \124cffFFC300CD: "..cd_str);
 			elseif not ni.vars.combat.aoe and not ni.vars.combat.cd then
 				ni.frames.notification:Hide();

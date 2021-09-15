@@ -20,6 +20,8 @@ local GetSpellCooldown,
 	tinsert,
 	StrafeLeftStart,
 	StrafeLeftStop,
+	MoveForwardStop,
+	MoveForwardStart,
 	IsPlayerSpell =
 	GetSpellCooldown,
 	GetTime,
@@ -43,6 +45,8 @@ local GetSpellCooldown,
 	tinsert,
 	StrafeLeftStart,
 	StrafeLeftStop,
+	MoveForwardStop,
+	MoveForwardStart,	
 	IsPlayerSpell
 
 local _, class = UnitClass("player")
@@ -269,8 +273,8 @@ spell.stopcasting = function()
 	ni.functions.stopcasting()   
 end
 spell.stopchanneling = function()
-	ni.functions.callprotected("MoveForwardStart")
-    ni.functions.callprotected("MoveForwardStop")
+	MoveForwardStart()
+    MoveForwardStart()
 end
 spell.valid = function(t, spellid, facing, los, friendly)
 	friendly = true and friendly or false
