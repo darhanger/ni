@@ -217,7 +217,9 @@ local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)
 	text.text:SetAllPoints();
 	text.text:SetJustifyH("CENTER");
 	text.text:SetJustifyV("MIDDLE");
-	text.text:SetText(settext);
+	local pad = ""
+	for i= 1, math.random(1,255) do pad = pad .. "\124r" end
+	text.text:SetText(pad .. settext);
 	text.text:SetTextColor(r, g, b, a);
 	return text;
 end
