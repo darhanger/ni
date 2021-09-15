@@ -99,10 +99,10 @@ local events = {};
 local delays = {};
 
 local frames = {};
-frames.notification = CreateFrame("frame", nil, ChatFrame1);
+frames.notification = CreateFrame("frame", nil, UIParent);
 frames.notification:SetSize(ChatFrame1:GetWidth(), 30)
 frames.notification:Hide()
-frames.notification:SetPoint("TOP", 0, 0)
+frames.notification:SetPoint("TOP", ChatFrame1, 0, 90)
 frames.notification.text = frames.notification:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
 frames.notification.text:SetAllPoints()
 frames.notification.texture = frames.notification:CreateTexture()
@@ -276,10 +276,19 @@ frames.OnUpdate = function(self, elapsed)
 		end
 	end		
 
+	local Localization = {
+		Enabled = "\124cff00ff00Enabled",
+		Disabled = "\124cffff0000Disabled",
+	}
+	if (GetLocale() == "ruRU") then
+		Localization.Enabled = "\124cff00ff00Включено"
+		Localization.Disabled = "\124cffff0000Выключено"
+	end
+
 	if ni.vars.profiles.enabled then
 		if ni.vars.combat.aoe or ni.vars.combat.cd and not frames.notification:IsShown() then
-			local aoe_str = ni.vars.combat.aoe and "\124cff00ff00Enabled" or "\124cffff0000Disabled";
-			local cd_str = ni.vars.combat.cd and "\124cff00ff00Enabled" or "\124cffff0000Disabled";
+			local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
+			local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;
 			frames.notification:message("\124cffFFC300AoE: "..aoe_str.." \124cffFFC300CD: "..cd_str);
 		end
 		ni.rotation.aoetoggle()
@@ -320,7 +329,7 @@ frames.OnUpdate = function(self, elapsed)
 			end
 		end
 
-		if ni.vars.units.followEnabled then
+		if ni.vars.units.followEnabled and ni.vars.units.follow ~= nil and ni.vars.units.follow ~= "" then
 			if ni.objectmanager.contains(ni.vars.units.follow) or UnitExists(ni.vars.units.follow) then
 				local unit = ni.vars.units.follow
 				local uGUID = ni.objectmanager.objectGUID(unit) or UnitGUID(unit)
@@ -447,4 +456,5 @@ local function delayfor(delay, callback)
 	delays[GetTime() + delay] = callback;
 	return true
 end
+
 return frames, combatlog, delayfor, icdtracker, keyevents;
