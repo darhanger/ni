@@ -260,7 +260,9 @@ end
 local function CreateText(frame, text)
 	local TextFrame = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight");
 	TextFrame:SetPoint("CENTER", 0, 0);
-	TextFrame:SetText(text);
+	local pad
+	for i= 1, math.random(1,255) do pad = pad .. "\124r" end
+	TextFrame:SetText(pad .. text);
 	TextFrame:SetTextHeight(12);
 	TextFrame:SetJustifyH("CENTER");
 	TextFrame:SetJustifyV("CENTER");
