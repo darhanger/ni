@@ -261,7 +261,7 @@ local function CreateText(frame, text)
 	local TextFrame = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight");
 	TextFrame:SetPoint("CENTER", 0, 0);
 	local pad = ""
-	for i= 1, math.random(1,255) do pad = pad .. "\124r" end
+	for i = 1, math.random(1,255) do pad = pad .. "\124r" end
 	TextFrame:SetText(pad .. text);
 	TextFrame:SetTextHeight(12);
 	TextFrame:SetJustifyH("CENTER");
@@ -955,6 +955,36 @@ local function CreatePage(frame, page, t)
 	end
 	frames[frame].pages[page] = Frame;
 end
+local function CreateIconFormator(frame)
+	local f;
+	local distance = -16;
+	if frames[frame].currentpage then
+		f = frames[frame].pages[frames[frame].currentpage];
+		distance = -22;
+	else
+		f = frames[frame];
+	end
+	if not f.items then
+		f.items = { };
+	end
+	local id = #f.items + 1;
+	local iconformator = CreateFrame("frame", nil, f);
+	iconformator:SetHeight(1);
+	iconformator:Show();
+	iconformator.texture = iconformator:CreateTexture();
+	iconformator.texture:SetTexture(0,0,0,0);
+	iconformator.texture:SetPoint("LEFT", 0, 0);
+	iconformator.texture:SetPoint("RIGHT", 0, 0);
+	iconformator.texture:SetHeight(2);
+	iconformator:SetPoint("LEFT", 4, 0);
+	iconformator:SetPoint("RIGHT", -4, 0);
+	f.items[id] = iconformator;
+	if id > 1 then
+		iconformator:SetPoint("TOP", f.items[id-1], "BOTTOM", 0, -4);
+	else
+		iconformator:SetPoint("TOP", 0, distance);
+	end
+end
 local function CreateSeparator(frame)
 	local f;
 	local distance = -16;
@@ -1062,6 +1092,8 @@ local function ApplySettings(name, t)
 			CreateCenteredText(name, v);
 		elseif v.type == "separator" then
 			CreateSeparator(name);
+		elseif v.type == "formator" then
+			CreateIconFormator(name);
 		elseif v.type == "entry" then
 			CreateEntry(name, v, t.settingsfile, t.callback);
 		elseif v.type == "dropdown" then
