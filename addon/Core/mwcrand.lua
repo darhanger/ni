@@ -6,7 +6,7 @@ local function normalize(n) --keep numbers at (positive) 32 bits
 	return n % 0x80000000
 end
 
-multiply_with_carry = {}
+local multiply_with_carry = {}
 multiply_with_carry.__index = multiply_with_carry
 
 function multiply_with_carry:random(a, b)
@@ -25,7 +25,7 @@ function multiply_with_carry:random(a, b)
 end
 
 function multiply_with_carry:randomseed(s)
-	if not s then s = seed() end
+	if not s then s = 0 end
 	self.c = self.ic
 	self.x = normalize(s)
 end
