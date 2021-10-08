@@ -744,9 +744,9 @@ local function CreateEntry(frame, t, settingsfile, callback)
 	end
 	local id = #f.items + 1;
 	local TempFrame = CreateFrame("frame", nil, f);
-	TempFrame:SetHeight(16);
-	TempFrame:SetPoint("LEFT", 4, 0);
-	TempFrame:SetPoint("RIGHT", -4, 0);
+	TempFrame:SetHeight(22);
+	TempFrame:SetPoint("LEFT", 6, 0);
+	TempFrame:SetPoint("RIGHT", -6, 0);
 	TempFrame:Show();
 	local combwidth;
 	if t.menu == nil then
