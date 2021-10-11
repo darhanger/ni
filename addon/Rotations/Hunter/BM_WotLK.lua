@@ -357,6 +357,7 @@ local abilities = {
 	["PetControl"] = function()
 			if UnitExists("pet")
 			and not UnitIsDeadOrGhost("pet") then
+			
 					--Attack the same unit as player
 					local petTarget = UnitGUID("pettarget")
 					local playerTarget = UnitGUID("target")

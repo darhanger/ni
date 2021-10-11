@@ -1,5 +1,3 @@
-local data = ni.utils.require("Example");
-
 local enables = {
 	["Action"] = false,
 }
@@ -26,8 +24,6 @@ end
 local items = {
 	callback = GUICallback,
 	{ type = "title", text = "Example GUI" },
-	{ type = "separator" },
-	{ type = "title", text = "Example Data version "..data.version() },
 	{ type = "separator" },
 	{
 		type = "entry",
@@ -65,11 +61,9 @@ local items = {
 }
 local function OnLoad()
 	ni.GUI.AddFrame("GUIExample", items);
-	ni.combatlog.registerhandler("GUIExample", data.combatfilter);
 end
 local function OnUnload()
 	ni.GUI.DestroyFrame("GUIExample");
-	ni.combatlog.unregisterhandler("GUIExample");
 end
 local queue = {
 	"action",

@@ -446,7 +446,7 @@ local abilities = {
 		end
 	end,
 	["Holy Wrath"] = function()
-		local cd = ni.spell.cd(spells.HolyWrath.id)
+		local cd = ni.spell.cd(spells.HolyWrath.id)	
 		if enables["HolyWrath"] and cd == 0 and incombat
 		and ni.spell.available(spells.HolyWrath.id)
 		and ActiveEnemies() >= values["HolyWrath"] then
