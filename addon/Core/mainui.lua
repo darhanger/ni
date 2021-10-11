@@ -862,11 +862,11 @@ slider:SetOrientation("HORIZONTAL");
 slider:SetHeight(15);
 slider:SetWidth(175);
 slider:SetPoint("TOP", settings, 0, -20);
-slider:SetMinMaxValues(20, 2000);
+slider:SetMinMaxValues(20, 1000);
 slider:SetValueStep(5);
 slider:SetValue(ni.vars.latency);
 _G[latency_name.."Low"]:SetText(20);
-_G[latency_name.."High"]:SetText(2000);
+_G[latency_name.."High"]:SetText(1000);
 _G[latency_name.."Text"]:SetText(Localization.Latency);
 slider:SetScript("OnValueChanged", function(self, value)
 	_G[latency_name.."Text"]:SetText("Latency ("..value.." ms)");	
