@@ -2,8 +2,6 @@ local queue = {
 	"DumpBook",
 	"DumpTalents"
 }
-
--- Requires ElvUi on all wow versions to work!!!
 local dumped = false
 local dumpedTalents = false
 local abilities = {
