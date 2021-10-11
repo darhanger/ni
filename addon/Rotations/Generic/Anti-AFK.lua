@@ -2,6 +2,7 @@ local queue = {
 	"Anti-AFK"
 }
 local lastreset = 0;
+
 local abilities = {
 	["Anti-AFK"] = function()
 		if GetTime() - lastreset > 30 then
