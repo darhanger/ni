@@ -32,7 +32,9 @@ local IsSpellInRange, IsCurrentSpell, IsMounted, UnitIsDeadOrGhost, UnitExists, 
 local p, t = "player", "target"
 
 local enables = {}
-local values = {}
+local values = {
+	["SpinningCraneKick"] = 3,
+}
 local inputs = {}
 local menus = {}
 local function GUICallback(key, item_type, value)
@@ -51,7 +53,14 @@ local items = {
 	callback = GUICallback,
 	{type = "separator"},
 	{type = "title", text = "Brewmaster"},
-	{type = "separator"}
+	{type = "separator"},
+	{
+		type = "entry",
+		text = "Spinning Crane Kick AoE",
+		tooltip = "Use Spinning Crane Kick when in range AoE",
+		value = values["SpinningCraneKick"],
+		key = "SpinningCraneKick"
+	},
 }
 
 local incombat = false
@@ -211,18 +220,12 @@ local abilities = {
 		end
 	end,
 	["KegSmash"] = function()
-		if
-			ni.player.powerraw("chi") <= 3 and ValidUsable(spells.KegSmash.id, t) and
-				FacingLosCast(spells.KegSmash.name, t)
-		 then
+		if ni.player.powerraw("chi") <= 3 and ValidUsable(spells.KegSmash.id, t) and FacingLosCast(spells.KegSmash.name, t) then
 			return true
 		end
 	end,
 	["TouchofDeath"] = function()
-		if
-			ni.player.buff(DeathNote) and ValidUsable(spells.TouchofDeath.id, t) and
-				FacingLosCast(spells.TouchofDeath.name, t)
-		 then
+		if ni.player.buff(DeathNote) and ValidUsable(spells.TouchofDeath.id, t) and FacingLosCast(spells.TouchofDeath.name, t) then
 			return true
 		end
 	end,
@@ -251,8 +254,7 @@ local abilities = {
 	end,
 	["BlackoutKick"] = function()
 		if
-			(ni.player.powerraw("chi") >= 3 or ni.player.buffremaining(Shuffle) < 2) and
-				ValidUsable(spells.BlackoutKick.id, t) and
+			(ni.player.powerraw("chi") >= 3 or ni.player.buffremaining(Shuffle) < 2) and ValidUsable(spells.BlackoutKick.id, t) and
 				FacingLosCast(spells.BlackoutKick.name, t)
 		 then
 			return true
@@ -296,7 +298,7 @@ local abilities = {
 	end,
 	["SpinningCraneKick"] = function()
 		if
-			ActiveEnemies() >= 2 and ni.player.buffremaining(Shuffle) > 2 and ni.spell.available(spells.SpinningCraneKick.id) and
+			ActiveEnemies() >= values["SpinningCraneKick"] and ni.player.buffremaining(Shuffle) > 2 and ni.spell.available(spells.SpinningCraneKick.id) and
 				ni.spell.cast(spells.SpinningCraneKick.name, p)
 		 then
 			return true
@@ -320,7 +322,8 @@ local abilities = {
 		end
 	end,
 	["NimbleBrew"] = function()
-		if ni.spell.available(spells.NimbleBrew.id) then
+		if ni.spell.available(spells.NimbleBrew.id) and (ni.player.isstunned() or ni.player.isfleeing()) then
+			ni.spell.cast(spells.NimbleBrew.id)
 		end
 	end
 }
