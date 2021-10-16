@@ -20,20 +20,22 @@ local queue = {
 }
 
 --Localize
-local IsSpellInRange, IsCurrentSpell, IsMounted, UnitIsDeadOrGhost, UnitExists, UnitCanAttack, GetShapeshiftFormID =
+local IsSpellInRange, IsCurrentSpell, IsMounted, UnitIsDeadOrGhost, UnitExists, UnitCanAttack, GetShapeshiftFormID, IsSpellKnown =
 	IsSpellInRange,
 	IsCurrentSpell,
 	IsMounted,
 	UnitIsDeadOrGhost,
 	UnitExists,
 	UnitCanAttack,
-	GetShapeshiftFormID
+	GetShapeshiftFormID,
+	IsSpellKnown
 
 local p, t = "player", "target"
 
 local enables = {}
 local values = {
 	["SpinningCraneKick"] = 3,
+	["Guard"] = 90
 }
 local inputs = {}
 local menus = {}
@@ -60,6 +62,12 @@ local items = {
 		tooltip = "Use Spinning Crane Kick when in range AoE",
 		value = values["SpinningCraneKick"],
 		key = "SpinningCraneKick"
+	},
+	{
+		type = "entry",
+		text = "Guard Hp",
+		value = values["Guard"],
+		key = "Guard"
 	},
 }
 
@@ -196,7 +204,7 @@ local abilities = {
 	["Pause"] = function()
 		if
 			IsMounted() or UnitIsDeadOrGhost(p) or not UnitExists(t) or UnitIsDeadOrGhost(t) or
-				(UnitExists(t) and not UnitCanAttack(p, t))
+				(UnitExists(t) and not UnitCanAttack(p, t)) or ni.player.buff(spells.SpinningCraneKick.id)
 		 then
 			return true
 		end
@@ -283,7 +291,7 @@ local abilities = {
 		end
 	end,
 	["Guard"] = function()
-		if ni.player.hp() < 90 and ni.spell.available(spells.Guard.id) and IsSpellInRange(spells.KegSmash.name, t) == 1 then
+		if ni.player.hp() < values["Guard"] and ni.spell.available(spells.Guard.id) and IsSpellInRange(spells.KegSmash.name, t) == 1 then
 			ni.spell.cast(spells.Guard.name, p)
 			return true
 		end
@@ -322,7 +330,7 @@ local abilities = {
 		end
 	end,
 	["NimbleBrew"] = function()
-		if ni.spell.available(spells.NimbleBrew.id) and (ni.player.isstunned() or ni.player.isfleeing()) then
+		if IsSpellKnown(spells.NimbleBrew.id) and ni.spell.cd(spells.NimbleBrew.id) == 0 and (ni.player.isstunned() or ni.player.isfleeing()) then
 			ni.spell.cast(spells.NimbleBrew.id)
 		end
 	end
