@@ -130,7 +130,7 @@ local abilities = {
 	end,
 	["stance of the fierce tiger"] = function()
 		if ni.spell.available(stanceofthefiercetiger) then
-			if not cache.mounted and not cache.coc and not cache.dog and not cache.eod and not GetShapeshiftFormID() ~= 24 then
+			if not cache.mounted and not cache.coc and not cache.dog and not cache.eod and GetShapeshiftFormID() ~= 24 then
 				ni.spell.cast(stanceofthefiercetiger, "player")
 				return true
 			end
