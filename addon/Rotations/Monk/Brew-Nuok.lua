@@ -16,11 +16,19 @@ local queue = {
 	"SpinningCraneKick",
 	"ChiWave",
 	"Jab",
+	"TigerPalmFiller",
 	"AutoAttack"
 }
 
 --Localize
-local IsSpellInRange, IsCurrentSpell, IsMounted, UnitIsDeadOrGhost, UnitExists, UnitCanAttack, GetShapeshiftFormID, IsSpellKnown =
+local IsSpellInRange,
+	IsCurrentSpell,
+	IsMounted,
+	UnitIsDeadOrGhost,
+	UnitExists,
+	UnitCanAttack,
+	GetShapeshiftFormID,
+	IsSpellKnown =
 	IsSpellInRange,
 	IsCurrentSpell,
 	IsMounted,
@@ -32,10 +40,13 @@ local IsSpellInRange, IsCurrentSpell, IsMounted, UnitIsDeadOrGhost, UnitExists, 
 
 local p, t = "player", "target"
 
-local enables = {}
+local enables = {
+	["ElusiveBrew"] = true
+}
 local values = {
 	["SpinningCraneKick"] = 3,
-	["Guard"] = 90
+	["Guard"] = 90,
+	["ElusiveBrew"] = 10
 }
 local inputs = {}
 local menus = {}
@@ -69,6 +80,14 @@ local items = {
 		value = values["Guard"],
 		key = "Guard"
 	},
+	{
+		type = "entry",
+		text = "Elusive Brew",
+		tooltip = "Use Elusive Brew at x stacks",
+		value = values["ElusiveBrew"],
+		enabled = enables["ElusiveBrew"],
+		key = "ElusiveBrew"
+	}
 }
 
 local incombat = false
@@ -204,14 +223,15 @@ local abilities = {
 	["Pause"] = function()
 		if
 			IsMounted() or UnitIsDeadOrGhost(p) or not UnitExists(t) or UnitIsDeadOrGhost(t) or
-				(UnitExists(t) and not UnitCanAttack(p, t)) or ni.player.buff(spells.SpinningCraneKick.id)
+				(UnitExists(t) and not UnitCanAttack(p, t)) or
+				ni.player.buff(spells.SpinningCraneKick.id)
 		 then
 			return true
 		end
 	end,
 	["AutoAttack"] = function()
-		if not IsCurrentSpell(spells.AutoAttack.id) then
-			ni.spell.cast(spells.AutoAttack.id)
+		if not IsCurrentSpell(spells.AutoAttack.id) and ni.unit.inmelee(p, t) then
+			ni.spell.cast(spells.AutoAttack.name)
 		end
 	end,
 	["StanceoftheSturdyOx"] = function()
@@ -244,6 +264,11 @@ local abilities = {
 				FacingLosCast(spells.TigerPalm.name, t) and
 				ni.player.buffremaining(Shuffle) > 2
 		 then
+			return true
+		end
+	end,
+	["TigerPalmFiller"] = function()
+		if ValidUsable(spells.TigerPalm.id, t) and FacingLosCast(spells.TigerPalm.name, t) then
 			return true
 		end
 	end,
@@ -291,7 +316,10 @@ local abilities = {
 		end
 	end,
 	["Guard"] = function()
-		if ni.player.hp() < values["Guard"] and ni.spell.available(spells.Guard.id) and IsSpellInRange(spells.KegSmash.name, t) == 1 then
+		if
+			ni.player.hp() < values["Guard"] and ni.spell.available(spells.Guard.id) and
+				IsSpellInRange(spells.KegSmash.name, t) == 1
+		 then
 			ni.spell.cast(spells.Guard.name, p)
 			return true
 		end
@@ -306,7 +334,8 @@ local abilities = {
 	end,
 	["SpinningCraneKick"] = function()
 		if
-			ActiveEnemies() >= values["SpinningCraneKick"] and ni.player.buffremaining(Shuffle) > 2 and ni.spell.available(spells.SpinningCraneKick.id) and
+			ActiveEnemies() >= values["SpinningCraneKick"] and ni.player.buffremaining(Shuffle) > 2 and
+				ni.spell.available(spells.SpinningCraneKick.id) and
 				ni.spell.cast(spells.SpinningCraneKick.name, p)
 		 then
 			return true
@@ -324,13 +353,18 @@ local abilities = {
 		end
 	end,
 	["ElusiveBrew"] = function()
-		if ni.spell.available(spells.ElusiveBrew.id) and ni.player.buffstacks(ElusiveBrewStacks) == 15 then
-			ni.spell.cast(spells.ElusiveBrew.id, p)
-			return true
+		if enables["ElusiveBrew"] then
+			if ni.spell.available(spells.ElusiveBrew.id) and ni.player.buffstacks(ElusiveBrewStacks) >= values["ElusiveBrew"] then
+				ni.spell.cast(spells.ElusiveBrew.id, p)
+				return true
+			end
 		end
 	end,
 	["NimbleBrew"] = function()
-		if IsSpellKnown(spells.NimbleBrew.id) and ni.spell.cd(spells.NimbleBrew.id) == 0 and (ni.player.isstunned() or ni.player.isfleeing()) then
+		if
+			IsSpellKnown(spells.NimbleBrew.id) and ni.spell.cd(spells.NimbleBrew.id) == 0 and
+				(ni.player.isstunned() or ni.player.isfleeing())
+		 then
 			ni.spell.cast(spells.NimbleBrew.id)
 		end
 	end
