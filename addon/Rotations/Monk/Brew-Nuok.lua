@@ -7,6 +7,7 @@ local queue = {
 	"ElusiveBrew",
 	"SpearHandStrike",
 	"Guard",
+	"SummonBlackOxStatue",
 	"TouchofDeath",
 	"KegSmash",
 	"BreathofFire",
@@ -38,10 +39,99 @@ local IsSpellInRange,
 	GetShapeshiftFormID,
 	IsSpellKnown
 
+local spells = {
+	--General 0
+	AutoAttack = {id = 6603, name = GetSpellInfo(6603), icon = select(3, GetSpellInfo(6603))},
+	QuakingPalm = {id = 107079, name = GetSpellInfo(107079), icon = select(3, GetSpellInfo(107079))},
+	ArmorSkills = {id = 106904, name = GetSpellInfo(106904), icon = select(3, GetSpellInfo(106904))},
+	BattleFatigue = {id = 134732, name = GetSpellInfo(134732), icon = select(3, GetSpellInfo(134732))},
+	Bouncy = {id = 107076, name = GetSpellInfo(107076), icon = select(3, GetSpellInfo(107076))},
+	Epicurean = {id = 107072, name = GetSpellInfo(107072), icon = select(3, GetSpellInfo(107072))},
+	ExpertRiding = {id = 34090, name = GetSpellInfo(34090), icon = select(3, GetSpellInfo(34090))},
+	FlightMastersLicense = {id = 90267, name = GetSpellInfo(90267), icon = select(3, GetSpellInfo(90267))},
+	Gourmand = {id = 107073, name = GetSpellInfo(107073), icon = select(3, GetSpellInfo(107073))},
+	InnerPeace = {id = 107074, name = GetSpellInfo(107074), icon = select(3, GetSpellInfo(107074))},
+	Languages = {id = 143369, name = GetSpellInfo(143369), icon = select(3, GetSpellInfo(143369))},
+	WeaponSkills = {id = 106902, name = GetSpellInfo(106902), icon = select(3, GetSpellInfo(106902))},
+	ColdWeatherFlying = {id = 54197, name = GetSpellInfo(54197), icon = select(3, GetSpellInfo(54197))},
+	ArtisanRiding = {id = 34091, name = GetSpellInfo(34091), icon = select(3, GetSpellInfo(34091))},
+	MasterRiding = {id = 90265, name = GetSpellInfo(90265), icon = select(3, GetSpellInfo(90265))},
+	CloudSerpentRiding = {id = 130487, name = GetSpellInfo(130487), icon = select(3, GetSpellInfo(130487))},
+	WisdomoftheFourWinds = {id = 115913, name = GetSpellInfo(115913), icon = select(3, GetSpellInfo(115913))},
+	--Brewmaster 0
+	AvertHarm = {id = 115213, name = GetSpellInfo(115213), icon = select(3, GetSpellInfo(115213))},
+	BlackoutKick = {id = 100784, name = GetSpellInfo(100784), icon = select(3, GetSpellInfo(100784))},
+	BreathofFire = {id = 115181, name = GetSpellInfo(115181), icon = select(3, GetSpellInfo(115181))},
+	Clash = {id = 122057, name = GetSpellInfo(122057), icon = select(3, GetSpellInfo(122057))},
+	CracklingJadeLightning = {id = 117952, name = GetSpellInfo(117952), icon = select(3, GetSpellInfo(117952))},
+	Detox = {id = 115450, name = GetSpellInfo(115450), icon = select(3, GetSpellInfo(115450))},
+	Disable = {id = 116095, name = GetSpellInfo(116095), icon = select(3, GetSpellInfo(116095))},
+	DizzyingHaze = {id = 115180, name = GetSpellInfo(115180), icon = select(3, GetSpellInfo(115180))},
+	ElusiveBrew = {id = 115308, name = GetSpellInfo(115308), icon = select(3, GetSpellInfo(115308))},
+	ExpelHarm = {id = 115072, name = GetSpellInfo(115072), icon = select(3, GetSpellInfo(115072))},
+	FortifyingBrew = {id = 115203, name = GetSpellInfo(115203), icon = select(3, GetSpellInfo(115203))},
+	GrappleWeapon = {id = 117368, name = GetSpellInfo(117368), icon = select(3, GetSpellInfo(117368))},
+	Guard = {id = 115295, name = GetSpellInfo(115295), icon = select(3, GetSpellInfo(115295))},
+	HealingSphere = {id = 115460, name = GetSpellInfo(115460), icon = select(3, GetSpellInfo(115460))},
+	Jab = {id = 100780, name = GetSpellInfo(100780), icon = select(3, GetSpellInfo(100780))},
+	KegSmash = {id = 121253, name = GetSpellInfo(121253), icon = select(3, GetSpellInfo(121253))},
+	LegacyoftheEmperor = {id = 115921, name = GetSpellInfo(115921), icon = select(3, GetSpellInfo(115921))},
+	NimbleBrew = {id = 137562, name = GetSpellInfo(137562), icon = select(3, GetSpellInfo(137562))},
+	Paralysis = {id = 115078, name = GetSpellInfo(115078), icon = select(3, GetSpellInfo(115078))},
+	Provoke = {id = 115546, name = GetSpellInfo(115546), icon = select(3, GetSpellInfo(115546))},
+	PurifyingBrew = {id = 119582, name = GetSpellInfo(119582), icon = select(3, GetSpellInfo(119582))},
+	Resuscitate = {id = 115178, name = GetSpellInfo(115178), icon = select(3, GetSpellInfo(115178))},
+	Roll = {id = 109132, name = GetSpellInfo(109132), icon = select(3, GetSpellInfo(109132))},
+	SpearHandStrike = {id = 116705, name = GetSpellInfo(116705), icon = select(3, GetSpellInfo(116705))},
+	SpinningCraneKick = {id = 101546, name = GetSpellInfo(101546), icon = select(3, GetSpellInfo(101546))},
+	StanceoftheFierceTiger = {id = 103985, name = GetSpellInfo(103985), icon = select(3, GetSpellInfo(103985))},
+	StanceoftheSturdyOx = {id = 115069, name = GetSpellInfo(115069), icon = select(3, GetSpellInfo(115069))},
+	SummonBlackOxStatue = {id = 115315, name = GetSpellInfo(115315), icon = select(3, GetSpellInfo(115315))},
+	TigerPalm = {id = 100787, name = GetSpellInfo(100787), icon = select(3, GetSpellInfo(100787))},
+	TouchofDeath = {id = 115080, name = GetSpellInfo(115080), icon = select(3, GetSpellInfo(115080))},
+	Transcendence = {id = 101643, name = GetSpellInfo(101643), icon = select(3, GetSpellInfo(101643))},
+	TranscendenceTransfer = {id = 119996, name = GetSpellInfo(119996), icon = select(3, GetSpellInfo(119996))},
+	ZenMeditation = {id = 115176, name = GetSpellInfo(115176), icon = select(3, GetSpellInfo(115176))},
+	ZenPilgrimage = {id = 126892, name = GetSpellInfo(126892), icon = select(3, GetSpellInfo(126892))},
+	BrewingElusiveBrew = {id = 128938, name = GetSpellInfo(128938), icon = select(3, GetSpellInfo(128938))},
+	BrewmasterTraining = {id = 117967, name = GetSpellInfo(117967), icon = select(3, GetSpellInfo(117967))},
+	DesperateMeasures = {id = 126060, name = GetSpellInfo(126060), icon = select(3, GetSpellInfo(126060))},
+	DualWield = {id = 124146, name = GetSpellInfo(124146), icon = select(3, GetSpellInfo(124146))},
+	FightingStyle = {id = 115074, name = GetSpellInfo(115074), icon = select(3, GetSpellInfo(115074))},
+	GiftoftheOx = {id = 124502, name = GetSpellInfo(124502), icon = select(3, GetSpellInfo(124502))},
+	LeatherSpecialization = {id = 120225, name = GetSpellInfo(120225), icon = select(3, GetSpellInfo(120225))},
+	MasteryElusiveBrawler = {id = 117906, name = GetSpellInfo(117906), icon = select(3, GetSpellInfo(117906))},
+	Parry = {id = 116812, name = GetSpellInfo(116812), icon = select(3, GetSpellInfo(116812))},
+	SwiftReflexes = {id = 124334, name = GetSpellInfo(124334), icon = select(3, GetSpellInfo(124334))},
+	Vengeance = {id = 120267, name = GetSpellInfo(120267), icon = select(3, GetSpellInfo(120267))},
+	WayoftheMonk = {id = 120277, name = GetSpellInfo(120277), icon = select(3, GetSpellInfo(120277))},
+	--Talents
+	Celerity = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	TigersLust = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	Momentum = {id = 115174, name = GetSpellInfo(115174), icon = select(3, GetSpellInfo(115174))},
+	ChiWave = {id = 115098, name = GetSpellInfo(115098), icon = select(3, GetSpellInfo(115098))},
+	ZenSphere = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	ChiBurst = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	PowerStrikes = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	Ascension = {id = 115396, name = GetSpellInfo(115396), icon = select(3, GetSpellInfo(115396))},
+	ChiBrew = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	RingofPeace = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	ChargingOxWave = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	LegSweep = {id = 119381, name = GetSpellInfo(119381), icon = select(3, GetSpellInfo(119381))},
+	HealingElixirs = {id = 122280, name = GetSpellInfo(122280), icon = select(3, GetSpellInfo(122280))},
+	DampenHarm = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	DiffuseMagic = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	RushingJadeWind = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	InvokeXuentheWhiteTiger = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	ChiTorpedo = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))}
+	--Glyph
+}
+
 local p, t = "player", "target"
 
 local enables = {
-	["ElusiveBrew"] = true
+	["ElusiveBrew"] = true,
+	["SummonBlackOxStatue"] = false
 }
 local values = {
 	["SpinningCraneKick"] = 3,
@@ -69,24 +159,30 @@ local items = {
 	{type = "separator"},
 	{
 		type = "entry",
-		text = "Spinning Crane Kick AoE",
+		text = "\124T" .. spells.SpinningCraneKick.icon .. ":26:26\124t Spinning Crane Kick AoE",
 		tooltip = "Use Spinning Crane Kick when in range AoE",
 		value = values["SpinningCraneKick"],
 		key = "SpinningCraneKick"
 	},
 	{
 		type = "entry",
-		text = "Guard Hp",
+		text = "\124T" .. spells.Guard.icon .. ":26:26\124t Guard Hp",
 		value = values["Guard"],
 		key = "Guard"
 	},
 	{
 		type = "entry",
-		text = "Elusive Brew",
+		text = "\124T" .. spells.ElusiveBrew.icon .. ":26:26\124t Elusive Brew",
 		tooltip = "Use Elusive Brew at x stacks",
 		value = values["ElusiveBrew"],
 		enabled = enables["ElusiveBrew"],
 		key = "ElusiveBrew"
+	},
+	{
+		type = "entry",
+		text = "\124T" .. spells.SummonBlackOxStatue.icon .. ":26:26\124t Summon Black Ox Statue",
+		enabled = enables["SummonBlackOxStatue"],
+		key = "SummonBlackOxStatue"
 	}
 }
 
@@ -108,78 +204,6 @@ local function OnUnload()
 	ni.combatlog.unregisterhandler("Brewmaster")
 	ni.GUI.DestroyFrame("Brewmaster")
 end
-
-local spells = {
-	--General 0
-	AutoAttack = {id = 6603, name = GetSpellInfo(6603)},
-	--Brewmaster 0
-	AvertHarm = {id = 115213, name = GetSpellInfo(115213)},
-	BlackoutKick = {id = 100784, name = GetSpellInfo(100784)},
-	BreathofFire = {id = 115181, name = GetSpellInfo(115181)},
-	ChiWave = {id = 115098, name = GetSpellInfo(115098)},
-	Clash = {id = 122057, name = GetSpellInfo(122057)},
-	CracklingJadeLightning = {id = 117952, name = GetSpellInfo(117952)},
-	Detox = {id = 115450, name = GetSpellInfo(115450)},
-	Disable = {id = 116095, name = GetSpellInfo(116095)},
-	DizzyingHaze = {id = 115180, name = GetSpellInfo(115180)},
-	ElusiveBrew = {id = 115308, name = GetSpellInfo(115308)},
-	ExpelHarm = {id = 115072, name = GetSpellInfo(115072)},
-	FortifyingBrew = {id = 115203, name = GetSpellInfo(115203)},
-	GrappleWeapon = {id = 117368, name = GetSpellInfo(117368)},
-	Guard = {id = 115295, name = GetSpellInfo(115295)},
-	HealingSphere = {id = 115460, name = GetSpellInfo(115460)},
-	Jab = {id = 100780, name = GetSpellInfo(100780)},
-	KegSmash = {id = 121253, name = GetSpellInfo(121253)},
-	LegSweep = {id = 119381, name = GetSpellInfo(119381)},
-	LegacyoftheEmperor = {id = 115921, name = GetSpellInfo(115921)},
-	NimbleBrew = {id = 137562, name = GetSpellInfo(137562)},
-	Paralysis = {id = 115078, name = GetSpellInfo(115078)},
-	Provoke = {id = 115546, name = GetSpellInfo(115546)},
-	Resuscitate = {id = 115178, name = GetSpellInfo(115178)},
-	Roll = {id = 109132, name = GetSpellInfo(109132)},
-	SpearHandStrike = {id = 116705, name = GetSpellInfo(116705)},
-	SpinningCraneKick = {id = 101546, name = GetSpellInfo(101546)},
-	StanceoftheFierceTiger = {id = 103985, name = GetSpellInfo(103985)},
-	StanceoftheSturdyOx = {id = 115069, name = GetSpellInfo(115069)},
-	TigerPalm = {id = 100787, name = GetSpellInfo(100787)},
-	TouchofDeath = {id = 115080, name = GetSpellInfo(115080)},
-	ZenPilgrimage = {id = 126892, name = GetSpellInfo(126892)},
-	Ascension = {id = 115396, name = GetSpellInfo(115396)},
-	BrewingElusiveBrew = {id = 128938, name = GetSpellInfo(128938)},
-	BrewmasterTraining = {id = 117967, name = GetSpellInfo(117967)},
-	DesperateMeasures = {id = 126060, name = GetSpellInfo(126060)},
-	DualWield = {id = 124146, name = GetSpellInfo(124146)},
-	FightingStyle = {id = 115074, name = GetSpellInfo(115074)},
-	GiftoftheOx = {id = 124502, name = GetSpellInfo(124502)},
-	LeatherSpecialization = {id = 120225, name = GetSpellInfo(120225)},
-	Momentum = {id = 115174, name = GetSpellInfo(115174)},
-	Parry = {id = 116812, name = GetSpellInfo(116812)},
-	SwiftReflexes = {id = 124334, name = GetSpellInfo(124334)},
-	Vengeance = {id = 120267, name = GetSpellInfo(120267)},
-	WayoftheMonk = {id = 120277, name = GetSpellInfo(120277)},
-	SummonBlackOxStatue = {id = 115315, name = GetSpellInfo(115315)},
-	PurifyingBrew = {id = 119582, name = GetSpellInfo(119582)},
-	MasteryElusiveBrawler = {id = 117906, name = GetSpellInfo(117906)},
-	ZenMeditation = {id = 115176, name = GetSpellInfo(115176)},
-	Transcendence = {id = 101643, name = GetSpellInfo(101643)},
-	TranscendenceTransfer = {id = 119996, name = GetSpellInfo(119996)},
-	--Talents
-	Celerity = {id = nil, name = GetSpellInfo(nil)},
-	TigersLust = {id = nil, name = GetSpellInfo(nil)},
-	ZenSphere = {id = nil, name = GetSpellInfo(nil)},
-	ChiBurst = {id = nil, name = GetSpellInfo(nil)},
-	PowerStrikes = {id = nil, name = GetSpellInfo(nil)},
-	ChiBrew = {id = nil, name = GetSpellInfo(nil)},
-	RingofPeace = {id = nil, name = GetSpellInfo(nil)},
-	ChargingOxWave = {id = nil, name = GetSpellInfo(nil)},
-	HealingElixirs = {id = nil, name = GetSpellInfo(nil)},
-	DampenHarm = {id = nil, name = GetSpellInfo(nil)},
-	DiffuseMagic = {id = nil, name = GetSpellInfo(nil)},
-	RushingJadeWind = {id = nil, name = GetSpellInfo(nil)},
-	InvokeXuentheWhiteTiger = {id = nil, name = GetSpellInfo(nil)},
-	ChiTorpedo = {id = nil, name = GetSpellInfo(nil)}
-	--Glyph
-}
 
 local enemies = {}
 
@@ -230,7 +254,7 @@ local abilities = {
 		end
 	end,
 	["AutoAttack"] = function()
-		if not IsCurrentSpell(spells.AutoAttack.id) and ni.unit.inmelee(p, t) then
+		if not IsCurrentSpell(spells.AutoAttack.id) and ni.unit.inmelee(p, t) and incombat then
 			ni.spell.cast(spells.AutoAttack.name)
 		end
 	end,
@@ -343,7 +367,7 @@ local abilities = {
 	end,
 	["PurifyingBrew"] = function()
 		if ni.player.debuff(HeavyStagger) and ni.spell.available(spells.PurifyingBrew.id) then
-			ni.spell.cast(spells.PurifyingBrew.id)
+			ni.spell.cast(spells.PurifyingBrew.name)
 		end
 	end,
 	["LegacyoftheEmperor"] = function()
@@ -355,7 +379,7 @@ local abilities = {
 	["ElusiveBrew"] = function()
 		if enables["ElusiveBrew"] then
 			if ni.spell.available(spells.ElusiveBrew.id) and ni.player.buffstacks(ElusiveBrewStacks) >= values["ElusiveBrew"] then
-				ni.spell.cast(spells.ElusiveBrew.id, p)
+				ni.spell.cast(spells.ElusiveBrew.name, p)
 				return true
 			end
 		end
@@ -366,6 +390,30 @@ local abilities = {
 				(ni.player.isstunned() or ni.player.isfleeing())
 		 then
 			ni.spell.cast(spells.NimbleBrew.id)
+		end
+	end,
+	["SummonBlackOxStatue"] = function()
+		if enables["SummonBlackOxStatue"] then
+			if ni.spell.available(spells.SummonBlackOxStatue.id) and incombat and ni.unit.isboss(t) then
+				if not ni.player.buff(SanctuaryoftheOx) then
+					ni.spell.castat(spells.SummonBlackOxStatue.name, p)
+					return true
+				end
+				if ni.player.buff(SanctuaryoftheOx) then
+					local c = ni.unit.creations(p)
+					local guid
+					for i = 1, #c do
+						local cr = c[i]
+						if string.match(cr.name, "Ox") then
+							guid = cr.guid
+						end
+					end
+					if guid ~= nil and ni.player.distance(guid) > 38 then
+						ni.spell.castat(spells.SummonBlackOxStatue.id, p)
+						return true
+					end
+				end
+			end
 		end
 	end
 }
