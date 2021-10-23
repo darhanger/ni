@@ -18,20 +18,6 @@ local function GetSetting(name)
          and v.key == name then
             return v.value, v.enabled
         end
-        if v.type == "dropdown"
-         and v.key ~= nil
-         and v.key == name then
-            for k2, v2 in pairs(v.menu) do
-                if v2.selected then
-                    return v2.value
-                end
-            end
-        end
-        if v.type == "input"
-         and v.key ~= nil
-         and v.key == name then
-            return v.value
-        end
     end
 end;
 
