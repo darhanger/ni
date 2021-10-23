@@ -47,7 +47,7 @@ local abilities = {
 									sname = string.gsub(sname, "-", "")
 									sname = string.gsub(sname, ":", "")
 									sname = string.gsub(sname, ",", "")
-									local text = string.format("%s = {id = %s, name = GetSpellInfo(%s)},", sname, flyoutID, flyoutID)
+									local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", sname, flyoutID, flyoutID, flyoutID)
 									CopyChatFrameEditBox:Insert(text)
 									CopyChatFrameEditBox:Insert("\n")
 								end
@@ -60,7 +60,7 @@ local abilities = {
 									sname = string.gsub(sname, "-", "")
 									sname = string.gsub(sname, ":", "")
 									sname = string.gsub(sname, ",", "")
-									local text = string.format("%s = {id = %s, name = GetSpellInfo(%s)},", sname, id, id)
+									local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", sname, id, id, id)
 									CopyChatFrameEditBox:Insert(text)
 									CopyChatFrameEditBox:Insert("\n")
 									dumped = true
@@ -87,7 +87,7 @@ local abilities = {
 				end
 			end
 			for k, v in pairs(sb) do
-				local text = string.format("%s = {id = %s, name = GetSpellInfo(%s)},", k, v, v)
+				local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), , icon = select(3, GetSpellInfo(%s))},", k, v, v, v)
 				CopyChatFrameEditBox:Insert(text)
 				CopyChatFrameEditBox:Insert("\n")
 			end
@@ -127,7 +127,7 @@ local abilities = {
 					sname = string.gsub(sname, ",", "")
 					sname = string.gsub(sname, "-", "")
 					sname = string.gsub(sname, ":", "")
-					local text = string.format("%s = {id = %s, name = GetSpellInfo(%s)},", sname, sid, sid)
+					local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", sname, sid, sid, sid)
 					CopyChatFrameEditBox:Insert(text)
 					CopyChatFrameEditBox:Insert("\n")
 					dumpedTalents = true
