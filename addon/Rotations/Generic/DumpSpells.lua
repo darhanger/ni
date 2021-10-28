@@ -10,15 +10,16 @@ local abilities = {
 			local sb = {}
 			CopyChatFrame:Show()
 			local tabs = GetNumSpellTabs()
+			CopyChatFrameEditBox:Insert(string.format("--ni.vars.build == %s", ni.vars.build))
+			CopyChatFrameEditBox:Insert("\n")
 			for i = 1, tabs do
 				local name, _, offset, numSpells, isGuild, offspecID = GetSpellTabInfo(i)
-				CopyChatFrameEditBox:Insert(string.format("--%s %s", name, offspecID))
+				CopyChatFrameEditBox:Insert(string.format("--%s", name))
 				CopyChatFrameEditBox:Insert("\n")
 				local tabEnd = offset + numSpells
-				if offspecID ~= nil and offspecID == 0 then
+				if offspecID == nil or offspecID == 0 then
 					for j = offset + 1, tabEnd do
 						ni.debug.log(string.format("j %s", j))
-						-- /dump n.vars.build
 						if ni.vars.build == 30300 then
 							local spellName, spellRank = GetSpellName(j, BOOKTYPE_SPELL)
 							if spellRank ~= "Passive" and spellRank ~= "Racial Passive" then
@@ -30,7 +31,6 @@ local abilities = {
 								spellName = string.gsub(spellName, ",", "")
 								GameTooltip:SetSpell(j, BOOKTYPE_SPELL)
 								local spellID = select(3, GameTooltip:GetSpell())
-
 								ni.debug.log(string.format("spellID %s", spellID))
 								dumped = true
 							end
@@ -47,20 +47,34 @@ local abilities = {
 									sname = string.gsub(sname, "-", "")
 									sname = string.gsub(sname, ":", "")
 									sname = string.gsub(sname, ",", "")
-									local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", sname, flyoutID, flyoutID, flyoutID)
+									local text =
+										string.format(
+										"%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},",
+										sname,
+										flyoutID,
+										flyoutID,
+										flyoutID
+									)
 									CopyChatFrameEditBox:Insert(text)
 									CopyChatFrameEditBox:Insert("\n")
 								end
 							end
 							if (type == "SPELL" or type == "FUTURESPELL") then
 								local sname, rank = GetSpellInfo(id)
-								if not string.match(rank, "Guild Perk") then
+								if not string.match(rank, "Guild") then
 									sname = string.gsub(sname, "%s+", "")
 									sname = string.gsub(sname, "'", "")
 									sname = string.gsub(sname, "-", "")
 									sname = string.gsub(sname, ":", "")
 									sname = string.gsub(sname, ",", "")
-									local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", sname, id, id, id)
+									local text =
+										string.format(
+										"%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},",
+										sname,
+										id,
+										id,
+										id
+									)
 									CopyChatFrameEditBox:Insert(text)
 									CopyChatFrameEditBox:Insert("\n")
 									dumped = true
@@ -87,7 +101,8 @@ local abilities = {
 				end
 			end
 			for k, v in pairs(sb) do
-				local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), , icon = select(3, GetSpellInfo(%s))},", k, v, v, v)
+				local text =
+					string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", k, v, v, v)
 				CopyChatFrameEditBox:Insert(text)
 				CopyChatFrameEditBox:Insert("\n")
 			end
@@ -108,6 +123,11 @@ local abilities = {
 					local active = GetActiveTalentGroup(false, false)
 					for i = 1, numTalents do
 						local nameTalent, _, _, _, currRank, maxRank = GetTalentInfo(t, i)
+						nameTalent = string.gsub(sname, "%s+", "")
+						nameTalent = string.gsub(sname, "'", "")
+						nameTalent = string.gsub(sname, "-", "")
+						nameTalent = string.gsub(sname, ":", "")
+						nameTalent = string.gsub(sname, ",", "")
 						CopyChatFrameEditBox:Insert(
 							string.format("%s (%s/%s) = GetTalentInfo(%s, %s)", nameTalent, currRank, maxRank, t, i)
 						)
@@ -127,7 +147,14 @@ local abilities = {
 					sname = string.gsub(sname, ",", "")
 					sname = string.gsub(sname, "-", "")
 					sname = string.gsub(sname, ":", "")
-					local text = string.format("%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},", sname, sid, sid, sid)
+					local text =
+						string.format(
+						"%s = {id = %s, name = GetSpellInfo(%s), icon = select(3, GetSpellInfo(%s))},",
+						sname,
+						sid,
+						sid,
+						sid
+					)
 					CopyChatFrameEditBox:Insert(text)
 					CopyChatFrameEditBox:Insert("\n")
 					dumpedTalents = true
