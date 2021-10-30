@@ -1,5 +1,6 @@
 local queue = {
 	"Pause",
+	"Cache",
 	"Seal",
 	"Inquisition",
 	"TemplarsVerdict",
@@ -14,13 +15,7 @@ local queue = {
 }
 
 --Localize
-local IsSpellInRange,
-	IsCurrentSpell,
-	IsMounted,
-	UnitIsDeadOrGhost,
-	UnitExists,
-	UnitCanAttack,
-	IsUsableSpell =
+local IsSpellInRange, IsCurrentSpell, IsMounted, UnitIsDeadOrGhost, UnitExists, UnitCanAttack, IsUsableSpell =
 	IsSpellInRange,
 	IsCurrentSpell,
 	IsMounted,
@@ -32,23 +27,7 @@ local IsSpellInRange,
 local spells = {
 	--WoWBuild 40300
 	--General
-	ArmorSkills = {id = 76271, name = GetSpellInfo(76271), icon = select(3, GetSpellInfo(76271))},
 	AutoAttack = {id = 6603, name = GetSpellInfo(6603), icon = select(3, GetSpellInfo(6603))},
-	Cultivation = {id = 20552, name = GetSpellInfo(20552), icon = select(3, GetSpellInfo(20552))},
-	Endurance = {id = 20550, name = GetSpellInfo(20550), icon = select(3, GetSpellInfo(20550))},
-	Languages = {id = 79746, name = GetSpellInfo(79746), icon = select(3, GetSpellInfo(79746))},
-	NatureResistance = {id = 20551, name = GetSpellInfo(20551), icon = select(3, GetSpellInfo(20551))},
-	WarStomp = {id = 20549, name = GetSpellInfo(20549), icon = select(3, GetSpellInfo(20549))},
-	WeaponSkills = {id = 76294, name = GetSpellInfo(76294), icon = select(3, GetSpellInfo(76294))},
-	ApprenticeRiding = {id = 33388, name = GetSpellInfo(33388), icon = select(3, GetSpellInfo(33388))},
-	JourneymanRiding = {id = 33391, name = GetSpellInfo(33391), icon = select(3, GetSpellInfo(33391))},
-	PlateSpecialization = {id = 86525, name = GetSpellInfo(86525), icon = select(3, GetSpellInfo(86525))},
-	ExpertRiding = {id = 34090, name = GetSpellInfo(34090), icon = select(3, GetSpellInfo(34090))},
-	FlightMastersLicense = {id = 90267, name = GetSpellInfo(90267), icon = select(3, GetSpellInfo(90267))},
-	ColdWeatherFlying = {id = 54197, name = GetSpellInfo(54197), icon = select(3, GetSpellInfo(54197))},
-	ArtisanRiding = {id = 34091, name = GetSpellInfo(34091), icon = select(3, GetSpellInfo(34091))},
-	MasterRiding = {id = 90265, name = GetSpellInfo(90265), icon = select(3, GetSpellInfo(90265))},
-	Mastery = {id = 86474, name = GetSpellInfo(86474), icon = select(3, GetSpellInfo(86474))},
 	--Holy
 	HolyLight = {id = 635, name = GetSpellInfo(635), icon = select(3, GetSpellInfo(635))},
 	WordofGlory = {id = 85673, name = GetSpellInfo(85673), icon = select(3, GetSpellInfo(85673))},
@@ -200,7 +179,10 @@ local function ValidUsable(id, tar)
 	return false
 end
 
-local HolyPower, inmelee = 0, false
+local cache = {
+	holypower = 0,
+	inmelee = false
+}
 
 local abilities = {
 	["Pause"] = function()
@@ -212,11 +194,11 @@ local abilities = {
 		end
 	end,
 	["Cache"] = function()
-		HolyPower = ni.player.powerraw("holy")
-		inmelee = IsSpellInRange(spells.CrusaderStrike.id, t) == 1
+		cache.holypower = ni.player.powerraw("holy")
+		cache.inmelee = IsSpellInRange(spells.CrusaderStrike.name, t) == 1
 	end,
 	["AutoAttack"] = function()
-		if not IsCurrentSpell(spells.AutoAttack.id) and ni.unit.inmelee(p, t) and incombat then
+		if not IsCurrentSpell(spells.AutoAttack.id) and cache.inmelee and incombat then
 			ni.spell.cast(spells.AutoAttack.name)
 		end
 	end,
@@ -247,8 +229,7 @@ local abilities = {
 	end,
 	["TemplarsVerdict"] = function()
 		if
-			ValidUsable(spells.TemplarsVerdict.id, t) and ni.player.powerraw("holy") >= 3 and
-				FacingLosCast(spells.TemplarsVerdict.name, t)
+			ValidUsable(spells.TemplarsVerdict.id, t) and cache.holypower >= 3 and FacingLosCast(spells.TemplarsVerdict.name, t)
 		 then
 			return true
 		end
@@ -275,19 +256,22 @@ local abilities = {
 		end
 	end,
 	["HolyWrath"] = function()
-		if ni.spell.available(spells.HolyWrath.id) and inmelee then
+		if ni.spell.available(spells.HolyWrath.id) and cache.inmelee then
 			ni.spell.cast(spells.HolyWrath.name)
 			return true
 		end
 	end,
 	["Consecration"] = function()
-		if ni.spell.available(spells.Consecration.id) and inmelee then
+		if ni.spell.available(spells.Consecration.id) and cache.inmelee then
 			ni.spell.cast(spells.Consecration.name)
 			return true
 		end
 	end,
 	["Inquisition"] = function()
-		if ni.spell.available(spells.Inquisition.id) and HolyPower == 3 and ni.player.buffremaining(spells.Inquisition.id) <= 3 then
+		if
+			ni.spell.available(spells.Inquisition.id) and cache.holypower == 3 and
+				ni.player.buffremaining(spells.Inquisition.id) <= 3
+		 then
 			ni.spell.cast(spells.Inquisition.name)
 			return true
 		end
