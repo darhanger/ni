@@ -123,15 +123,17 @@ local abilities = {
 					local active = GetActiveTalentGroup(false, false)
 					for i = 1, numTalents do
 						local nameTalent, _, _, _, currRank, maxRank = GetTalentInfo(t, i)
-						nameTalent = string.gsub(sname, "%s+", "")
-						nameTalent = string.gsub(sname, "'", "")
-						nameTalent = string.gsub(sname, "-", "")
-						nameTalent = string.gsub(sname, ":", "")
-						nameTalent = string.gsub(sname, ",", "")
-						CopyChatFrameEditBox:Insert(
-							string.format("%s (%s/%s) = GetTalentInfo(%s, %s)", nameTalent, currRank, maxRank, t, i)
-						)
-						CopyChatFrameEditBox:Insert("\n")
+						if nameTalent ~= nil then
+							nameTalent = string.gsub(nameTalent, "%s+", "")
+							nameTalent = string.gsub(nameTalent, "'", "")
+							nameTalent = string.gsub(nameTalent, "-", "")
+							nameTalent = string.gsub(nameTalent, ":", "")
+							nameTalent = string.gsub(nameTalent, ",", "")
+							CopyChatFrameEditBox:Insert(
+								string.format("%s (%s/%s) = GetTalentInfo(%s, %s)", nameTalent, currRank, maxRank, t, i)
+							)
+							CopyChatFrameEditBox:Insert("\n")
+						end
 						dumpedTalents = true
 					end
 				end
