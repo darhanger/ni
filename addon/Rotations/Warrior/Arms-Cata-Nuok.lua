@@ -1,6 +1,7 @@
 local queue = {
 	"Pause",
 	"BattleStance",
+	"BattleShout",
 	"Cache",
 	"Pummel",
 	"VictoryRush",
