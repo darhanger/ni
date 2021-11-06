@@ -7,6 +7,7 @@ local queue = {
 	"BoneShield",
 	"IceboundFortitude",
 	"RuneTap",
+	"DancingRuneWeapon",
 	"DeathandDecay",
 	"Pestilence",
 	"Outbreak",
@@ -40,6 +41,7 @@ local spells = {
 	DarkCommand = {id = 56222, name = GetSpellInfo(56222), icon = select(3, GetSpellInfo(56222))},
 	DeathPact = {id = 48743, name = GetSpellInfo(48743), icon = select(3, GetSpellInfo(48743))},
 	DarkSimulacrum = {id = 77606, name = GetSpellInfo(77606), icon = select(3, GetSpellInfo(77606))},
+	DancingRuneWeapon = {id = 49028, name = GetSpellInfo(49028), icon = select(3, GetSpellInfo(49028))},
 	--Frost
 	FrostFever = {id = 59921, name = GetSpellInfo(59921), icon = select(3, GetSpellInfo(59921))},
 	FrostPresence = {id = 48266, name = GetSpellInfo(48266), icon = select(3, GetSpellInfo(48266))},
@@ -91,12 +93,14 @@ local enables = {
 	["RuneTap"] = true,
 	["BoneShield"] = true,
 	["VampiricBlood"] = true,
-	["IceboundFortitude"] = true
+	["IceboundFortitude"] = true,
+	["DancingRuneWeapon"]= true,
 }
 local values = {
 	["RuneTap"] = 40,
 	["VampiricBlood"] = 30,
-	["IceboundFortitude"] = 40
+	["IceboundFortitude"] = 40,
+	["DancingRuneWeapon"] = 30,
 }
 local inputs = {}
 local menus = {}
@@ -125,6 +129,14 @@ local items = {
 		tooltip = "Use " .. spells.BoneShield.name,
 		enabled = enables["BoneShield"],
 		key = "BoneShield"
+	},
+	{
+		type = "entry",
+		text = "\124T" .. spells.DancingRuneWeapon.icon .. ":20:20\124t " .. spells.DancingRuneWeapon.name,
+		tooltip = "Use Dancing Rune Weapon when below this Hp pct",
+		value = values["DancingRuneWeapon"],
+		enabled = enables["DancingRuneWeapon"],
+		key = "DancingRuneWeapon"
 	},
 	{
 		type = "entry",
@@ -313,6 +325,14 @@ local abilities = {
 				ni.player.hp() <= values["IceboundFortitude"]
 		 then
 			ni.spell.cast(spells.IceboundFortitude.name)
+		end
+	end,
+	["DancingRuneWeapon"] = function()
+		if
+			enables["DancingRuneWeapon"] and ni.spell.available(spells.DancingRuneWeapon.id) and
+				ni.player.hp() <= values["DancingRuneWeapon"]
+		 then
+			ni.spell.cast(spells.DancingRuneWeapon.name)
 		end
 	end,
 	["MindFreeze"] = function()
