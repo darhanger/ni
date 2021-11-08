@@ -65,7 +65,7 @@ end
 local items = {
 	settingsfile = "prot_cata.xml",
 	callback = GUICallback,
-	{ type = "title", text = "Prot Pala Cata" },
+	{ type = "title", text = "Prot Pala Wrath" },
 	{ type = "separator" },
 	{ type = "title", text = "Seal Selection" },
 	{
@@ -463,4 +463,4 @@ local abilities = {
 		end
 	end
 }
-ni.bootstrap.profile("Prot - Cata", queue, abilities, OnLoad, OnUnload);
+ni.bootstrap.profile("Prot - Wrath", queue, abilities, OnLoad, OnUnload);
