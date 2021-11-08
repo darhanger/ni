@@ -13,8 +13,8 @@ local abilities = {
 			CopyChatFrameEditBox:Insert(string.format("--ni.vars.build == %s", ni.vars.build))
 			CopyChatFrameEditBox:Insert("\n")
 			for i = 1, tabs do
-				local name, _, offset, numSpells, isGuild, offspecID = GetSpellTabInfo(i)
-				CopyChatFrameEditBox:Insert(string.format("--%s", name))
+				local name, tabicon, offset, numSpells, isGuild, offspecID = GetSpellTabInfo(i)
+				CopyChatFrameEditBox:Insert(string.format("--%s icon = select(2, GetSpellTabInfo(%s))", name, i))
 				CopyChatFrameEditBox:Insert("\n")
 				local tabEnd = offset + numSpells
 				if offspecID == nil or offspecID == 0 then
