@@ -4,15 +4,18 @@ local queue = {
 	"WaitForChannel",
 	"PowerWordShield",
 	"InnerFire",
-	"DevouringPlague",
+	"Shadowform",
 	"ShadowWordPain",
+	"DevouringPlague",
+	"VampiricTouch",
 	"MindBlast",
+	"ShadowWordDeath",
 	"MindFlay",
 	"Smite"
 }
 
 local spells = {
-	--rmQkOoeIEA.vars.build == 40300
+	--build == 40300
 	--General icon = select(2, GetSpellTabInfo(1))
 	ArcaneAffinity = {id = 28877, name = GetSpellInfo(28877), icon = select(3, GetSpellInfo(28877))},
 	ArcaneResistance = {id = 822, name = GetSpellInfo(822), icon = select(3, GetSpellInfo(822))},
@@ -74,28 +77,22 @@ local spells = {
 	MindSoothe = {id = 453, name = GetSpellInfo(453), icon = select(3, GetSpellInfo(453))},
 	Shadowfiend = {id = 34433, name = GetSpellInfo(34433), icon = select(3, GetSpellInfo(34433))},
 	MindSear = {id = 48045, name = GetSpellInfo(48045), icon = select(3, GetSpellInfo(48045))},
-	MindSpike = {id = 73510, name = GetSpellInfo(73510), icon = select(3, GetSpellInfo(73510))}
+	MindSpike = {id = 73510, name = GetSpellInfo(73510), icon = select(3, GetSpellInfo(73510))},
+	VampiricTouch = {id = 34914, name = GetSpellInfo(34914), icon = select(3, GetSpellInfo(34914))},
+	Shadowform = {id = 15473, name = GetSpellInfo(15473), icon = select(3, GetSpellInfo(15473))}
 }
 
-local IsSpellInRange,
-	IsCurrentSpell,
-	IsMounted,
-	UnitIsDeadOrGhost,
-	UnitExists,
-	UnitCanAttack,
-	GetShapeshiftFormID,
-	IsSpellKnown =
+local IsSpellInRange, IsMounted, UnitIsDeadOrGhost, UnitExists, UnitCanAttack, IsUsableSpell =
 	IsSpellInRange,
 	IsCurrentSpell,
 	IsMounted,
 	UnitIsDeadOrGhost,
 	UnitExists,
 	UnitCanAttack,
-	GetShapeshiftFormID,
-	IsSpellKnown
+	IsUsableSpell
 
 local enables = {
-	["PowerWordShield"] = true,
+	["PowerWordShield"] = true
 }
 local values = {}
 local inputs = {}
@@ -124,7 +121,7 @@ local items = {
 		tooltip = "Use " .. spells.PowerWordShield.name,
 		enabled = enables["PowerWordShield"],
 		key = "PowerWordShield"
-	},
+	}
 }
 
 local incombat = false
@@ -177,7 +174,7 @@ local cache = {
 	targets = nil,
 	moving = ni.player.ismoving(),
 	curchannel = nil,
-	iscasting = nil,
+	iscasting = nil
 }
 
 local t, p = "target", "player"
@@ -195,10 +192,10 @@ local abilities = {
 	["Cache"] = function()
 		cache.targets = ActiveEnemies()
 		cache.moving = ni.player.ismoving()
-		cache.curchannel = UnitChannelInfo(p) --/dump UnitChannelInfo("player")
+		cache.curchannel = UnitChannelInfo(p)
 		cache.iscasting = UnitCastingInfo(p)
 	end,
-	["WaitForChannel"] = function ()
+	["WaitForChannel"] = function()
 		if cache.curchannel == spells.MindFlay.name then
 			return true
 		end
@@ -209,8 +206,17 @@ local abilities = {
 			return true
 		end
 	end,
+	["Shadowform"] = function()
+		if ni.spell.available(spells.Shadowform.id) and not ni.player.buff(spells.Shadowform.id) then
+			ni.spell.cast(spells.Shadowform.name)
+			return true
+		end
+	end,
 	["PowerWordShield"] = function()
-		if ni.spell.available(spells.PowerWordShield.id) and not ni.player.debuff(WeakenedSoul) and not ni.player.buff(spells.PowerWordShield.id) then
+		if
+			ni.spell.available(spells.PowerWordShield.id) and not ni.player.debuff(WeakenedSoul) and
+				not ni.player.buff(spells.PowerWordShield.id)
+		 then
 			ni.spell.cast(spells.PowerWordShield.name, p)
 			return true
 		end
@@ -231,6 +237,15 @@ local abilities = {
 			return true
 		end
 	end,
+	["VampiricTouch"] = function()
+		if
+			not cache.moving and ValidUsable(spells.VampiricTouch.id, t) and
+				ni.unit.debuffremaining(t, spells.VampiricTouch.id, p) < 2 and
+				FacingLosCast(spells.VampiricTouch.name, t)
+		 then
+			return true
+		end
+	end,
 	["Smite"] = function()
 		if not cache.moving and ValidUsable(spells.Smite.id, t) and FacingLosCast(spells.Smite.name, t) then
 			return true
@@ -241,10 +256,18 @@ local abilities = {
 			return true
 		end
 	end,
+	["ShadowWordDeath"] = function()
+		if
+			IsUsableSpell(spells.ShadowWordDeath.name) and ValidUsable(spells.ShadowWordDeath.id, t) and
+				FacingLosCast(spells.ShadowWordDeath.name, t)
+		 then
+			return true
+		end
+	end,
 	["MindFlay"] = function()
 		if not cache.moving and ValidUsable(spells.MindFlay.id, t) and FacingLosCast(spells.MindFlay.name, t) then
 			return true
 		end
-	end,
+	end
 }
 ni.bootstrap.profile("Shadow - Cata", queue, abilities, OnLoad, OnUnload)
