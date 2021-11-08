@@ -9,6 +9,7 @@ local queue = {
 	"RuneTap",
 	"DancingRuneWeapon",
 	"DeathandDecay",
+	"BloodBoil",
 	"Pestilence",
 	"Outbreak",
 	"IcyTouch",
@@ -212,7 +213,7 @@ end
 
 local cache = {
 	bloodplauge = 0,
-	FrostFever = 0,
+	frostFever = 0,
 	targets = nil,
 	bloodRune = 0
 }
@@ -298,10 +299,27 @@ local abilities = {
 				if ni.player.threat(v.guid) ~= -1 then
 					if ni.unit.debuffremaining(v.guid, 55078, p) < 2 or ni.unit.debuffremaining(v.guid, 55078, p) < 2 then
 						castit = true
+						break
 					end
 				end
 			end
 			if castit and FacingLosCast(spells.Pestilence.name, t) then
+				return true
+			end
+		end
+	end,
+	["BloodBoil"] = function()
+		local castit = false
+		if ValidUsable(spells.BloodBoil.id, t) and #cache.targets >= 2 and cache.bloodPlauge > 2 and cache.frostFever > 2 then
+			for k, v in ipairs(cache.targets) do
+				if ni.player.threat(v.guid) ~= -1 then
+					if ni.unit.debuffremaining(v.guid, 55078, p) > 2 or ni.unit.debuffremaining(v.guid, 55078, p) > 2 then
+						castit = true
+						break
+					end
+				end
+			end
+			if castit and FacingLosCast(spells.BloodBoil.name, t) then
 				return true
 			end
 		end
