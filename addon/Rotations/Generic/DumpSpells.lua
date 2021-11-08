@@ -10,7 +10,7 @@ local abilities = {
 			local sb = {}
 			CopyChatFrame:Show()
 			local tabs = GetNumSpellTabs()
-			CopyChatFrameEditBox:Insert(string.format("--ni.vars.build == %s", ni.vars.build))
+			CopyChatFrameEditBox:Insert(string.format("--build == %s", ni.vars.build))
 			CopyChatFrameEditBox:Insert("\n")
 			for i = 1, tabs do
 				local name, tabicon, offset, numSpells, isGuild, offspecID = GetSpellTabInfo(i)
