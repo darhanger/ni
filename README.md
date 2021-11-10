@@ -11,7 +11,7 @@
 [![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni/total?style=flat-square)](https://github.com/darhanger/ni/releases)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=E5ULM2VAQHE9N&source=url)
 
-<img src="https://darhanger.github.io/ni/_media/ni.png" alt="Logo of ni" width="256"/>
+<img src="https://github.com/darhanger/ni/blob/main/docs/_media/logo.png" alt="Logo of ni" width="256"/>
 
 Profile Framework for World of Warcraft and its older expansions.
 
@@ -19,7 +19,7 @@ Profile Framework for World of Warcraft and its older expansions.
 
 ##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/PC.gif" width="30px"> How to?
 
-See the [Quick start](https://darhanger.github.io/ni/#/getting-started/quickstart) guide for more details.
+See the [Quick start](https://github.com/darhanger/ni/blob/main/docs/getting-started/quickstart.md) guide for more details.
 
 ##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/coin.gif" width="30px"> Features
 
