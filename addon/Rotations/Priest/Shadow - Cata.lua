@@ -84,7 +84,6 @@ local spells = {
 
 local IsSpellInRange, IsMounted, UnitIsDeadOrGhost, UnitExists, UnitCanAttack, IsUsableSpell =
 	IsSpellInRange,
-	IsCurrentSpell,
 	IsMounted,
 	UnitIsDeadOrGhost,
 	UnitExists,
@@ -111,7 +110,7 @@ local function GUICallback(key, item_type, value)
 end
 
 local items = {
-	settingsfile = "blood_cata.xml",
+	settingsfile = "shadow_cata.xml",
 	callback = GUICallback,
 	{type = "title", text = "\124T" .. select(2, GetSpellTabInfo(4)) .. ":20:20\124t Shadow Cata"},
 	{type = "separator"},
@@ -213,7 +212,7 @@ local abilities = {
 		end
 	end,
 	["PowerWordShield"] = function()
-		if
+		if enables["PowerWordShield"] and
 			ni.spell.available(spells.PowerWordShield.id) and not ni.player.debuff(WeakenedSoul) and
 				not ni.player.buff(spells.PowerWordShield.id)
 		 then
