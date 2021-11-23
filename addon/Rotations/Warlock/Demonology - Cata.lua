@@ -17,24 +17,8 @@ local queue = {
 local spells = {
 	--build == 40300
 	--General icon = select(2, GetSpellTabInfo(1))
-	ArmorSkills = {id = 76277, name = GetSpellInfo(76277), icon = select(3, GetSpellInfo(76277))},
 	AutoAttack = {id = 6603, name = GetSpellInfo(6603), icon = select(3, GetSpellInfo(6603))},
-	Cannibalize = {id = 20577, name = GetSpellInfo(20577), icon = select(3, GetSpellInfo(20577))},
-	Languages = {id = 79747, name = GetSpellInfo(79747), icon = select(3, GetSpellInfo(79747))},
-	ShadowResistance = {id = 20579, name = GetSpellInfo(20579), icon = select(3, GetSpellInfo(20579))},
 	Shoot = {id = 5019, name = GetSpellInfo(5019), icon = select(3, GetSpellInfo(5019))},
-	UnderwaterBreathing = {id = 5227, name = GetSpellInfo(5227), icon = select(3, GetSpellInfo(5227))},
-	WeaponSkills = {id = 76299, name = GetSpellInfo(76299), icon = select(3, GetSpellInfo(76299))},
-	WilloftheForsaken = {id = 7744, name = GetSpellInfo(7744), icon = select(3, GetSpellInfo(7744))},
-	ApprenticeRiding = {id = 33388, name = GetSpellInfo(33388), icon = select(3, GetSpellInfo(33388))},
-	JourneymanRiding = {id = 33391, name = GetSpellInfo(33391), icon = select(3, GetSpellInfo(33391))},
-	Nethermancy = {id = 86091, name = GetSpellInfo(86091), icon = select(3, GetSpellInfo(86091))},
-	ExpertRiding = {id = 34090, name = GetSpellInfo(34090), icon = select(3, GetSpellInfo(34090))},
-	FlightMastersLicense = {id = 90267, name = GetSpellInfo(90267), icon = select(3, GetSpellInfo(90267))},
-	ColdWeatherFlying = {id = 54197, name = GetSpellInfo(54197), icon = select(3, GetSpellInfo(54197))},
-	ArtisanRiding = {id = 34091, name = GetSpellInfo(34091), icon = select(3, GetSpellInfo(34091))},
-	MasterRiding = {id = 90265, name = GetSpellInfo(90265), icon = select(3, GetSpellInfo(90265))},
-	Mastery = {id = 86478, name = GetSpellInfo(86478), icon = select(3, GetSpellInfo(86478))},
 	--Affliction icon = select(2, GetSpellTabInfo(2))
 	Corruption = {id = 172, name = GetSpellInfo(172), icon = select(3, GetSpellInfo(172))},
 	DrainLife = {id = 689, name = GetSpellInfo(689), icon = select(3, GetSpellInfo(689))},
