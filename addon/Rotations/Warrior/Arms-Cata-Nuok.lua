@@ -24,16 +24,14 @@ local IsSpellInRange,
 	UnitIsDeadOrGhost,
 	UnitExists,
 	UnitCanAttack,
-	IsUsableSpell,
-	GetShapeshiftFormID =
+	IsUsableSpell =
 	IsSpellInRange,
 	IsCurrentSpell,
 	IsMounted,
 	UnitIsDeadOrGhost,
 	UnitExists,
 	UnitCanAttack,
-	IsUsableSpell,
-	GetShapeshiftFormID
+	IsUsableSpell
 
 local spells = {
 	--ni.vars.build == 40300
