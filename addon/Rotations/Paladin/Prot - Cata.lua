@@ -116,8 +116,6 @@ local values = {
 	["ArdentDefender"] = 25
 }
 local inputs = {}
-local Truth, Insight, Righteousness = "|cffFFFF33Truth", "|cffFF9900Insight", "|cff24E0FBRighteousness"
-
 local menus = {
 	["Seal"] = 1
 }
