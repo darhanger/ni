@@ -191,7 +191,6 @@ local spells = {
 	Deterrence = {id = 19263, name = GetSpellInfo(19263)}, --FUTURESPELL,
 	MasteryMasterofBeasts = {id = 76657, name = GetSpellInfo(76657)}, --FUTURESPELL,
 	CobraShot = {id = 77767, name = GetSpellInfo(77767)}, --FUTURESPELL,
-	CallPet5 = {id = 83245, name = GetSpellInfo(83245)}, --FUTURESPELL,
 	Camouflage = {id = 51753, name = GetSpellInfo(51753)}, --FUTURESPELL,
 	Stampede = {id = 121818, name = GetSpellInfo(121818)} --FUTURESPELL,
 }
