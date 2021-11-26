@@ -62,6 +62,12 @@ local abilities = {
 							if (type == "SPELL" or type == "FUTURESPELL") then
 								local sname, rank = GetSpellInfo(id)
 								if not string.match(rank, "Guild") then
+									if (string.match(rank, "Cat")) then
+										sname = sname .. "Cat"
+									end
+									if (string.match(rank, "Bear")) then
+										sname = sname .. "Bear"
+									end
 									sname = string.gsub(sname, "%s+", "")
 									sname = string.gsub(sname, "'", "")
 									sname = string.gsub(sname, "-", "")
@@ -130,7 +136,7 @@ local abilities = {
 							nameTalent = string.gsub(nameTalent, ":", "")
 							nameTalent = string.gsub(nameTalent, ",", "")
 							CopyChatFrameEditBox:Insert(
-								string.format("%s (%s/%s) = GetTalentInfo(%s, %s)", nameTalent, currRank, maxRank, t, i)
+								string.format("%s = GetTalentInfo(%s, %s), -- (%s/%s)", nameTalent, t, i, currRank, maxRank)
 							)
 							CopyChatFrameEditBox:Insert("\n")
 						end
