@@ -222,7 +222,7 @@ local cache = {
 local ss = {
 	none = 0,
 	cat = 1,
-	bear = 2
+	bear = 5
 }
 
 local abilities = {
