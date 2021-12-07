@@ -10,6 +10,7 @@ local queue = {
 	"SummonBlackOxStatue",
 	"TouchofDeath",
 	"KegSmash",
+	"RushingJadeWind",
 	"BreathofFire",
 	"BlackoutKick",
 	"TigerPalm",
@@ -40,25 +41,10 @@ local IsSpellInRange,
 	IsSpellKnown
 
 local spells = {
-	--General 0
+	--build == 50400
+	--General icon = select(2, GetSpellTabInfo(1))
 	AutoAttack = {id = 6603, name = GetSpellInfo(6603), icon = select(3, GetSpellInfo(6603))},
-	QuakingPalm = {id = 107079, name = GetSpellInfo(107079), icon = select(3, GetSpellInfo(107079))},
-	ArmorSkills = {id = 106904, name = GetSpellInfo(106904), icon = select(3, GetSpellInfo(106904))},
-	BattleFatigue = {id = 134732, name = GetSpellInfo(134732), icon = select(3, GetSpellInfo(134732))},
-	Bouncy = {id = 107076, name = GetSpellInfo(107076), icon = select(3, GetSpellInfo(107076))},
-	Epicurean = {id = 107072, name = GetSpellInfo(107072), icon = select(3, GetSpellInfo(107072))},
-	ExpertRiding = {id = 34090, name = GetSpellInfo(34090), icon = select(3, GetSpellInfo(34090))},
-	FlightMastersLicense = {id = 90267, name = GetSpellInfo(90267), icon = select(3, GetSpellInfo(90267))},
-	Gourmand = {id = 107073, name = GetSpellInfo(107073), icon = select(3, GetSpellInfo(107073))},
-	InnerPeace = {id = 107074, name = GetSpellInfo(107074), icon = select(3, GetSpellInfo(107074))},
-	Languages = {id = 143369, name = GetSpellInfo(143369), icon = select(3, GetSpellInfo(143369))},
-	WeaponSkills = {id = 106902, name = GetSpellInfo(106902), icon = select(3, GetSpellInfo(106902))},
-	ColdWeatherFlying = {id = 54197, name = GetSpellInfo(54197), icon = select(3, GetSpellInfo(54197))},
-	ArtisanRiding = {id = 34091, name = GetSpellInfo(34091), icon = select(3, GetSpellInfo(34091))},
-	MasterRiding = {id = 90265, name = GetSpellInfo(90265), icon = select(3, GetSpellInfo(90265))},
-	CloudSerpentRiding = {id = 130487, name = GetSpellInfo(130487), icon = select(3, GetSpellInfo(130487))},
-	WisdomoftheFourWinds = {id = 115913, name = GetSpellInfo(115913), icon = select(3, GetSpellInfo(115913))},
-	--Brewmaster 0
+	--Brewmaster icon = select(2, GetSpellTabInfo(2))
 	AvertHarm = {id = 115213, name = GetSpellInfo(115213), icon = select(3, GetSpellInfo(115213))},
 	BlackoutKick = {id = 100784, name = GetSpellInfo(100784), icon = select(3, GetSpellInfo(100784))},
 	BreathofFire = {id = 115181, name = GetSpellInfo(115181), icon = select(3, GetSpellInfo(115181))},
@@ -82,8 +68,8 @@ local spells = {
 	PurifyingBrew = {id = 119582, name = GetSpellInfo(119582), icon = select(3, GetSpellInfo(119582))},
 	Resuscitate = {id = 115178, name = GetSpellInfo(115178), icon = select(3, GetSpellInfo(115178))},
 	Roll = {id = 109132, name = GetSpellInfo(109132), icon = select(3, GetSpellInfo(109132))},
-	SpearHandStrike = {id = 116705, name = GetSpellInfo(116705), icon = select(3, GetSpellInfo(116705))},
 	SpinningCraneKick = {id = 101546, name = GetSpellInfo(101546), icon = select(3, GetSpellInfo(101546))},
+	SpearHandStrike = {id = 116705, name = GetSpellInfo(116705), icon = select(3, GetSpellInfo(116705))},
 	StanceoftheFierceTiger = {id = 103985, name = GetSpellInfo(103985), icon = select(3, GetSpellInfo(103985))},
 	StanceoftheSturdyOx = {id = 115069, name = GetSpellInfo(115069), icon = select(3, GetSpellInfo(115069))},
 	SummonBlackOxStatue = {id = 115315, name = GetSpellInfo(115315), icon = select(3, GetSpellInfo(115315))},
@@ -106,9 +92,9 @@ local spells = {
 	Vengeance = {id = 120267, name = GetSpellInfo(120267), icon = select(3, GetSpellInfo(120267))},
 	WayoftheMonk = {id = 120277, name = GetSpellInfo(120277), icon = select(3, GetSpellInfo(120277))},
 	--Talents
-	Celerity = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	Celerity = {id = 115173, name = GetSpellInfo(115173), icon = select(3, GetSpellInfo(115173))},
 	TigersLust = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	Momentum = {id = 115174, name = GetSpellInfo(115174), icon = select(3, GetSpellInfo(115174))},
+	Momentum = {id = nil, name = GetSpellInfo(115174), icon = select(3, GetSpellInfo(115174))},
 	ChiWave = {id = 115098, name = GetSpellInfo(115098), icon = select(3, GetSpellInfo(115098))},
 	ZenSphere = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
 	ChiBurst = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
@@ -121,10 +107,9 @@ local spells = {
 	HealingElixirs = {id = 122280, name = GetSpellInfo(122280), icon = select(3, GetSpellInfo(122280))},
 	DampenHarm = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
 	DiffuseMagic = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	RushingJadeWind = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
+	RushingJadeWind = {id = 116847, name = GetSpellInfo(116847), icon = select(3, GetSpellInfo(116847))},
 	InvokeXuentheWhiteTiger = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
 	ChiTorpedo = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))}
-	--Glyph
 }
 
 local p, t = "player", "target"
@@ -155,7 +140,7 @@ local items = {
 	settingsfile = "BrewNuok.xml",
 	callback = GUICallback,
 	{type = "separator"},
-	{type = "title", text = "Brewmaster"},
+	{type = "title", text = "\124T" .. select(2, GetSpellTabInfo(2)) .. ":20:20\124t Brewmaster"},
 	{type = "separator"},
 	{
 		type = "entry",
