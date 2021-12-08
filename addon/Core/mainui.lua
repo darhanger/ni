@@ -268,13 +268,13 @@ UIDropDownMenu_Initialize(dropdownmenu, function(self, level)
 		end;
 		local matched = false
 		local lower = string.lower(file)
-		if (build == 50400 or build == 50300) and string.match(lower, "mop") then --MOP
+		if (build == 50400 or build == 50300) and (string.match(lower, "mop") or string.match(lower, "548") or string.match(lower, "547")) then --MOP
 			matched = true
 		end
-		if build == 40300 and string.match(lower, "cata") then --cata
+		if build == 40300 and (string.match(lower, "cata") or string.match(lower, "434")) then --cata
 			matched = true
 		end
-		if build == 30300 and string.match(lower, "wrath") then --wrath
+		if build == 30300 and string.match(lower, "wrath") or string.match(lower, "343") then --wrath
 			matched = true
 		end
 		if not string.match(lower, "mop") and not string.match(lower, "cata") and not string.match(lower, "wrath")
