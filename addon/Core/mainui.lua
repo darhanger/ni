@@ -248,10 +248,12 @@ local primaryIndex = 1;
 UIDropDownMenu_Initialize(dropdownmenu, function(self, level)
 	local info = UIDropDownMenu_CreateInfo();
 	local index = 0;
+	local build = ni.vars.build;
 	for k, v in ipairs(profiles) do
 		index = index + 1;
 		local file = GetFilename(v);
 		local checked = false;
+		
 		if ni.vars.profiles.primary == file then
 			primary = file;
 			primaryIndex = index;
@@ -264,7 +266,25 @@ UIDropDownMenu_Initialize(dropdownmenu, function(self, level)
 			UIDropDownMenu_SetSelectedID(dropdownmenu, self:GetID());
 			ni.vars.profiles.primary = self:GetText();
 		end;
-		UIDropDownMenu_AddButton(info, level);
+		local matched = false
+		local lower = string.lower(file)
+		if (build == 50400 or build == 50300) and string.match(lower, "mop") then --MOP
+			matched = true
+		end
+		if build == 40300 and string.match(lower, "cata") then --cata
+			matched = true
+		end
+		if build == 30300 and string.match(lower, "wrath") then --wrath
+			matched = true
+		end
+		if not string.match(lower, "mop") and not string.match(lower, "cata") and not string.match(lower, "wrath")
+		and not string.match(lower, "434") and not string.match(lower, "548") and not string.match(lower, "547") and not string.match(lower, "343") then
+			matched = true
+			info.text = info.text .. " unkown version"
+		end
+		if matched then
+			UIDropDownMenu_AddButton(info, level);
+		end
 	end
 end)
 UIDropDownMenu_SetWidth(dropdownmenu, 150);
@@ -283,6 +303,7 @@ local secondaryIndex = 1;
 UIDropDownMenu_Initialize(dropdownmenu2, function(self, level)
 	local info = UIDropDownMenu_CreateInfo();
 	local index = 0;
+	local build = ni.vars.build;
 	for k, v in ipairs(profiles) do
 		index = index + 1;
 		local file = GetFilename(v);
@@ -299,7 +320,25 @@ UIDropDownMenu_Initialize(dropdownmenu2, function(self, level)
 			UIDropDownMenu_SetSelectedID(dropdownmenu2, self:GetID());
 			ni.vars.profiles.secondary = self:GetText();
 		end;
-		UIDropDownMenu_AddButton(info, level);
+		local matched = false
+		local lower = string.lower(file)
+		if (build == 50400 or build == 50300) and (string.match(lower, "mop") or string.match(lower, "548") or string.match(lower, "547")) then --MOP
+			matched = true
+		end
+		if build == 40300 and (string.match(lower, "cata") or string.match(lower, "434")) then --cata
+			matched = true
+		end
+		if build == 30300 and string.match(lower, "wrath") or string.match(lower, "343") then --wrath
+			matched = true
+		end
+		if not string.match(lower, "mop") and not string.match(lower, "cata") and not string.match(lower, "wrath")
+		and not string.match(lower, "434") and not string.match(lower, "548") and not string.match(lower, "547") and not string.match(lower, "343") then
+			matched = true
+			info.text = info.text .. " unkown version"
+		end
+		if matched then
+			UIDropDownMenu_AddButton(info, level);
+		end
 	end
 end)
 UIDropDownMenu_SetWidth(dropdownmenu2, 150);
