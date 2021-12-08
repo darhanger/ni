@@ -402,4 +402,4 @@ local abilities = {
 		end
 	end
 }
-ni.bootstrap.profile("Brew-Nuok", queue, abilities, OnLoad, OnUnload)
+ni.bootstrap.profile("Brewmaster-MoP", queue, abilities, OnLoad, OnUnload)

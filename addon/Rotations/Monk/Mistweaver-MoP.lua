@@ -924,4 +924,4 @@ local function queue()
 	settings.group_type = "main";
 	return mainqueue;
 end
-ni.bootstrap.rotation("Mistweaver", queue, abilities, nil, { [1] = "Mistweaver", [2] = items });
+ni.bootstrap.rotation("Mistweaver-MoP", queue, abilities, nil, { [1] = "Mistweaver", [2] = items });

@@ -365,4 +365,4 @@ local abilities = {
 		end
 	end
 }
-ni.bootstrap.rotation("Windwalker", queue, abilities)
+ni.bootstrap.rotation("Windwalker-MoP", queue, abilities)
