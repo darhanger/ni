@@ -2,7 +2,7 @@ local queue = {
 	"Pause",
 	"FrostArmor",
 	"ArcaneIntellect",
-	--"Blizzard",
+	"Blizzard",
 	"Frostbolt",
 	"Fireball"
 }
@@ -118,7 +118,7 @@ local abilities = {
 		and incombat
 		and IsSpellInRange(spells.Frostbolt.name, "target") == 1
 		and not ni.player.ismoving()
-		and ni.player.los(tar) then
+		and ni.player.los("target") then
 			local nearby = #ni.unit.enemiesinrange("target", 8)
 			local n = UnitChannelInfo("player")
 			if n ~= nil and n == spells.Blizzard.name
