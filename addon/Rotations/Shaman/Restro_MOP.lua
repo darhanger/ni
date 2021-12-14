@@ -130,23 +130,6 @@ local spells = {
 	Resurgence = {id = 16196, name = GetSpellInfo(16196), icon = select(3, GetSpellInfo(16196))},
 	SpiritualInsight = {id = 112858, name = GetSpellInfo(112858), icon = select(3, GetSpellInfo(112858))},
 	TidalWaves = {id = 51564, name = GetSpellInfo(51564), icon = select(3, GetSpellInfo(51564))},
-	--Talents
-	NaturesGuardian = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	AstralShift = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	FrozenPower = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	CalloftheElements = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	TotemicPersistence = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	TotemicProjection = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	ElementalMastery = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	AncestralSwiftness = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	EchooftheElements = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	RushingStreams = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	AncestralGuidance = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	Conductivity = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	UnleashedFury = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	PrimalElementalist = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))},
-	ElementalBlast = {id = nil, name = GetSpellInfo(nil), icon = select(3, GetSpellInfo(nil))}
-	--Glyph
 }
 
 local items = {
@@ -296,6 +279,8 @@ local function ValidUsable(id, tar)
 	return false
 end
 
+local t, p, f = "target", "player", "focus"
+
 --GetTotemInfo
 local Totem = {
 	Fire = 1,
@@ -317,8 +302,23 @@ local function TotemTimeRemaining(slot, name)
 	end
 	return startTime + duration - GetTime()
 end
-
-local t, p, f = "target", "player", "focus"
+local function TotemDistance(name, target)
+	local c = ni.unit.creations(p)
+	local guid
+	for i = 1, #c do
+		local cr = c[i]
+		ni.vars.debug = true
+		ni.debug.log(cr.name .. cr.guid)
+		ni.vars.debug = false
+		if string.match(cr.name, name) then
+			guid = cr.guid
+		end
+	end
+	if guid ~= nil and ni.player.distance(guid) then
+		return ni.unit.distance(target, guid)
+	end
+	return -1
+end
 
 local abilities = {
 	["Pause"] = function()
