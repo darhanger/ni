@@ -3,6 +3,7 @@ local queue = {
 	"Cache",
 	"WaitForChannel",
 	"PowerWordShield",
+	"PowerWordFortitude",
 	"InnerFire",
 	"Shadowform",
 	"ShadowWordPain",
@@ -11,8 +12,32 @@ local queue = {
 	"MindBlast",
 	"ShadowWordDeath",
 	"MindFlay",
-	"Smite"
+	"Smite",
+	"Wand"
 }
+
+local IsSpellInRange,
+	IsCurrentSpell,
+	IsMounted,
+	UnitIsDeadOrGhost,
+	UnitExists,
+	UnitCanAttack,
+	IsUsableSpell,
+	GetSpellInfo,
+	GetSpellTabInfo,
+	UnitChannelInfo,
+	UnitCastingInfo =
+	IsSpellInRange,
+	IsCurrentSpell,
+	IsMounted,
+	UnitIsDeadOrGhost,
+	UnitExists,
+	UnitCanAttack,
+	IsUsableSpell,
+	GetSpellInfo,
+	GetSpellTabInfo,
+	UnitChannelInfo,
+	UnitCastingInfo
 
 local spells = {
 	--build == 40300
@@ -205,6 +230,12 @@ local abilities = {
 			return true
 		end
 	end,
+	["PowerWordFortitude"] = function()
+		if ni.spell.available(spells.PowerWordFortitude.id) and not ni.player.buff(spells.PowerWordFortitude.id) then
+			ni.spell.cast(spells.PowerWordFortitude.name)
+			return true
+		end
+	end,
 	["Shadowform"] = function()
 		if ni.spell.available(spells.Shadowform.id) and not ni.player.buff(spells.Shadowform.id) then
 			ni.spell.cast(spells.Shadowform.name)
@@ -266,6 +297,12 @@ local abilities = {
 	["MindFlay"] = function()
 		if not cache.moving and ValidUsable(spells.MindFlay.id, t) and FacingLosCast(spells.MindFlay.name, t) then
 			return true
+		end
+	end,
+	["Wand"] = function ()
+		local RangedSlot = GetInventorySlotInfo("RangedSlot")
+		if RangedSlot ~= nil and not cache.moving and not IsCurrentSpell(spells.Shoot.id) then
+			ni.spell.cast(spells.Shoot.name, t)
 		end
 	end
 }

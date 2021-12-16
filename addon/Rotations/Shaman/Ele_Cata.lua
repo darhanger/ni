@@ -166,13 +166,14 @@ local function ValidUsable(id, tar)
 	return false
 end
 
+local t, p = "target", "player"
+
 --GetTotemInfo
-local Totem =
-{
+local Totem = {
 	Fire = 1,
 	Earth = 2,
 	Water = 3,
-	Air = 4,
+	Air = 4
 }
 local function HasTotem(slot, name)
 	local haveTotem, totemName = GetTotemInfo(slot)
@@ -189,13 +190,32 @@ local function TotemTimeRemaining(slot, name)
 	return startTime + duration - GetTime()
 end
 
+local function TotemDistance(name, target)
+	local c = ni.unit.creations(p)
+	local guid
+	for i = 1, #c do
+		local cr = c[i]
+		ni.vars.debug = true
+		ni.debug.log(cr.name .. cr.guid)
+		ni.vars.debug = false
+		if string.match(cr.name, name) then
+			guid = cr.guid
+		end
+	end
+	if guid ~= nil and ni.player.distance(guid) then
+		return ni.unit.distance(target, guid)
+	end
+	return -1
+end
+
+
 local cache = {
 	moving = ni.player.ismoving(),
 	curchannel = nil,
 	iscasting = nil
 }
 
-local t, p = "target", "player"
+
 
 local abilities = {
 	["Pause"] = function()
@@ -254,7 +274,7 @@ local abilities = {
 		end
 	end,
 	["SearingTotem"] = function()
-		if TotemTimeRemaining(Totem.Fire, spells.SearingTotem.name) < 5 and ni.spell.available(spells.SearingTotem.id) then
+		if (TotemTimeRemaining(Totem.Fire, spells.SearingTotem.name) < 5 or TotemDistance("fire", t) > 40) and ni.spell.available(spells.SearingTotem.id) then
 			ni.spell.cast(spells.SearingTotem.name)
 		end
 	end,

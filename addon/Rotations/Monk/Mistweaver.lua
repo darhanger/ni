@@ -230,7 +230,7 @@ local function GetTableForBestUnit(health, distance, unitsclose, buff)
 					end
 				end
 			else
-				temptable = ni.members.inrangebelow(ni.members[i].unit, distance, health);				
+				temptable = ni.members.inrangebelow(ni.members[i].unit, distannce, health);				
 			end
 			if #temptable >= unitsclose then
 				tinsert(customtable, { unit = ni.members[i].unit, hp = ni.members[i].hp, unitsclose = #temptable });
