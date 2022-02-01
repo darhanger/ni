@@ -3,8 +3,8 @@ local queue = {
 	"Cache",
 	"FlametongueWeapon",
 	"LightningShield",
+	"CalloftheTotems",
 	"Thunderstorm",
-	"SearingTotem",
 	"FlameShock",
 	"EarthShock",
 	"LavaBurst",
@@ -97,10 +97,23 @@ local IsSpellInRange,
 	GetWeaponEnchantInfo,
 	GetTotemInfo
 
-local enables = {}
-local values = {}
+local Callofthe = {
+	Elements = 1,
+	Ancestors = 2,
+	Spirits = 3
+}
+
+local enables = {
+	["MultiTotem"] = true,
+	["TotemicRecall"] = true
+}
+local values = {
+	["TotemicRecall"] = 35
+}
 local inputs = {}
-local menus = {}
+local menus = {
+	["Callofthe"] = 1
+}
 
 local function GUICallback(key, item_type, value)
 	if item_type == "enabled" then
@@ -118,6 +131,43 @@ local items = {
 	settingsfile = "ele_cata.xml",
 	callback = GUICallback,
 	{type = "title", text = "\124T" .. select(2, GetSpellTabInfo(2)) .. ":20:20\124t " .. GetSpellTabInfo(2)},
+	{type = "separator"},
+	{type = "title", text = "Totems"},
+	{
+		type = "entry",
+		text = "Use Call of the Totems",
+		enabled = enables["MultiTotem"],
+		key = "MultiTotem"
+	},
+	{type = "title", text = "Call Totem Set"},
+	{
+		type = "dropdown",
+		menu = {
+			{
+				selected = (menus["Callofthe"] == Callofthe.Elements),
+				value = Callofthe.Elements,
+				text = "\124T" .. spells.CalloftheElements.icon .. ":15:15\124t " .. spells.CalloftheElements.name
+			},
+			{
+				selected = (menus["Callofthe"] == Callofthe.Ancestors),
+				value = Callofthe.Ancestors,
+				text = "\124T" .. spells.CalloftheAncestors.icon .. ":15:15\124t " .. spells.CalloftheAncestors.name
+			},
+			{
+				selected = (menus["Callofthe"] == Callofthe.Spirits),
+				value = Callofthe.Ancestors,
+				text = "\124T" .. spells.CalloftheSpirits.icon .. ":15:15\124t " .. spells.CalloftheSpirits.name
+			}
+		},
+		key = "Callofthe"
+	},
+	{
+		type = "entry",
+		text = "\124T" .. spells.TotemicRecall.icon .. ":15:15\124t " .. spells.TotemicRecall.name,
+		enabled = enables["TotemicRecall"],
+		value = values["TotemicRecall"],
+		key = "TotemicRecall"
+	},
 	{type = "separator"}
 }
 
@@ -175,29 +225,25 @@ local Totem = {
 	Water = 3,
 	Air = 4
 }
-local function HasTotem(slot, name)
-	local haveTotem, totemName = GetTotemInfo(slot)
-	if haveTotem and totemName == name then
+local function HasTotem(slot)
+	local _, _, startTime = GetTotemInfo(slot)
+	if startTime ~= 0 then
 		return true
 	end
 	return false
 end
-local function TotemTimeRemaining(slot, name)
-	local haveTotem, totemName, startTime, duration = GetTotemInfo(slot)
-	if not haveTotem or totemName == nil or totemName ~= name then
-		return 0
+local function HasTotemName(slot, name)
+	local _, totemName, startTime = GetTotemInfo(slot)
+	if totemName ~= nil and totemName == name then
+		return true
 	end
-	return startTime + duration - GetTime()
+	return false
 end
-
 local function TotemDistance(name, target)
 	local c = ni.unit.creations(p)
 	local guid
 	for i = 1, #c do
 		local cr = c[i]
-		ni.vars.debug = true
-		ni.debug.log(cr.name .. cr.guid)
-		ni.vars.debug = false
 		if string.match(cr.name, name) then
 			guid = cr.guid
 		end
@@ -207,15 +253,26 @@ local function TotemDistance(name, target)
 	end
 	return -1
 end
-
+local function AnyTotemDistance(target)
+	local c = ni.unit.creations(p)
+	local guid
+	for i = 1, #c do
+		local cr = c[i]
+		if string.match(cr.name, "Totem") then
+			guid = cr.guid
+		end
+	end
+	if guid ~= nil and ni.player.distance(guid) then
+		return ni.unit.distance(target, guid)
+	end
+	return -1
+end
 
 local cache = {
 	moving = ni.player.ismoving(),
 	curchannel = nil,
 	iscasting = nil
 }
-
-
 
 local abilities = {
 	["Pause"] = function()
@@ -273,11 +330,6 @@ local abilities = {
 			return true
 		end
 	end,
-	["SearingTotem"] = function()
-		if (TotemTimeRemaining(Totem.Fire, spells.SearingTotem.name) < 5 or TotemDistance("fire", t) > 40) and ni.spell.available(spells.SearingTotem.id) then
-			ni.spell.cast(spells.SearingTotem.name)
-		end
-	end,
 	["Thunderstorm"] = function()
 		if ActiveEnemies(9) >= 1 and ni.spell.available(spells.Thunderstorm.id) then
 			ni.spell.cast(spells.Thunderstorm.name)
@@ -285,10 +337,35 @@ local abilities = {
 	end,
 	["EarthShock"] = function()
 		if
-			ValidUsable(spells.EarthShock.name, t) and ni.player.buffstacks(spells.LightningShield.id) > 7 and
+			ValidUsable(spells.EarthShock.name, t) and ni.player.buffstacks(spells.LightningShield.id) == 9 and
+				select(5, GetTalentInfo(1, 13)) == 1 and
 				FacingLosCast(spells.EarthShock.name, t)
 		 then
 			return true
+		end
+	end,
+	["CalloftheTotems"] = function()
+		if enables["TotemicRecall"] then
+			if (AnyTotemDistance(t) > values["TotemicRecall"]) and ni.spell.available(spells.TotemicRecall.id) then
+				ni.spell.cast(spells.TotemicRecall.name)
+				return true
+			end
+		end
+		if enables["MultiTotem"] and IsSpellInRange(spells.LightningBolt.name, t) == 1 then
+			if not HasTotem(Totem.Fire) and incombat then
+				if menus.Callofthe == Callofthe.Elements and ni.spell.available(spells.CalloftheElements.id) then
+					ni.spell.cast(spells.CalloftheElements.name)
+					return true
+				end
+				if menus.Callofthe == Callofthe.Ancestors and ni.spell.available(spells.CalloftheAncestors.id) then
+					ni.spell.cast(spells.CalloftheAncestors.name)
+					return true
+				end
+				if menus.Callofthe == Callofthe.Spirits and ni.spell.available(spells.CalloftheSpirits.id) then
+					ni.spell.cast(spells.CalloftheSpirits.name)
+					return true
+				end
+			end
 		end
 	end
 }
