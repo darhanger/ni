@@ -1,7 +1,8 @@
 local vars = {
-	latency = 170,
+	latency = 225,
 	interrupt = "all",
 	debug = false,
+	icon = true,
 	customtarget = "player",
 	hotkeys = {
 		aoe = "Left Shift",

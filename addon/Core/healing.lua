@@ -1,11 +1,5 @@
-local UnitDebuff, UnitClass, tContains, tinsert, UnitHealthMax =
-	UnitDebuff,
-	UnitClass,
-	tContains,
-	tinsert,
-	UnitHealthMax
-
-local class = string.lower(select(2, UnitClass("player")))
+local UnitClass, select, strlower, tContains, tinsert, UnitDebuff, wipe, UnitHealthMax, sort, unpack = UnitClass, select, strlower, tContains, tinsert, UnitDebuff, wipe, UnitHealthMax, sort, unpack
+local class = strlower(select(2, UnitClass("player")))
 
 healing = {};
 healing.debufftoblacklist = function(id)
@@ -74,14 +68,14 @@ local function gettanks()
 	if ni.vars.units.mainTankEnabled and ni.vars.units.offTankEnabled then
 		return ni.vars.units.mainTank, ni.vars.units.offTank
 	end
-	table.wipe(tanks);
+	wipe(tanks);
 	for i = 1, #ni.members do
 		if ni.members[i].istank then
 			tinsert(tanks, {unit = ni.members[i].unit, health = UnitHealthMax(ni.members[i].unit)})
 		end
 	end
 	if #tanks > 1 then
-		table.sort(
+		sort(
 			tanks,
 			function(x, y)
 				return x.health > y.health

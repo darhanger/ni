@@ -1,5 +1,4 @@
 ni = ni or { 
-    -- secureload = %%SecureLoad%%,
 	functions = {
 		moveto = %%MoveTo%%,
 		clickat = %%ClickAt%%,
@@ -65,7 +64,7 @@ local function addProtectedFunctions(randomFunc)
 	local functions = { "CastSpellByName", "CastSpellByID", "JumpOrAscendStart" }
 	]]--
 
-	local append = "SAFE"; -- Change to any word / symbols. Измените на любые слова / символы; ;
+	local append = "SAFE"; -- НЕ НУЖНО НИЧЕГО МЕНЯТЬ! // DO NOT CHANGE ANYTHING!
 	if append == "SAFE" then append = randomFunc(20) end
 	-- Add the functions you want to use here
 	local functions = { "MoveForwardStop", "MoveForwardStart", "PetPassiveMode", "ToggleSpellAutocast", "TargetNearestEnemy",
@@ -81,7 +80,7 @@ local function addProtectedFunctions(randomFunc)
 			end
 		end
 	end
-end
+end;
 
 if not ni.loaded then
 	local frame = CreateFrame("frame")
@@ -91,14 +90,14 @@ if not ni.loaded then
 			ni.castdest = func
 			self:Hide()
 		end
-	end)
+	end);
 	local loaded_files = { };
 	local function pack(...)
 		local n = select('#', ...)
 		return setmetatable({...}, {
 			__len = function() return n end,
 		})
-	end
+	end;
 	local function require(name)
 		if not name:find(".lua") and not name:find(".enc") then
 			name = name..".lua"
@@ -107,7 +106,7 @@ if not ni.loaded then
 			loaded_files[name] = pack(ni.functions.require(name));
 		end
 		return unpack(loaded_files[name]);
-	end
+	end;
 	local dir = ni.functions.getbasefolder();
 	local json = require(dir.."addon\\core\\json.lua");
 	local vars = ni.functions.loadcontent(dir.."addon\\settings\\"..UnitName("player")..".json");
@@ -117,13 +116,14 @@ if not ni.loaded then
 	ni.vars.profiles.delay = 0;
 	ni.functions.savecontent(dir.."addon\\settings\\"..UnitName("player")..".json", json.encode(ni.vars));
 	ni.vars.build = select(4, GetBuildInfo());
+	ni.utils = require(dir.."addon\\core\\utils.lua");
+	ni.strongrand = require(dir.."addon\\core\\mwcrand.lua");
 	ni.debug = require(dir.."addon\\core\\debug.lua");
 	ni.memory = require(dir.."addon\\core\\memory.lua");
 	ni.rotation = require(dir.."addon\\core\\rotation.lua");
 	ni.bootstrap = require(dir.."addon\\core\\bootstrap.lua");
 	ni.tables = require(dir.."addon\\core\\tables.lua");
 	ni.drtracker = require(dir.."addon\\core\\drtracker.lua");
-	ni.utils = require(dir.."addon\\core\\utils.lua");
 	ni.utils.require = require;
 	ni.utils.json = json;
 	ni.utils.savesetting = function(filename, settings)
@@ -136,7 +136,6 @@ if not ni.loaded then
 		local content = ni.functions.loadcontent(dir.."addon\\Settings\\"..filename);
 		return content and json.decode(content) or { };
 	end;
-
 	ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = require(dir.."addon\\core\\frames.lua");
 	ni.spell = require(dir.."addon\\core\\spell.lua");
 	ni.power = require(dir.."addon\\core\\power.lua");
@@ -148,38 +147,32 @@ if not ni.loaded then
 	ni.objects, ni.objectmanager = require(dir.."addon\\core\\objectmanager.lua");
 	ni.stopcastingtracker = require(dir.."addon\\core\\stopcastingtracker.lua");
 	ni.ttd = require(dir.."addon\\core\\timetodie.lua");
+	ni.main = require(dir.."addon\\core\\mainui.lua");
 	ni.GUI = require(dir.."addon\\core\\gui.lua");
-	local strongrand = require(dir.."addon\\core\\mwcrand.lua");
-	ni.strongrand = strongrand
 
 	local function RandomVariable(length)
-                local res = ""
-                for i = 1, length do
-                        res = res .. string.char(strongrand.generate(97, 122))
-                end
-                return res
-    	end
-
+		local res = ""
+		for i = 1, length do
+			res = res .. string.char(ni.strongrand.generate(97, 122))
+		end
+		return res
+    end;
 	local generated_names = { };
-
-	ni.utils.GenerateRandomName = function()
+	ni.getrandomname = function()
 		local name = RandomVariable(20);
 		while tContains(generated_names, name) do
 			name = RandomVariable(20);
 		end
 		table.insert(generated_names, name);
 		return name;
-	end
-
-	ni.main = require(dir.."addon\\core\\mainui.lua");
-
-	ni.showstatus = function(str, enabled)
+	end;
+	ni.showstatus = function(str, enabled)		
 		if enabled then
 			ni.frames.floatingtext:message("\124cff00ff00" .. str)
 		else
 			ni.frames.floatingtext:message("\124cffff0000" .. str)
 		end
-	end
+	end;
 	ni.toggleprofile = function(str)
 		local unload = false;
 		if ni.vars.profiles.active == str then
@@ -216,7 +209,7 @@ if not ni.loaded then
 			ni.rotation.lastprofile = str;
 		end
 		ni.showstatus(str, ni.vars.profiles.enabled);
-	end
+	end;
 
 	ni.togglegeneric = function(str)
 		local unload = false;
@@ -254,30 +247,45 @@ if not ni.loaded then
 			ni.rotation.lastgeneric = str;
 		end
 		ni.showstatus(str, ni.vars.profiles.genericenabled);
-	end
+	end;
 
 	ni.showintstatus = function()
 		if ni.vars.profiles.interrupt then
-			ni.frames.floatingtext:message("Interrupts: \124cff00ff00Enabled")
+			if (GetLocale() == "ruRU") then
+				ni.frames.floatingtext:message("Прерывание: \124cff00ff00Включено")
+			else
+				ni.frames.floatingtext:message("Interrupts: \124cff00ff00Enabled")
+			end
 		else
-			ni.frames.floatingtext:message("Interrupts: \124cffff0000Disabled")
+			if (GetLocale() == "ruRU") then
+				ni.frames.floatingtext:message("Прерывание: \124cffff0000Выключено")
+			else			
+				ni.frames.floatingtext:message("Interrupts: \124cffff0000Disabled")
+			end
 		end
-	end
+	end;
 
 	ni.updatefollow = function(enabled)
 		if enabled then
-			ni.frames.floatingtext:message("Auto follow: \124cff00ff00Enabled")
+			if (GetLocale() == "ruRU") then
+				ni.frames.floatingtext:message("Авто следование: \124cff00ff00Включено")
+			else
+				ni.frames.floatingtext:message("Auto follow: \124cff00ff00Enabled")
+			end
 		else
-			ni.frames.floatingtext:message("Auto follow: \124cffff0000Disabled")
+			if (GetLocale() == "ruRU") then
+				ni.frames.floatingtext:message("Авто следование: \124cffff0000Выключено")
+			else		
+				ni.frames.floatingtext:message("Auto follow: \124cffff0000Disabled")
+			end
 		end
-	end
+	end;
 
 	ni.getspellidfromactionbar = function()
 		local focus = GetMouseFocus():GetName()
 		if string.match(focus, "Button") then
 			local button = _G[focus]
-			local slot =
-				ActionButton_GetPagedID(button) or ActionButton_CalculateAction(button) or button:GetAttribute("action") or 0
+			local slot = ActionButton_GetPagedID(button) or ActionButton_CalculateAction(button) or button:GetAttribute("action") or 0
 			if HasAction(slot) then
 				local aType, aID, _, aMaxID = GetActionInfo(slot)
 				if aType == "spell" then
@@ -285,7 +293,7 @@ if not ni.loaded then
 				end
 			end
 		end
-	end
+	end;
 	ni.functionsregistered = function()
 		return %%ToggleConsole%% ~= nil;
 	end
@@ -298,4 +306,4 @@ if not ni.loaded then
 		_G[ni.vars["global"]] = ni;
 	end
 	ni.loaded = true
-end
+end;

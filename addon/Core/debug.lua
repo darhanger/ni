@@ -1,3 +1,4 @@
+local print = print
 local debug = {
 	print = function(string)
 		if ni.vars.debug then

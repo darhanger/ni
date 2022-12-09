@@ -1,5 +1,4 @@
-local UnitGUID, GetTime = UnitGUID, GetTime
-
+local UnitGUID, GetTime, pairs = UnitGUID, GetTime, pairs
 local drtracker = {};
 drtracker.resettime = 18;
 drtracker.units = {};

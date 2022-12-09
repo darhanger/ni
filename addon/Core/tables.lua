@@ -813,8 +813,8 @@ local tables = {
 		-- [37985] = true, -- Dream Cloud , Valithria "Add"
 		[36853] = true, -- Sindragosa
 		[36597] = true, -- The Lich King (Icecrown Citadel)
-		[37217] = true, -- Precious
-		[37025] = true, -- Stinki
+		-- [37217] = true, -- Precious
+		-- [37025] = true, -- Stinki
 		[36661] = true, -- Rimefang <Drake of Tyrannus>
 		--Ruby Sanctum (PTR 3.3.5)
 		[39746] = true, --Zarithrian
@@ -1383,11 +1383,15 @@ local tables = {
 		[24792] = "Advanced Training Dummy",
 		[67127] = "Training Dummy",
 		[46647] = "Training Dummy",
+		[47105] = "Training Dummy",
 	},
 	mismarkedbosses = {
 		-- Magtheridon's Lair
 		[17256] = true, -- Hellfire Channeler 
-		[18829] = true -- Hellfire Warder
+		[18829] = true, -- Hellfire Warder
+		-- ICC
+		[36948] = true,
+		[36939] = true
 	},
 	stopcasting = {
 		stop = {
@@ -1427,4 +1431,4 @@ local tables = {
 		[36980] = "Ice Tomb"
 	},
 }
-return tables
+return tables;

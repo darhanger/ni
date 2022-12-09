@@ -1,25 +1,13 @@
-local UnitName, UnitGUID, UnitAffectingCombat, GetTime, UnitCanAssist, UnitCanAttack =
-	UnitName,
-	UnitGUID,
-	UnitAffectingCombat,
-	GetTime,
-	UnitCanAssist,
-	UnitCanAttack
+local GetLocale, UnitName, pairs, type, tonumber, UnitGUID, setmetatable, UnitCanAttack, UnitCanAssist, UnitAffectingCombat, select, GetTime, math_random = GetLocale, UnitName, pairs, type, tonumber, UnitGUID, setmetatable, UnitCanAttack, UnitCanAssist, UnitAffectingCombat, select, GetTime, math.random
+local locale = GetLocale();
+local unknown = locale == "ruRU" and "Неизвестно" or "Unknown"
 
-local locale = GetLocale()
-local unknown;
-if locale == "ruRU" then
-	unknown = "Неизвестно";
-else
-	unknown = "Unknown";
-end
-
-local objects = {}
+local objects = {};
 
 local objectmanager = {}
 objectmanager.get = function()
 	return ni.functions.getom()
-end
+end;
 objectmanager.contains = function(o)
 	local tmp = UnitName(o)
 	if tmp ~= nil then
@@ -33,7 +21,7 @@ objectmanager.contains = function(o)
 		end
 	end
 	return false
-end
+end;
 objectmanager.objectGUID = function(o)
 	if tonumber(o) ~= nil then
 		return o
@@ -50,14 +38,14 @@ objectmanager.objectGUID = function(o)
 			end
 		end
 	end
-end
-local objectsetup = {}
-objectsetup.cache = {}
+end;
+local objectsetup = {};
+objectsetup.cache = {};
 objectsetup.cache.__index = {
 	guid = 0,
 	name = unknown,
 	type = 0
-}
+};
 setmetatable(
 	objects,
 	{
@@ -75,14 +63,14 @@ setmetatable(
 			return objects:get(0, 0, unknown)
 		end
 	}
-)
+);
 function objects:get(objguid, objtype, objname)
 	if objectsetup.cache[objguid] then
 		return objectsetup.cache[objguid]
 	else
 		return objects:create(objguid, objtype, objname)
 	end
-end
+end;
 function objects:create(objguid, objtype, objname)
 	local o = {}
 	setmetatable(o, objectsetup);
@@ -188,17 +176,17 @@ function objects:create(objguid, objtype, objname)
 	end
 	objectsetup.cache[objguid] = o
 	return o
-end
+end;
 function objects:new(objguid, objtype, objname)
 	if objectsetup.cache[objguid] then
 		return false
 	end
 	return objects:create(objguid, objtype, objname)
-end
+end;
 function objects:updateobjects()
 	for k, v in pairs(objects) do
 		if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-			if v.lastupdate == nil or GetTime() >= (v.lastupdate + (math.random(1, 12) / 100)) then
+			if v.lastupdate == nil or GetTime() >= (v.lastupdate + (math_random(1, 12) / 100)) then
 				v.lastupdate = GetTime()
 				if not v:exists() then
 					objectsetup.cache[k] = nil
@@ -209,5 +197,5 @@ function objects:updateobjects()
 			end
 		end
 	end
-end
-return objects, objectmanager
+end;
+return objects, objectmanager;

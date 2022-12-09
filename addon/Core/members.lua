@@ -1,13 +1,4 @@
-local GetNumRaidMembers, GetNumPartyMembers, tinsert, UnitClass, UnitIsDeadOrGhost, UnitHealthMax, UnitName, UnitGUID =
-	GetNumRaidMembers,
-	GetNumPartyMembers,
-	tinsert,
-	UnitClass,
-	UnitIsDeadOrGhost,
-	UnitHealthMax,
-	UnitName,
-	UnitGUID
-
+local setmetatable, IsInRaid, GetNumGroupMembers, tinsert, GetNumRaidMembers, GetNumPartyMembers, type, UnitClass, select, UnitGroupRolesAssigned, UnitIsDeadOrGhost, UnitHealthMax, UnitName, UnitGUID, tostring, sort, wipe, ipairs, UnitIsUnit, tremove = setmetatable, IsInRaid, GetNumGroupMembers, tinsert, GetNumRaidMembers, GetNumPartyMembers, type, UnitClass, select, UnitGroupRolesAssigned, UnitIsDeadOrGhost, UnitHealthMax, UnitName, UnitGUID, tostring, sort, wipe, ipairs, UnitIsUnit, tremove
 local members = {};
 local memberssetup = {}
 memberssetup.cache = {}
@@ -81,7 +72,7 @@ function memberssetup:create(unit)
 			return true;
 		elseif oclass == "DRUID" and (ni.unit.buff(o.unit, 9634, "EXACT") or ni.unit.buff(o.unit, 5487, "EXACT"))	then
 			return true;
-		elseif oclass == "PALADIN" and ni.unit.buff(o.unit, 25780) then
+		elseif oclass == "PALADIN" and (ni.unit.buff(o.unit, 25780) and ni.power.currentraw(o.unit, 0) < 14000) then
 			return true;
 		elseif ni.unit.aura(o.guid, 57340) then
 			return true;
@@ -112,7 +103,7 @@ function memberssetup:create(unit)
 		if o.istank then
 			hp = hp - 5
 		end
-		if UnitIsDeadOrGhost(o.unit) == 1 then
+		if UnitIsDeadOrGhost(o.unit) == 1 or ni.unit.debuff(o.unit, 8326) then
 			hp = 250
 		end
 		if o.dispel then
@@ -176,7 +167,7 @@ memberssetup.set = function()
 			members[i]:updatemember()
 		end
 
-		table.sort(
+		sort(
 			members,
 			function(x, y)
 				if x.range and y.range then
@@ -192,8 +183,8 @@ memberssetup.set = function()
 		)
 	end
 	function members.reset()
-		table.wipe(members)
-		table.wipe(memberssetup.cache)
+		wipe(members)
+		wipe(memberssetup.cache)
 		memberssetup.set()
 	end
 	function members.below(percent)
@@ -230,7 +221,7 @@ memberssetup.set = function()
 		return average/m;
 	end
 	function members.inrange(unit, distance)
-		table.wipe(membersrange);
+		wipe(membersrange);
 		for _, v in ipairs(members) do
 			if not UnitIsUnit(v.unit, unit) then
 				local unitdistance = ni.unit.distance(v.unit, unit);
@@ -242,7 +233,7 @@ memberssetup.set = function()
 		return membersrange;
 	end
 	function members.inrangebelow(unit, distance, hp)
-		table.wipe(membersbelow);
+		wipe(membersbelow);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if v.hp < hp then
@@ -252,7 +243,7 @@ memberssetup.set = function()
 		return membersbelow;
 	end
 	function members.inrangewithbuff(unit, distance, buff, filter)
-		table.wipe(memberswithbuff);
+		wipe(memberswithbuff);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if v:buff(buff, filter) then
@@ -262,7 +253,7 @@ memberssetup.set = function()
 		return memberswithbuff;
 	end
 	function members.inrangewithbuffbelow(unit, distance, buff, hp, filter)
-		table.wipe(memberswithbuffbelow);
+		wipe(memberswithbuffbelow);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if v:buff(buff, filter) 
@@ -273,7 +264,7 @@ memberssetup.set = function()
 		return memberswithbuffbelow;
 	end
 	function members.inrangewithoutbuff(unit, distance, buff, filter)
-		table.wipe(memberswithoutbuff);
+		wipe(memberswithoutbuff);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if not v:buff(buff, filter) then
@@ -283,7 +274,7 @@ memberssetup.set = function()
 		return memberswithoutbuff
 	end
 	function members.inrangewithoutbuffbelow(unit, distance, buff, hp, filter)
-		table.wipe(memberswithoutbuffbelow);
+		wipe(memberswithoutbuffbelow);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if not v:buff(buff, filter) 
@@ -294,7 +285,7 @@ memberssetup.set = function()
 		return memberswithoutbuffbelow
 	end
 	function members.inrangewithdebuff(unit, distance, debuff, filter)
-		table.wipe(memberswithdebuff);
+		wipe(memberswithdebuff);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if v:debuff(debuff, filter) then
@@ -304,7 +295,7 @@ memberssetup.set = function()
 		return memberswithdebuff;
 	end
 	function members.inrangewithdebuffbelow(unit, distance, debuff, hp, filter)
-		table.wipe(memberswithdebuffbelow);
+		wipe(memberswithdebuffbelow);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if v:debuff(debuff, filter) 
@@ -315,7 +306,7 @@ memberssetup.set = function()
 		return memberswithdebuffbelow;
 	end
 	function members.inrangewithoutdebuff(unit, distance, debuff, filter)
-		table.wipe(memberswithoutdebuff);
+		wipe(memberswithoutdebuff);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if not v:debuff(debuff, filter) then
@@ -325,7 +316,7 @@ memberssetup.set = function()
 		return memberswithoutdebuff
 	end
 	function members.inrangewithoutdebuffbelow(unit, distance, debuff, hp, filter)
-		table.wipe(memberswithoutdebuffbelow);
+		wipe(memberswithoutdebuffbelow);
 		members.inrange(unit, distance);
 		for _, v in ipairs(membersrange) do
 			if not v:debuff(debuff, filter) 

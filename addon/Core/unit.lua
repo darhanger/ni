@@ -1,44 +1,4 @@
-local UnitGUID,
-	UnitCanAttack,
-	tinsert,
-	tonumber,
-	UnitLevel,
-	UnitHealth,
-	UnitHealthMax,
-	UnitExists,
-	UnitThreatSituation,
-	GetUnitSpeed,
-	UnitIsDeadOrGhost,
-	UnitReaction,
-	UnitCastingInfo,
-	UnitBuff,
-	GetSpellInfo,
-	tContains,
-	UnitDebuff,
-	UnitChannelInfo,
-	GetTime,
-	UnitGetIncomingHeals =
-	UnitGUID,
-	UnitCanAttack,
-	tinsert,
-	tonumber,
-	UnitLevel,
-	UnitHealth,
-	UnitHealthMax,
-	UnitExists,
-	UnitThreatSituation,
-	GetUnitSpeed,
-	UnitIsDeadOrGhost,
-	UnitReaction,
-	UnitCastingInfo,
-	UnitBuff,
-	GetSpellInfo,
-	tContains,
-	UnitDebuff,
-	UnitChannelInfo,
-	GetTime,
-	UnitGetIncomingHeals
-
+local math_pow, tonumber, UnitGUID, pairs, string_len, string_lower, string_sub, table_insert, table_wipe, type, UnitLevel, UnitThreatSituation, GetUnitSpeed, math_max, UnitExists, tostring, UnitIsDeadOrGhost, UnitCanAttack, UnitHealth, UnitHealthMax, UnitGetIncomingHeals, select, GetTime, tinsert, UnitReaction, UnitCastingInfo, UnitChannelInfo, UnitBuff, tContains, GetSpellInfo, strupper, strfind, UnitDebuff, UnitClass = math.pow, tonumber, UnitGUID, pairs, string.len, string.lower, string.sub, table.insert, table.wipe, type, UnitLevel, UnitThreatSituation, GetUnitSpeed, math.max, UnitExists, tostring, UnitIsDeadOrGhost, UnitCanAttack, UnitHealth, UnitHealthMax, UnitGetIncomingHeals, select, GetTime, tinsert, UnitReaction, UnitCastingInfo, UnitChannelInfo, UnitBuff, tContains, GetSpellInfo, strupper, strfind, UnitDebuff, UnitClass
 local creaturetypes = {
 	[0] = "Unknown",
 	[1] = "Beast",
@@ -54,7 +14,7 @@ local creaturetypes = {
 	[11] = "Totem",
 	[12] = "NonCombatPet",
 	[13] = "GasCloud"
-}
+};
 
 local unitauras = { };
 local BehindTime = 0;
@@ -86,7 +46,7 @@ unit.creations = function(unit)
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
 				if v:creator() == guid then
-					table.insert(creationstable, {name = v.name, guid = v.guid})
+					table_insert(creationstable, {name = v.name, guid = v.guid})
 				end
 			end
 		end
@@ -163,7 +123,7 @@ unit.id = function(t)
 end
 unit.shortguid = function(t)
 	if UnitExists(t) then
-		return string.sub(tostring(UnitGUID(t)), -5, -1);
+		return string_sub(tostring(UnitGUID(t)), -5, -1);
 	end
 	return "";
 end
@@ -192,8 +152,15 @@ unit.ttd = function(t)
 	return -1
 end
 unit.hp = function(t)
+	if (unit.debuff(t, 30843) or unit.debuff(t, 55593)) then
+		return 100
+	end
+	if UnitIsDeadOrGhost(t) == 1 or unit.debuff(t, 8326) then
+		return 250
+	end
+	
 	return 100 * UnitHealth(t) / UnitHealthMax(t)
-end
+end;
 unit.hpraw = function(t)
 	return UnitHealthMax(t) - UnitHealth(t)
 end
@@ -300,12 +267,12 @@ end
 unit.distancesqr = function(t1, t2)
 	local x1, y1, z1 = unit.location(t1)
 	local x2, y2, z2 = unit.location(t2)
-	return math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2) + math.pow(z1 - z2, 2)
+	return math_pow(x1 - x2, 2) + math_pow(y1 - y2, 2) + math_pow(z1 - z2, 2)
 end
 unit.meleerange = function(t1, t2)
 	local cr1 = unit.combatreach(t1)
 	local cr2 = unit.combatreach(t2)
-	return math.max(5.0, cr1 + cr2 + (4 / 3))
+	return math_max(5.0, cr1 + cr2 + (4 / 3))
 end
 unit.inmelee = function(t1, t2)
 	local meleerange = unit.meleerange(t1, t2)
@@ -361,7 +328,7 @@ unit.unitstargeting = function(t, friendlies)
 					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) <= 4 and not UnitIsDeadOrGhost(k) then
 						local target = v:target()
 						if target ~= nil and target == t then
-							table.insert(targetingtable, {name = v.name, guid = k})
+							table_insert(targetingtable, {name = v.name, guid = k})
 						end
 					end
 				end
@@ -372,7 +339,7 @@ unit.unitstargeting = function(t, friendlies)
 					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) > 4 then
 						local target = v:target()
 						if target ~= nil and target == t then
-							table.insert(targetingtable, {name = v.name, guid = k})
+							table_insert(targetingtable, {name = v.name, guid = k})
 						end
 					end
 				end
@@ -408,7 +375,7 @@ unit.channelpercent = function(t)
 	return 0
 end
 unit.auras = function(t)
-	table.wipe(unitauras);
+	table_wipe(unitauras);
 	unitauras = ni.functions.auras(t) or { };
 	return unitauras;
 end
@@ -443,7 +410,7 @@ unit.bufftype = function(t, str)
 				bufftype = "Enrage"
 			end
 
-			local dTlwr = string.lower(bufftype)
+			local dTlwr = string_lower(bufftype)
 			if tContains(st, dTlwr) then
 				has = true
 				break
@@ -485,7 +452,7 @@ end
 unit.buffs = function(t, ids, filter)
 	local ands = ni.utils.findand(ids)
 	local results = false
-	if ands ~= nil or (ands == nil and string.len(ids) > 0) then
+	if ands ~= nil or (ands == nil and string_len(ids) > 0) then
 		local tmp
 		if ands then
 			tmp = ni.utils.splitstringbydelimiter(ids, "&&")
@@ -547,7 +514,7 @@ unit.debufftype = function(t, str)
 		local debufftype = select(5, UnitDebuff(t, i))
 
 		if debufftype ~= nil then
-			local dTlwr = string.lower(debufftype)
+			local dTlwr = string_lower(debufftype)
 			if tContains(st, dTlwr) then
 				has = true
 				break
@@ -589,7 +556,7 @@ end
 unit.debuffs = function(t, spellIDs, filter)
 	local ands = ni.utils.findand(spellIDs)
 	local results = false
-	if ands ~= nil or (ands == nil and string.len(spellIDs) > 0) then
+	if ands ~= nil or (ands == nil and string_len(spellIDs) > 0) then
 		local tmp
 		if ands then
 			tmp = ni.utils.splitstringbydelimiter(spellIDs, "&&")
@@ -668,85 +635,88 @@ unit.buffremaining = function(target, spell, filter)
 end
 unit.flags = function(t)
 	return ni.functions.unitflags(t)
-end
+end;
 unit.dynamicflags = function(t)
 	return ni.functions.unitdynamicflags(t)
-end
+end;
 unit.istappedbyallthreatlist = function(t)
 	return (unit.exists(t) and select(2, unit.dynamicflags(t))) or false
-end
+end;
 unit.islootable = function(t)
 	return (unit.exists(t) and select(3, unit.dynamicflags(t))) or false
-end
+end;
 unit.istaggedbyme = function(t)
 	return (unit.exists(t) and select(7, unit.dynamicflags(t))) or false
-end
+end;
 unit.istaggedbyother = function(t)
 	return (unit.exists(t) and select(8, unit.dynamicflags(t))) or false
-end
+end;
 unit.canperformaction = function(t)
 	return (unit.exists(t) and select(1, unit.flags(t))) or false
-end
+end;
 unit.isconfused = function(t)
 	return (unit.exists(t) and select(23, unit.flags(t))) or false
+end;
+unit.notbleed = function(t)
+	return (unit.exists(t) and select(16, unit.flags(t))) or false
 end
 unit.isdisarmed = function(t)
 	return (unit.exists(t) and select(22, unit.flags(t))) or false
-end
+end;
 unit.isfleeing = function(t)
 	return (unit.exists(t) and select(24, unit.flags(t))) or false
-end
+end;
 unit.islooting = function(t)
 	return (unit.exists(t) and select(11, unit.flags(t))) or false
-end
+end;
 unit.ismounted = function(t)
 	return (unit.exists(t) and select(28, unit.flags(t))) or false
-end
+end;
 unit.isnotattackable = function(t)
 	return (unit.exists(t) and select(2, unit.flags(t))) or false
-end
+end;
 unit.isnotselectable = function(t)
 	return (unit.exists(t) and select(26, unit.flags(t))) or false
-end
+end;
 unit.ispacified = function(t)
 	return (unit.exists(t) and select(18, unit.flags(t))) or false
-end
+end;
 unit.ispetinombat = function(t)
 	return (unit.exists(t) and select(12, unit.flags(t))) or false
-end
+end;
 unit.isplayercontrolled = function(t)
 	return (unit.exists(t) and select(4, unit.flags(t))) or false
-end
+end;
 unit.ispossessed = function(t)
 	return (unit.exists(t) and select(25, unit.flags(t))) or false
-end
+end;
 unit.ispreparation = function(t)
 	return (unit.exists(t) and select(6, unit.flags(t))) or false
-end
+end;
 unit.ispvpflagged = function(t)
 	return (unit.exists(t) and select(13, unit.flags(t))) or false
-end
+end;
 unit.issilenced = function(t)
 	return (unit.exists(t) and select(14, unit.flags(t))) or false
-end
+end;
 unit.isskinnable = function(t)
 	return (unit.exists(t) and select(27, unit.flags(t))) or false
-end
+end;
 unit.isstunned = function(t)
 	return (unit.exists(t) and select(19, unit.flags(t))) or false
-end
+end;
 unit.isimmune = function(t)
 	return (unit.exists(t) and select(32, unit.flags(t))) or false
-end
+end;
 unit.isplayer = function(t)
 	return select(5, unit.info(t)) == 4
-end
+end;
 unit.transport = function(t)
 	return ni.functions.transport(t);
-end
+end;
 unit.facing = function(t)
 	return ni.functions.facing(t);
-end
+end;
 unit.hasheal = function(t)
 	if UnitExists(t) then
 		local _, class = UnitClass(t)
@@ -763,8 +733,7 @@ unit.hasheal = function(t)
 
 		return false
 	end
-end
-
+end;
 local function UnitEvents(event, ...)
 	if event == "UI_ERROR_MESSAGE" then
 		local errorMessage = ...;
@@ -772,6 +741,6 @@ local function UnitEvents(event, ...)
 			BehindTime = GetTime();
 		end
 	end
-end
+end;
 ni.combatlog.registerhandler("Internal Unit Handler", UnitEvents);
 return unit;

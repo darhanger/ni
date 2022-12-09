@@ -1,5 +1,4 @@
-local GetRuneCooldown, GetRuneType, GetTime = GetRuneCooldown, GetRuneType, GetTime
-
+local GetTime, GetRuneCooldown, GetRuneType = GetTime, GetRuneCooldown, GetRuneType
 local rune = {};
 rune.available = function()
 	local runesavailable = 0
@@ -10,9 +9,8 @@ rune.available = function()
 			runesavailable = runesavailable + 1
 		end
 	end
-
 	return runesavailable
-end
+end;
 rune.deathrunes = function()
 	local dr = 0;
 	for i = 1, 6 do
@@ -21,7 +19,7 @@ rune.deathrunes = function()
 		end
 	end
 	return dr;
-end
+end;
 rune.cd = function(r)
 	local runesoncd = 0
 	local runesoffcd = 0
@@ -38,18 +36,17 @@ rune.cd = function(r)
 		end
 	end
 	return runesoncd, runesoffcd
-end
+end;
 rune.deathrunecd = function()
 	return rune.cd(4)
-end
+end;
 rune.frostrunecd = function()
 	return rune.cd(3)
-end
+end;
 rune.unholyrunecd = function()
 	return rune.cd(2)
-end
+end;
 rune.bloodrunecd = function()
 	return rune.cd(1)
-end
-
+end;
 return rune;

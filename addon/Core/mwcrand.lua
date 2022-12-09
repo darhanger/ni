@@ -1,10 +1,9 @@
-local mwcexports = {}
-
+local setmetatable, time = setmetatable, time
+local mwcexports = {};
 local math_floor = math.floor
-
-local function normalize(n) --keep numbers at (positive) 32 bits
+local function normalize(n)
 	return n % 0x80000000
-end
+end;
 
 local multiply_with_carry = {}
 multiply_with_carry.__index = multiply_with_carry
@@ -22,13 +21,13 @@ function multiply_with_carry:random(a, b)
 	else
 		return a + (y % (b - a + 1))
 	end
-end
+end;
 
 function multiply_with_carry:randomseed(s)
 	if not s then s = 0 end
 	self.c = self.ic
 	self.x = normalize(s)
-end
+end;
 
 function mwc(s)
 	local temp = {}
@@ -37,12 +36,12 @@ function mwc(s)
 	temp.ic = temp.c
 	temp:randomseed(s)
 	return temp
-end
+end;
 
 local c1 = mwc(0)
 c1:randomseed(time())
 
 mwcexports.generate = function(a,b)
 	return c1:random(a,b)
-end
-return mwcexports
+end;
+return mwcexports;

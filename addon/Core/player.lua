@@ -1,64 +1,50 @@
-local GetGlyphSocketInfo,
-	GetContainerNumSlots,
-	GetContainerItemID,
-	GetItemSpell,
-	GetInventoryItemID,
-	GetItemCooldown,
-	GetSpellCooldown,
-	GetTime,
-	IsFalling =
-	GetGlyphSocketInfo,
-	GetContainerNumSlots,
-	GetContainerItemID,
-	GetItemSpell,
-	GetInventoryItemID,
-	GetItemCooldown,
-	GetSpellCooldown,
-	GetTime,
-	IsFalling
-
+local GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable =GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable
 local CurrentMovingTime, CurrentStationaryTime, ResetMovementTime = 0, 0, 0.5;
-
-local player = {}
+local player = {};
 player.moveto = function(...) --target/x,y,z
 	ni.functions.moveto(...)
-end
+end;
 player.clickat = function(...) --target/x,y,z/mouse
 	ni.functions.clickat(...)
-end
+end;
 player.stopmoving = function()
 	ni.functions.callprotected(StrafeLeftStop);
 	ni.functions.callprotected(StrafeRightStop);
 	ni.functions.callprotected(TurnLeftStop);
 	ni.functions.callprotected(TurnRightStop);
 	ni.functions.stopmoving();
-end
+end;
 player.lookat = function(target, inv) --inv true to look away
+	ni.debug.print(format("Look on %s", target))
 	ni.functions.lookat(target, inv)
-end
+end;
 player.target = function(target)
 	ni.functions.settarget(target)
-end
+end;
 player.runtext = function(text)
-	ni.debug.print(string.format("Running: %s", text))
+	ni.debug.print(format("Running: %s", text))
 	ni.functions.runtext(text)
-end
+end;
 player.useitem = function(...) --itemid/name[, target]
 	if #{...} > 1 then
-		ni.debug.print(string.format("Using item %s on %s", ...))
+		ni.debug.print(format("Using item %s on %s", ...))
 	else
-		ni.debug.print(string.format("Using item %s", ...))
+		ni.debug.print(format("Using item %s", ...))
 	end
 	ni.functions.item(...)
-end
-player.useinventoryitem = function(slotid)
-	ni.debug.print(string.format("Using Inventory Slot %s", slotid))
-	ni.functions.inventoryitem(slotid)
-end
+end;
+player.useinventoryitem = function(...) --slotid[, target]
+	if #{...} > 1 then
+		ni.debug.print(format("Using Inventory Slot %s on %s", ...))
+	else
+		ni.debug.print(format("Using Inventory Slot %s", ...))
+	end
+	ni.functions.inventoryitem(...)
+end;
 player.interact = function(target)
-	ni.debug.print(string.format("Interacting with %s", target))
+	ni.debug.print(format("Interacting with %s", target))
 	ni.functions.interact(target)
-end
+end;
 player.hasglyph = function(glyphid)
 	for i = 1, 6 do
 		if GetGlyphSocketInfo(i) then
@@ -68,10 +54,10 @@ player.hasglyph = function(glyphid)
 		end
 	end
 	return false
-end
+end;
 player.hasitem = function(itemid)
 	return GetItemCount(itemid, false, false) > 0
-end
+end;
 player.hasitemequipped = function(id)
 	for i = 1, 19 do
 		if GetInventoryItemID("player", i) == id then
@@ -79,10 +65,12 @@ player.hasitemequipped = function(id)
 		end
 	end
 	return false
-end
+end;
 player.slotcastable = function(slotnum)
-	return GetItemSpell(GetInventoryItemID("player", slotnum)) ~= nil
-end
+	if select(1, GetItemSpell(GetInventoryItemID("player", slotnum))) ~= "SpellName0" then
+		return GetItemSpell(GetInventoryItemID("player", slotnum)) ~= nil
+	end
+end;
 player.slotcd = function(slotnum)
 	if not player.slotcastable(slotnum) then
 		return 0
@@ -92,14 +80,26 @@ player.slotcd = function(slotnum)
 		return start + duration - GetTime()
 	end
 	return 0
-end
+end;
+player.checkslots = function()
+	local freeslots = 0;
+	for i = 0, 4 do
+		if GetContainerNumFreeSlots(i) ~= 0 then
+			freeslots = freeslots + #GetContainerFreeSlots(i)
+		end
+	end
+	return freeslots
+end;
+player.getitemicon = function(itemid, width, height)
+    return "\124T"..(GetItemIcon(itemid) or select(3, GetSpellInfo(24720)))..":"..(height or 25)..":"..(width or 25).."\124t"	
+end;	
 player.itemcd = function(item)
 	local start, duration, enable = GetItemCooldown(item)
 	if (start > 0 and duration > 0) then
 		return start + duration - GetTime()
 	end
 	return 0
-end
+end;
 player.petcd = function(spell)
 	local start, duration, enable = GetSpellCooldown(spell)
 	if (start > 0 and duration > 0) then
@@ -107,7 +107,7 @@ player.petcd = function(spell)
 	else
 		return 0
 	end
-end
+end;
 player.registermovement = function(elapsed)
 	local speed = GetUnitSpeed("player");
 	if speed ~= 0 then
@@ -120,23 +120,23 @@ player.registermovement = function(elapsed)
 			CurrentMovingTime = 0;
 		end
 	end
-end
+end;
 player.movingfor = function(duration)
 	local duration = duration or 1;
 	if CurrentMovingTime >= duration and not ni.unit.buff("player", 98767) then
 		return true;
 	end
 	return false;
-end
+end;
 player.getmovingtime = function()
 	return CurrentMovingTime;
-end
+end;
 player.ismoving = function()
 	if ni.unit.ismoving("player") or IsFalling() then
 		return true
 	end
 	return false
-end
+end;
 
 setmetatable(
 	player,
@@ -150,5 +150,5 @@ setmetatable(
 			end
 		end
 	}
-)
+);
 return player;

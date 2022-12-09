@@ -1,34 +1,17 @@
-local IsLeftShiftKeyDown,
-	GetCurrentKeyBoardFocus,
-	GetTime,
-	IsLeftControlKeyDown,
-	IsLeftAltKeyDown,
-	IsRightShiftKeyDown,
-	IsRightControlKeyDown,
-	IsRightAltKeyDown =
-	IsLeftShiftKeyDown,
-	GetCurrentKeyBoardFocus,
-	GetTime,
-	IsLeftControlKeyDown,
-	IsLeftAltKeyDown,
-	IsRightShiftKeyDown,
-	IsRightControlKeyDown,
-	IsRightAltKeyDown
-
+local GetLocale, GetTime, IsLeftShiftKeyDown, GetCurrentKeyBoardFocus, IsLeftControlKeyDown, IsLeftAltKeyDown, IsRightShiftKeyDown, IsRightControlKeyDown, IsRightAltKeyDown = GetLocale, GetTime, IsLeftShiftKeyDown, GetCurrentKeyBoardFocus, IsLeftControlKeyDown, IsLeftAltKeyDown, IsRightShiftKeyDown, IsRightControlKeyDown, IsRightAltKeyDown
+local ru = GetLocale() == "ruRU" or false;
 local togglemod, cdtogglemod, customtogglemod = 0, 0, 0
-
 local function AddDelay(t)
 	ni.vars.profiles.delay = t;
-end
+end;
 local Localization = {
 	Enabled = "\124cff00ff00Enabled",
 	Disabled = "\124cffff0000Disabled",
-}
-if (GetLocale() == "ruRU") then
+};
+if ru then
 	Localization.Enabled = "\124cff00ff00Включено"
 	Localization.Disabled = "\124cffff0000Выключено"
-end
-
+end;
 local rotation = {
 	started = false,
 	profile = {},

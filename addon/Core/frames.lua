@@ -1,3 +1,4 @@
+local UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, CreateFrame, math_random, UIFrameFadeOut, print, v, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type = UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, CreateFrame, math.random, UIFrameFadeOut, print, v, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type
 ---DR Tracker
 local registeredevents = {
 	["SPELL_AURA_APPLIED"] = true,
@@ -5,8 +6,7 @@ local registeredevents = {
 	["SPELL_AURA_REMOVED"] = true,
 	["PARTY_KILL"] = true,
 	["UNIT_DIED"] = true
-}
-
+};
 local drtracker_events = function(self, event, ...)
 	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...;
 	if (not registeredevents[eventType]) then
@@ -37,12 +37,11 @@ local drtracker_events = function(self, event, ...)
 	elseif event == "PLAYER_LEAVING_WORLD" then
 		ni.drtracker.wipeall()
 	end
-end
+end;
 ---ICD Tracker
 local icdevents = {
 	["SPELL_AURA_APPLIED"] = true
-}
-
+};
 local icdtracker = {};
 icdtracker.timers = {};
 icdtracker.set = function(item, icd)
@@ -50,7 +49,7 @@ icdtracker.set = function(item, icd)
 		icd = icd,
 		time = 0
 	}
-end
+end;
 icdtracker.get = function(item)
 	if icdtracker.timers[item] then
 		local remaining = icdtracker.timers[item].time - GetTime();
@@ -60,8 +59,7 @@ icdtracker.get = function(item)
 		return remaining;
 	end
 	return -1;
-end
-
+end;
 local icdtracker_events = function(self, event, ...)
 	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...;
 	if not icdevents[eventType] then
@@ -74,7 +72,7 @@ local icdtracker_events = function(self, event, ...)
 			end
 		end
 	end
-end
+end;
 -------------
 
 local lastclick = 0;
@@ -92,14 +90,13 @@ local function isspelltoignore(spellname)
 		return true;
 	end
 	return false;
-end
-
+end;
 local events = {};
-
 local delays = {};
-
 local frames = {};
-frames.notification = CreateFrame("frame", nil, UIParent);
+
+local notfram = ni.utils.generaterandomname();
+frames.notification = CreateFrame("frame", notfram, UIParent);
 frames.notification:SetSize(ChatFrame1:GetWidth(), 30)
 frames.notification:Hide()
 frames.notification:SetPoint("TOP", ChatFrame1, 0, 90)
@@ -109,36 +106,33 @@ frames.notification.texture = frames.notification:CreateTexture()
 frames.notification.texture:SetAllPoints()
 frames.notification.texture:SetTexture(0, 0, 0, .50)
 function frames.notification:message(message)
-	self.text:SetText(message)
+	local pad = ""
+	for i = 1, math_random(1, 255) do pad = pad .. "\124r" end
+	self.text:SetText(pad .. message)
 	self:Show()
 end
-frames.spellqueueholder = CreateFrame("Frame")
+local spellqhol = ni.utils.generaterandomname();
+frames.spellqueueholder = CreateFrame("Frame", spellqhol)
 frames.spellqueueholder:ClearAllPoints()
 frames.spellqueueholder:SetHeight(30)
 frames.spellqueueholder:SetWidth(275)
 frames.spellqueueholder:SetMovable(true)
 frames.spellqueueholder:EnableMouse(true)
 frames.spellqueueholder:RegisterForDrag("LeftButton")
-frames.spellqueueholder:SetBackdrop(
-	{
-		bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-		edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-		tile = true,
-		tileSize = 16,
-		edgeSize = 16,
-		insets = {left = 4, right = 4, top = 4, bottom = 4}
-	}
-)
+frames.spellqueueholder.texture = frames.spellqueueholder:CreateTexture()
+frames.spellqueueholder.texture:SetAllPoints()
+frames.spellqueueholder.texture:SetTexture(0, 0, 0, .50)
 frames.spellqueueholder:SetBackdropColor(0, 0, 0, 1)
 frames.spellqueueholder:SetPoint("CENTER", UIParent, "BOTTOM", 0, 130)
 frames.spellqueueholder:Hide()
 
-frames.spellqueue = CreateFrame("Frame", nil, frames.spellqueueholder)
+local spellq = ni.utils.generaterandomname();
+frames.spellqueue = CreateFrame("Frame", spellq, frames.spellqueueholder)
 frames.spellqueue:ClearAllPoints()
 frames.spellqueue:SetHeight(20)
 frames.spellqueue:SetWidth(200)
 frames.spellqueue:Show()
-frames.spellqueue.text = frames.spellqueue:CreateFontString(nil, "BACKGROUND", "GameFontNormal")
+frames.spellqueue.text = frames.spellqueue:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 frames.spellqueue.text:SetAllPoints()
 frames.spellqueue.text:SetJustifyV("MIDDLE")
 frames.spellqueue.text:SetJustifyH("CENTER")
@@ -157,9 +151,10 @@ function frames.spellqueue.update(str, bool)
 			frames.spellqueueholder:Hide()
 		end
 	end
-end
+end;
 
-frames.floatingtext = CreateFrame("Frame")
+local floattext = ni.utils.generaterandomname();
+frames.floatingtext = CreateFrame("Frame", floattext)
 frames.floatingtext:SetSize(400, 30)
 frames.floatingtext:SetAlpha(0)
 frames.floatingtext:SetPoint("CENTER", 0, 80)
@@ -168,9 +163,15 @@ frames.floatingtext.text:SetAllPoints()
 frames.floatingtext.texture = frames.floatingtext:CreateTexture()
 frames.floatingtext.texture:SetAllPoints()
 function frames.floatingtext:message(message)
-	self.text:SetText(message)
-	UIFrameFadeOut(self, 2.5, 1, 0)
-end
+	local pad = ""
+	for i = 1, math_random(1,255) do pad = pad .. "\124r" end
+	if not ni.vars.stream then	
+		self.text:SetText(pad .. message)
+		UIFrameFadeOut(self, 2.5, 1, 0)
+	else
+		print(pad .. message)
+	end
+end;
 
 local keyevents = {};
 local keypress_events = {};
@@ -197,7 +198,6 @@ local function OnKeyHandler(self, keyType, key)
 end;
 
 ni.functions.registercallback(keyevents, OnKeyHandler);
-
 frames.main = CreateFrame("frame");
 frames.main:RegisterAllEvents();
 frames.OnEvent = function(self, event, ...)
@@ -241,7 +241,7 @@ frames.OnEvent = function(self, event, ...)
 			end
 		end
 	end
-	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" or event == "COMBAT_LOG_EVENT" then
 		local _, subevent, _, source, _, _, dest, _, spellID, spellName = ...
 		if source == UnitName("player") then
 			if subevent == "SPELL_CAST_SUCCESS" or subevent == "SPELL_CAST_FAILED" and not isspelltoignore(spellName) then
@@ -262,43 +262,49 @@ frames.OnUpdate = function(self, elapsed)
 		totalelapsed = 0;
 		return true
 	end
-
 	if select(11, ni.player.debuff(9454)) == 9454 then
 		return true
 	end
-
 	local time = GetTime();
-	
 	for k, v in pairs(delays) do
 		if k <= time then
 			v();
 			delays[k] = nil;
 		end
 	end		
-
 	local Localization = {
 		Enabled = "\124cff00ff00Enabled",
 		Disabled = "\124cffff0000Disabled",
-	}
+	};
 	if (GetLocale() == "ruRU") then
 		Localization.Enabled = "\124cff00ff00Включено"
 		Localization.Disabled = "\124cffff0000Выключено"
-	end
-
+	end;
 	if ni.vars.profiles.enabled then
-		if ni.vars.combat.aoe or ni.vars.combat.cd and not frames.notification:IsShown() then
-			local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
-			local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;
-			frames.notification:message("\124cffFFC300AoE: "..aoe_str.." \124cffFFC300CD: "..cd_str);
+		if not ni.vars.stream then
+			if ni.vars.combat.aoe or ni.vars.combat.cd and not frames.notification:IsShown() then
+				local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
+				local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;
+				frames.notification:message("\124cffFFC300AoE: "..aoe_str.." \124cffFFC300CD: "..cd_str);
+			end
+			ni.rotation.aoetoggle()
+			ni.rotation.cdtoggle()
 		end
-		ni.rotation.aoetoggle()
-		ni.rotation.cdtoggle()
 	else
 		if frames.notification:IsShown() then
 			frames.notification:Hide();
+		end		
+	end;
+	if ni.vars.profiles.enabled then
+		if ni.vars.stream then
+			if ni.vars.combat.aoe or ni.vars.combat.cd then
+				local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
+				local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;	
+			end
+			ni.rotation.aoetoggle()
+			ni.rotation.cdtoggle()
 		end
-	end
-
+	end;
 	local throttle = ni.vars.latency / 1000
 	totalelapsed = totalelapsed + elapsed;
 	self.st = elapsed + (self.st or 0)
@@ -375,7 +381,7 @@ frames.OnUpdate = function(self, elapsed)
 					ni.player.stopmoving()
 				end
 			end
-		end
+		end;
 
 		if ni.vars.profiles.enabled or ni.vars.profiles.genericenabled then
 			ni.player.registermovement(totalelapsed);
@@ -448,13 +454,13 @@ local combatlog = {
 		end
 		return false;
 	end
-}
+};
 local function delayfor(delay, callback)
 	if type(delay) ~= "number" or type(callback) ~= "function" then
 		return false
 	end
 	delays[GetTime() + delay] = callback;
 	return true
-end
+end;
 
 return frames, combatlog, delayfor, icdtracker, keyevents;

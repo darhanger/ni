@@ -1,6 +1,5 @@
-local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
-
-local power = { }
+local tonumber, UnitPower, UnitPowerMax = tonumber, UnitPower, UnitPowerMax
+local power = { };
 power.types = {
 	mana = 0,
 	rage = 1,
@@ -18,33 +17,33 @@ power.types = {
 	shadoworbs = 13,
 	burningembers = 14,
 	demonicfury = 15
-}
+};
 power.current = function(t, type)
 	if tonumber(type) == nil then
 		type = power.types[type]
 	end
 
 	return 100 * UnitPower(t, type) / UnitPowerMax(t, type)
-end
+end;
 power.currentraw = function(t, type)
 	if tonumber(type) == nil then
 		type = power.types[type]
 	end
 
 	return UnitPower(t, type)
-end
+end;
 power.max = function(t, type)
 	if tonumber(type) == nil then
 		type = power.types[type]
 	end
 
 	return UnitPowerMax(t, type)
-end
+end;
 power.ismax = function(t, type)
 	if tonumber(type) == nil then
 		type = power.types[type]
 	end
 
 	return UnitPower(t, type) == UnitPowerMax(t, type)
-end
+end;
 return power;

@@ -1,3 +1,4 @@
+local type, queue, table_wipe, onload, onunload = type, queue, table.wipe, onload, onunload
 local function start(name, queue, abilities, data, GUI)
 	local profile = { };
 	profile.loaded = false;
@@ -43,13 +44,14 @@ local function start(name, queue, abilities, data, GUI)
 		if self.loaded
 		 and self.data
 		 and self.data.key then
-			table.wipe(ni.data[self.data.key])
+			table_wipe(ni.data[self.data.key])
 			ni.data[self.data.key] = nil;
+			ni.frames.spellqueueholder:Hide()
 			self.loaded = false
 		end
 	end;
 	return profile;
-end
+end;
 local function startv2(name, queue, abilities, onload, onunload)
 	local profile = {};
 	profile.loaded = false;
@@ -67,6 +69,7 @@ local function startv2(name, queue, abilities, onload, onunload)
 		 and onunload ~= nil
 		 and type(onunload) == "function" then
 			onunload();
+			ni.frames.spellqueueholder:Hide()
 			self.loaded = false;
 		end
 	end
@@ -85,7 +88,7 @@ local function startv2(name, queue, abilities, onload, onunload)
 		end
 	end
 	return profile;
-end
+end;
 local bootstrap = {
 	rotation = function(profile, queue, abilities, data, GUI)
 		GUI = true and GUI or {};
@@ -97,5 +100,5 @@ local bootstrap = {
 		ni.debug.log("Loaded "..profile);
 		ni.rotation.profile[profile] = startv2(profile, queue, abilities, onload, onunload);
 	end
-}
+};
 return bootstrap

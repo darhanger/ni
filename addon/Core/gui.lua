@@ -1,4 +1,5 @@
-local GUI = CreateFrame("frame", nil, UIParent);
+local GUIRan = ni.utils.generaterandomname();
+local GUI = CreateFrame("frame", GUIRan, UIParent);
 -----------------------------------------------
 ----- Necessary tables for below functions ----
 -----------------------------------------------
@@ -258,7 +259,8 @@ end
 ----- Local functions to create the frames ----
 -----------------------------------------------
 local function CreateText(frame, text)
-	local TextFrame = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight");
+	local textran = ni.utils.generaterandomname();
+	local TextFrame = frame:CreateFontString(textran, "OVERLAY", "GameFontHighlight");
 	TextFrame:SetPoint("CENTER", 0, 0);
 	local pad = ""
 	for i = 1, math.random(1,255) do pad = pad .. "\124r" end
@@ -269,7 +271,8 @@ local function CreateText(frame, text)
 	return TextFrame;
 end
 local function CreateCheckBox(frame, t, settings, callback)
-	local CheckButton = CreateFrame("CheckButton", nil, frame, "OptionsBaseCheckButtonTemplate");
+	local buttran = ni.utils.generaterandomname()
+	local CheckButton = CreateFrame("CheckButton", buttran, frame, "OptionsBaseCheckButtonTemplate");
 	CheckButton:SetPoint("LEFT", 0, 0);
 	CheckButton:SetSize(26, 26);
 	CheckButton:SetChecked(t.enabled);
@@ -291,13 +294,15 @@ local function CreateCheckBox(frame, t, settings, callback)
 	return CheckButton;
 end
 local function CreateBlankSquare(frame)
-	local Frame = CreateFrame("frame", nil, frame);
+	local blankran = ni.utils.generaterandomname();
+	local Frame = CreateFrame("frame", blankran, frame);
 	Frame:SetSize(26, 26);
 	Frame:Show();
 	return Frame;
-end
+end;
 local function CreateEditBox(frame, t, settings, callback)
-	local EditBox = CreateFrame("EditBox", nil, frame);
+	local editran = ni.utils.generaterandomname();
+	local EditBox = CreateFrame("EditBox", editran, frame);
 	if t.width then
 		EditBox:SetSize(t.width, 14);
 	else
@@ -415,7 +420,8 @@ local function CreateInput(frame, t, settingsfile, callback)
 		f.items = { };
 	end
 	local id = #f.items + 1;
-	local TempFrame = CreateFrame("frame", nil, f);
+	local tempran = ni.utils.generaterandomname();
+	local TempFrame = CreateFrame("frame", tempran, f);
 	TempFrame:SetPoint("CENTER");
 	if t.height then
 		TempFrame:SetHeight(t.height + 2);
@@ -601,7 +607,8 @@ local function CreateInput(frame, t, settingsfile, callback)
 	end
 end
 local function CreateRadial(frame, t, k, settings, callback)
-	local CheckButton = CreateFrame("CheckButton", nil, frame, "OptionsBaseCheckButtonTemplate");
+	local checkran = ni.utils.generaterandomname();
+	local CheckButton = CreateFrame("CheckButton", checkran, frame, "OptionsBaseCheckButtonTemplate");
 	CheckButton:SetSize(0.1, 16);
 	CheckButton:SetChecked(t.menu[k].selected);
 	CheckButton:SetScript("OnEnter", GUI_OnEnter);
@@ -636,7 +643,8 @@ local function CreateRadial(frame, t, k, settings, callback)
 	return CheckButton;
 end
 local function CreateMenuFrame(frame, t, settings, callback)
-	local Frame = CreateFrame("frame", nil, frame);
+	local menran = ni.utils.generaterandomname();
+	local Frame = CreateFrame("frame", menran, frame);
 	Frame:SetBackdrop({
 		bgFile = "Interface/Buttons/WHITE8X8",
 		edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",
@@ -649,8 +657,9 @@ local function CreateMenuFrame(frame, t, settings, callback)
 	Frame.isshown = false;
 	local height = 0;
 	for k, v in ipairs(t.menu) do
+		local itran = ni.utils.generaterandomname();
 		local id = #Frame.items + 1;
-		local item = CreateFrame("frame", nil, Frame);
+		local item = CreateFrame("frame", itran, Frame);
 		item:SetHeight(16);
 		local text;
 		if v.text == nil then
@@ -698,7 +707,8 @@ local function CreateMenuFrame(frame, t, settings, callback)
 	return Frame;
 end
 local function CreateMenu(frame, t, settings, callback)
-	local DropDownMenu = CreateFrame("Button", nil, frame);
+	local dropran = ni.utils.generaterandomname();
+	local DropDownMenu = CreateFrame("Button", dropran, frame);
 	DropDownMenu:SetBackdrop({
 		bgFile = "Interface/Buttons/WHITE8X8",
 		edgeFile = "Interface/Buttons/WHITE8X8",
@@ -743,7 +753,8 @@ local function CreateEntry(frame, t, settingsfile, callback)
 		f.items = { };
 	end
 	local id = #f.items + 1;
-	local TempFrame = CreateFrame("frame", nil, f);
+	local entrran = ni.utils.generaterandomname();
+	local TempFrame = CreateFrame("frame", entrran, f);
 	TempFrame:SetHeight(22);
 	TempFrame:SetPoint("LEFT", 6, 0);
 	TempFrame:SetPoint("RIGHT", -6, 0);
@@ -832,8 +843,9 @@ local function CreateCenteredText(frame, t)
 	if not f.items then
 		f.items = { };
 	end
+	local cenran = ni.utils.generaterandomname();
 	local id = #f.items + 1;
-	local TempFrame = CreateFrame("frame", nil, f);
+	local TempFrame = CreateFrame("frame", cenran, f);
 	TempFrame:SetPoint("LEFT", 4, 0);
 	TempFrame:SetPoint("RIGHT", -4, 0);
 	local text = CreateText(TempFrame, t.text)
@@ -869,7 +881,8 @@ local function CreateCenteredText(frame, t)
 	end
 end
 local function NewFrame(frame)
-	frames[frame] = CreateFrame("frame", nil, GUI);
+	local newran = ni.utils.generaterandomname();
+	frames[frame] = CreateFrame("frame", newran, GUI);
 	frames[frame].name = frame;
 	frames[frame]:SetHeight(16);
 	frames[frame]:SetPoint("LEFT", 0, 0);
@@ -885,13 +898,15 @@ local function NewFrame(frame)
 	frames[frame]:Show();
 end
 local function CreatePage(frame, page, t)
-	local Frame = CreateFrame("frame", nil, frames[frame]);
+	local pagran = ni.utils.generaterandomname();
+	local Frame = CreateFrame("frame", pagran, frames[frame]);
 	Frame.page = page;
 	Frame.ispage = true;
 	Frame:SetHeight(16);
 	Frame:SetPoint("LEFT", 0, 0);
 	Frame:SetPoint("RIGHT", 0, 0);
-	local LeftButton = CreateFrame("Button", nil, Frame);
+	local lefran = ni.utils.generaterandomname();
+	local LeftButton = CreateFrame("Button", lefran, Frame);
 	LeftButton:RegisterForClicks("LeftButtonUp");
 	LeftButton:SetSize(24, 24);
 	LeftButton:SetPoint("TOPLEFT", 4, -1);
@@ -909,7 +924,8 @@ local function CreatePage(frame, page, t)
 		PopBack(GUI, ...);
 	end);
 	Frame.leftbutton = LeftButton;
-	local RightButton = CreateFrame("Button", nil, Frame);
+	local rigthran = ni.utils.generaterandomname();
+	local RightButton = CreateFrame("Button", ni.rigthran, Frame);
 	RightButton:RegisterForClicks("LeftButtonUp");
 	RightButton:SetSize(24, 24);
 	RightButton:SetPoint("TOPRIGHT", -4, -1);
@@ -968,7 +984,8 @@ local function CreateIconFormator(frame)
 		f.items = { };
 	end
 	local id = #f.items + 1;
-	local iconformator = CreateFrame("frame", nil, f);
+	local iconran = ni.utils.generaterandomname();
+	local iconformator = CreateFrame("frame", iconran, f);
 	iconformator:SetHeight(1);
 	iconformator:Show();
 	iconformator.texture = iconformator:CreateTexture();
@@ -998,7 +1015,8 @@ local function CreateSeparator(frame)
 		f.items = { };
 	end
 	local id = #f.items + 1;
-	local separator = CreateFrame("frame", nil, f);
+	local sepran = ni.utils.generaterandomname();
+	local separator = CreateFrame("frame", sepran, f);
 	separator:SetHeight(4);
 	separator:Show();
 	separator.texture = separator:CreateTexture();
@@ -1139,11 +1157,12 @@ GUI:SetFrameLevel(0);
 GUI:SetWidth(main_width);
 GUI:SetHeight(main_height);
 GUI:EnableMouse(true);
-GUI:SetBackdrop({bgFile = "Interface/DialogFrame/UI-DialogBox-Background",  
-				edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",
-				tile = true, tileSize = 16, edgeSize = 14, 
+GUI:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
+				edgeFile = "Interface/Buttons/WHITE8X8", 
+				tile = true, tileSize = 16, edgeSize = 4, 
 				insets = { left = 4, right = 4, top = 4, bottom = 4 }});
 GUI:SetBackdropColor(0,0,0,1);
+GUI:SetBackdropBorderColor(.3,.3,.3,.7)
 GUI:SetPoint("TOP", UIParent, "TOP", 0, main_y);
 GUI:SetScript("OnEnter", function(self, ...)
 	PopOut(self, ...);

@@ -1,3 +1,4 @@
+local pairs, string_format, error, string_char, table_concat, table_insert, type, tostring, select, tonumber = pairs, string.format, error, string.char, table.concat, table.insert, type, tostring, select, tonumber
 local json = { _version = "0.1.3" }
 
 -------------------------------------------------------------------------------
@@ -23,7 +24,7 @@ end
 
 
 local function escape_char(c)
-  return "\\" .. (escape_char_map[c] or string.format("u%04x", c:byte()))
+  return "\\" .. (escape_char_map[c] or string_format("u%04x", c:byte()))
 end
 
 
@@ -41,10 +42,10 @@ local function encode_table(val, stack)
 
   stack[val] = true
   -- Check whether to treat as a array or object
-  local array = true
-  local length = 0
-  local nLen = 0
-  for k,v in pairs(val) do
+	local array = true
+	local length = 0
+	local nLen = 0
+	for k,v in pairs(val) do
 		if (type(k) ~= "number" or k<=0) and not (k == "n" and type(v) == "number") then
 			array = nil
 			break	-- Treat as object
@@ -64,10 +65,10 @@ local function encode_table(val, stack)
 		end
     -- Encode
     for i = 1, length do
-      table.insert(res, encode(val[i], stack))
+      table_insert(res, encode(val[i], stack))
     end
     stack[val] = nil
-    return "[" .. table.concat(res, ",") .. "]"
+    return "[" .. table_concat(res, ",") .. "]"
 
   else
     -- Treat as an object
@@ -77,10 +78,10 @@ local function encode_table(val, stack)
         error("invalid table: mixed or invalid key types")
       end
 	  ]]
-      table.insert(res, encode(k, stack) .. ":" .. encode(v, stack))
+      table_insert(res, encode(k, stack) .. ":" .. encode(v, stack))
     end
     stack[val] = nil
-    return "{" .. table.concat(res, ",") .. "}"
+    return "{" .. table_concat(res, ",") .. "}"
   end
 end
 
@@ -169,7 +170,7 @@ local function decode_error(str, idx, msg)
       col_count = 1
     end
   end
-  error( string.format("%s at line %d col %d", msg, line_count, col_count) )
+  error( string_format("%s at line %d col %d", msg, line_count, col_count) )
 end
 
 
@@ -177,16 +178,16 @@ local function codepoint_to_utf8(n)
   -- http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=iws-appendixa
   local f = math.floor
   if n <= 0x7f then
-    return string.char(n)
+    return string_char(n)
   elseif n <= 0x7ff then
-    return string.char(f(n / 64) + 192, n % 64 + 128)
+    return string_char(f(n / 64) + 192, n % 64 + 128)
   elseif n <= 0xffff then
-    return string.char(f(n / 4096) + 224, f(n % 4096 / 64) + 128, n % 64 + 128)
+    return string_char(f(n / 4096) + 224, f(n % 4096 / 64) + 128, n % 64 + 128)
   elseif n <= 0x10ffff then
-    return string.char(f(n / 262144) + 240, f(n % 262144 / 4096) + 128,
+    return string_char(f(n / 262144) + 240, f(n % 262144 / 4096) + 128,
                        f(n % 4096 / 64) + 128, n % 64 + 128)
   end
-  error( string.format("invalid unicode codepoint '%x'", n) )
+  error( string_format("invalid unicode codepoint '%x'", n) )
 end
 
 
@@ -214,26 +215,26 @@ local function parse_string(str, i)
       decode_error(str, j, "control character in string")
 
     elseif x == 92 then -- `\`: Escape
-      table.insert(res, str:sub(k, j - 1))
+      table_insert(res, str:sub(k, j - 1))
       j = j + 1
       local c = str:sub(j, j)
       if c == "u" then
         local hex = str:match("^[dD][89aAbB]%x%x\\u%x%x%x%x", j + 1)
                  or str:match("^%x%x%x%x", j + 1)
                  or decode_error(str, j - 1, "invalid unicode escape in string")
-        table.insert(res, parse_unicode_escape(hex))
+        table_insert(res, parse_unicode_escape(hex))
         j = j + #hex
       else
         if not escape_chars[c] then
           decode_error(str, j - 1, "invalid escape char '" .. c .. "' in string")
         end
-        table.insert(res, escape_char_map_inv[c])
+        table_insert(res, escape_char_map_inv[c])
       end
       k = j + 1
 
     elseif x == 34 then -- `"`: End of string
-		table.insert(res, str:sub(k, j - 1))
-		return table.concat(res), j + 1
+		table_insert(res, str:sub(k, j - 1))
+		return table_concat(res), j + 1
     end
 
     j = j + 1
