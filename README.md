@@ -44,8 +44,8 @@ See the [Quick start](https://darhanger.github.io/ni-2/#/getting-started/quickst
 
 - **[DarhangeR](https://github.com/DarhangeR)**
 - **[Dimonsky](https://github.com/Dimonskynew)**
-- **[NuokHB](https://github.com/NuokHB/ni/tree/master/addon/Rotations)**
-- **[Brecherbernd](https://github.com/Brecherbernd/Doomsday)**
+- **[NuokHB](https://github.com/NuokHB)**
+- **[Brecherbernd](https://github.com/Brecherbernd)**
 
 ## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Hi.gif" width="30px"> Community 
 
