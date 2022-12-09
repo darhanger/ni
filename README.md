@@ -8,21 +8,17 @@
 [![Discord Server](https://img.shields.io/badge/Discord-7289DA?style=flat-squaree&logo=discord&logoColor=white)](https://discord.gg/xBFKJc6QRr)
 [![Last Release](https://img.shields.io/github/v/release/darhanger/ni-2?style=flat-square)](https://github.com/darhanger/ni-2)
 [![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni-2/total?style=flat-square)](https://github.com/darhanger/ni-2/releases)
-[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=E5ULM2VAQHE9N&source=url)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=WMPGGC32C7U7U)
 
-<img src="https://nhub.app/_media/GitHub Logo.png" alt="Logo of ni" width="256"/>
+<img src="https://github.com/darhanger/ni-2/blob/main/docs/_media/logo.png" alt="Logo of ni" width="256"/>
 
 Profile Framework for World of Warcraft and its older expansions.
 
 </div>
 
-##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Designer.gif" width="30px"> Оfficial NI
-
-**[Project page](https://github.com/official-nhub/ni).**
-
 ##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/PC.gif" width="30px"> How to?
 
-See the [Quick start](https://nhub.app/#/getting-started/quickstart) guide for more details.
+See the [Quick start](https://darhanger.github.io/ni-2/#/getting-started/quickstart) guide for more details.
 
 ##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/coin.gif" width="30px"> Features
 
