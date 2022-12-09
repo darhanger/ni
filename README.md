@@ -18,7 +18,7 @@ Profile Framework for World of Warcraft and its older expansions.
 
 ##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/PC.gif" width="30px"> How to?
 
-See the [Quick start](https://darhanger.github.io/ni-2/#/getting-started/quickstart) guide for more details.
+See the [Quick start](https://darhanger.github.io/ni-v2-/#/getting-started/quickstart) guide for more details.
 
 ##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/coin.gif" width="30px"> Features
 
