@@ -1,26 +1,27 @@
 <!-- markdownlint-disable MD004 MD033 -->
 <div align="center">
 
-# ni
+# ni (v2)
 
 ![Lua](https://img.shields.io/badge/Lua-2C2D72?style=flat-squaree&logo=lua&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=flat-squaree&logo=c%2B%2B&logoColor=white)
 [![Discord Server](https://img.shields.io/badge/Discord-7289DA?style=flat-squaree&logo=discord&logoColor=white)](https://discord.gg/xBFKJc6QRr)
-[![Last Release](https://img.shields.io/github/v/release/darhanger/ni-2?style=flat-square)](https://github.com/darhanger/ni-2)
-[![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni-2/total?style=flat-square)](https://github.com/darhanger/ni-2/releases)
+[![Last Release](https://img.shields.io/github/v/release/darhanger/ni-v2-?style=flat-square)](https://github.com/darhanger/ni-v2-)
+[![GitHub Last Download](https://img.shields.io/github/downloads/darhanger/ni-v2-/v0.0.56/total?style=flat-square)](https://github.com/darhanger/ni-v2-/releases)
+[![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni-v2-/total?style=flat-square)](https://github.com/darhanger/ni-v2-/releases)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=WMPGGC32C7U7U)
 
-<img src="https://github.com/darhanger/ni-2/blob/main/docs/_media/logo.png" alt="Logo of ni" width="256"/>
+<img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/logo.png" alt="Logo of ni" width="256"/>
 
 Profile Framework for World of Warcraft and its older expansions.
 
 </div>
 
-##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/PC.gif" width="30px"> How to?
+##  <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/PC.gif" width="30px"> How to?
 
 See the [Quick start](https://darhanger.github.io/ni-v2-/#/getting-started/quickstart) guide for more details.
 
-##  <img src="https://github.com/darhanger/darhanger/blob/master/Assets/coin.gif" width="30px"> Features
+##  <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/coin.gif" width="30px"> Features
 
 ⚡️ Wrapper for Protected Lua Functions<br>
 ⚡️ Anti Warden<br>
@@ -32,21 +33,17 @@ See the [Quick start](https://darhanger.github.io/ni-v2-/#/getting-started/quick
 ⚡️ Time to Die Calculations<br>
 ⚡️ Framework for Top Tier PvE/PvP Profiles<br>
 
-## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Designer.gif" width="30px"> Program Developer
+## <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/Designer.gif" width="30px"> Program Developer
 
 - **[Scott](https://github.com/scizzydo) or Scott#1180**
 
-## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Designer.gif" width="30px"> Lead Administrator
+## <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/Designer.gif" width="30px"> Lead Administrator
 
 - **[brajevicm](https://github.com/brajevicm)**
 
-## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Developer.gif" width="30px"> Contributers
+## <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/Developer.gif" width="30px"> Contributers
 
 - **[DarhangeR](https://github.com/DarhangeR)**
 - **[Dimonsky](https://github.com/Dimonskynew)**
 - **[NuokHB](https://github.com/NuokHB)**
 - **[Brecherbernd](https://github.com/Brecherbernd)**
-
-## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Hi.gif" width="30px"> Community 
-
-Users and the development team are usually in the [![Discord Server](https://img.shields.io/badge/Discord-7289DA?style=flat-squaree&logo=discord&logoColor=white)](https://discord.gg/xBFKJc6QRr)
