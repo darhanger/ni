@@ -11,17 +11,17 @@
 [![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni-v2-/total?style=flat-square)](https://github.com/darhanger/ni-v2-/releases)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=WMPGGC32C7U7U)
 
-<img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/logo.png" alt="Logo of ni" width="256"/>
+<img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/logo.png" alt="ni (v2)"/>
 
 Profile Framework for World of Warcraft and its older expansions.
 
 </div>
 
-##  <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/PC.gif" width="30px"> How to?
+##  🛠️ How to?
 
 See the [Quick start](https://darhanger.github.io/ni-v2-/#/getting-started/quickstart) guide for more details.
 
-##  <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/coin.gif" width="30px"> Features
+##  🪙 Features
 
 ⚡️ Wrapper for Protected Lua Functions<br>
 ⚡️ Anti Warden<br>
@@ -33,15 +33,15 @@ See the [Quick start](https://darhanger.github.io/ni-v2-/#/getting-started/quick
 ⚡️ Time to Die Calculations<br>
 ⚡️ Framework for Top Tier PvE/PvP Profiles<br>
 
-## <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/Designer.gif" width="30px"> Program Developer
+## 🖥️ Program Developer
 
 - **[Scott](https://github.com/scizzydo) or Scott#1180**
 
-## <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/Designer.gif" width="30px"> Lead Administrator
+## 🖥️ Lead Administrator
 
 - **[brajevicm](https://github.com/brajevicm)**
 
-## <img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/Developer.gif" width="30px"> Contributers
+## 	💻 Contributers
 
 - **[DarhangeR](https://github.com/DarhangeR)**
 - **[Dimonsky](https://github.com/Dimonskynew)**
