@@ -11,7 +11,7 @@
 [![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni-v2-/total?style=flat-square)](https://github.com/darhanger/ni-v2-/releases)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=WMPGGC32C7U7U)
 
-<img src="https://github.com/darhanger/ni-v2-/blob/main/docs/_media/logo.png" alt="ni (v2)">
+<img src="_media/logo.png" alt="ni (v2)">
 
 Profile Framework for World of Warcraft and its older expansions.
 
