@@ -36,14 +36,3 @@ See the [Quick start](https://darhanger.github.io/ni-v2-/#/getting-started/quick
 ## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Designer.gif" width="30px"> Program Developer
 
 - **[Scott](https://github.com/scizzydo) or Scott#1180**
-
-## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Designer.gif" width="30px"> Lead Administrator
-
-- **[brajevicm](https://github.com/brajevicm)**
-
-## <img src="https://github.com/darhanger/darhanger/blob/master/Assets/Developer.gif" width="30px"> Contributers
-
-- **[DarhangeR](https://github.com/DarhangeR)**
-- **[Dimonsky](https://github.com/Dimonskynew)**
-- **[NuokHB](https://github.com/NuokHB)**
-- **[Brecherbernd](https://github.com/Brecherbernd)**
