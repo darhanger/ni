@@ -452,9 +452,18 @@ local abilities = {
 		end
 	end,
 	["Cleanse"] = function()
-		if enables["Cleanse"] and ni.spell.available(spells.Cleanse.id) and ni.healing.candispel("player") then
-			ni.spell.cast(spells.Cleanse.name)
-			return true
+		if enables["Cleanse"] and ni.spell.available(spells.Cleanse.id) then
+			local i = 1
+			local debuff = UnitDebuff("player", i)
+			while debuff do
+				local debufftype = select(5, UnitDebuff("player", i))
+				if debufftype == "Curse" or debufftype == "Poison" then
+					ni.spell.cast(spells.Cleanse.name, "player")
+					return true
+				end
+			end
+			i = i + 1
+			debuff = UnitDebuff("player", i)
 		end
 	end
 }

@@ -6,6 +6,7 @@ local queue = {
 	"Tank Heal",
 	"CleanseSpirit",
 	"CalloftheTotems",
+	"HealingStreamTotem",
 	"Riptide",
 	"ChainHeal",
 	"HealingSurge",
@@ -13,6 +14,7 @@ local queue = {
 	"HealingWave",
 	"PauseCombat",
 	"FlametongueWeapon",
+	"SearingTotem",
 	"LavaBurst",
 	"FlameShock",
 	"EarthShock",
@@ -125,12 +127,9 @@ local enables = {
 	["FlameShock"] = false,
 	["EarthShock"] = false,
 	["SearingTotem"] = false,
+	["HealingStreamTotem"] = true,
 	["MultiTotem"] = true,
-	["CleanseSpirit"] = false,
-	["TotemicRecall"] = true,
-	["HealingSurge"] = true,
-	["HealingWave"] = true,
-	["GreaterHealingWave"] = true
+	["CleanseSpirit"] = false
 }
 local values = {
 	["RiptideTank"] = 92,
@@ -139,8 +138,7 @@ local values = {
 	["HealingSurgeHP"] = 70,
 	["HealingWaveHP"] = 86,
 	["ChainHealHP"] = 75,
-	["GreaterHealingWave"] = 60,
-	["TotemicRecall"] = 30
+	["GreaterHealingWave"] = 60
 }
 local inputs = {}
 local menus = {
@@ -209,21 +207,18 @@ local items = {
 		type = "entry",
 		text = "\124T" .. spells.HealingSurge.icon .. ":15:15\124t Healing Surge HP",
 		value = values["HealingSurgeHP"],
-		enabled = enables["HealingSurge"],
 		key = "HealingSurgeHP"
 	},
 	{
 		type = "entry",
 		text = "\124T" .. spells.HealingWave.icon .. ":15:15\124t Healing Wave HP",
 		value = values["HealingWaveHP"],
-		enabled = enables["HealingWave"],
 		key = "HealingWaveHP"
 	},
 	{
 		type = "entry",
 		text = "\124T" .. spells.GreaterHealingWave.icon .. ":15:15\124t Greater Healin gWave HP",
 		value = values["GreaterHealingWave"],
-		enabled = enables["GreaterHealingWave"],
 		key = "GreaterHealingWave"
 	},
 	{
@@ -271,10 +266,9 @@ local items = {
 	},
 	{
 		type = "entry",
-		text = "\124T" .. spells.TotemicRecall.icon .. ":15:15\124t " .. spells.TotemicRecall.name,
-		enabled = enables["TotemicRecall"],
-		value = values["TotemicRecall"],
-		key = "TotemicRecall"
+		text = "\124T" .. spells.HealingStreamTotem.icon .. ":15:15\124t " .. spells.HealingStreamTotem.name,
+		enabled = not enables["MultiTotem"] and enables["HealingStreamTotem"],
+		key = "HealingStreamTotem"
 	},
 	{type = "separator"},
 	{type = "title", text = "Dps"},
@@ -301,9 +295,15 @@ local items = {
 		text = "\124T" .. spells.EarthShock.icon .. ":15:15\124t Use Earth Shock",
 		enabled = enables["EarthShock"],
 		key = "EarthShock"
+	},
+	{
+		type = "entry",
+		text = "\124T" .. spells.SearingTotem.icon .. ":15:15\124t Use Searing Totem",
+		enabled = enables["SearingTotem"] and not enables["MultiTotem"],
+		key = "SearingTotem"
 	}
 }
-local t, p, f = "target", "player", "focus"
+
 local incombat = false
 local function CombatEventCatcher(event, ...)
 	if event == "PLAYER_REGEN_DISABLED" then
@@ -355,6 +355,7 @@ local function GetTableForBestUnit(health, distance, unitsclose, buff)
 end
 
 local lastSpell, lastUnit, lastTime
+local t, p, f = "target", "player", "focus"
 
 local function LosCast(spell, tar)
 	if ni.player.los(tar) and IsSpellInRange(spell, tar) == 1 then
@@ -407,14 +408,14 @@ local Totem = {
 	Air = 4
 }
 local function HasTotem(slot)
-	local _, _, startTime = GetTotemInfo(slot)
+	local _, _, startTime= GetTotemInfo(slot)
 	if startTime ~= 0 then
 		return true
 	end
 	return false
 end
 local function HasTotemName(slot, name)
-	local _, totemName, startTime = GetTotemInfo(slot)
+	local _, totemName, startTime= GetTotemInfo(slot)
 	if totemName ~= nil and totemName == name then
 		return true
 	end
@@ -554,8 +555,8 @@ local abilities = {
 				--HealingSurge offTank
 				if
 					enables["HealingSurgeTank"] and not Cache.moving and ni.unit.hp(offTank) <= values["HealingSurgeTank"] and
-						ValidUsable(spells.HealingSurge.id, offTank) and
-						LosCast(spells.HealingSurge.name, offTank)
+						ValidUsable(spells.HealingSurge.id, mainTank) and
+						LosCast(spells.HealingSurge.name, mainTank)
 				 then
 					return true
 				end
@@ -563,20 +564,27 @@ local abilities = {
 		end
 	end,
 	["Riptide"] = function()
-		if ni.spell.available(spells.Riptide.id) then
-			for i = 1, #Cache.members do
-				if
-					Cache.members[i].hp <= values["RiptideHP"] and not ni.unit.buff(Cache.members[i].unit, spells.Riptide.id, p) and
-						ValidUsable(spells.Riptide.id, Cache.members[i].unit) and
-						LosCast(spells.Riptide.name, Cache.members[i].unit)
-				 then
-					return true
-				end
+		for i = 1, #Cache.members do
+			if
+				Cache.members[i].hp <= values["RiptideHP"] and not ni.unit.buff(Cache.members[i].unit, spells.Riptide.id, p) and
+					ValidUsable(spells.Riptide.id, Cache.members[i].unit) and
+					LosCast(spells.Riptide.name, Cache.members[i].unit)
+			 then
+				return true
 			end
 		end
 	end,
+	["HealingStreamTotem"] = function()
+		if
+			not enables["MultiTotem"] and (not GetTotemInfo(Totem.Water) or TotemDistance(spells.HealingStreamTotem.name, p) > 20) and
+				ni.spell.available(spells.HealingStreamTotem.id) and
+				#Cache.members.inrangebelow(p, 40, 95) > 0
+		 then
+			ni.spell.cast(spells.HealingStreamTotem.name)
+		end
+	end,
 	["HealingSurge"] = function()
-		if enables["HealingSurge"] and not Cache.moving and ni.spell.available(spells.HealingSurge.id) then
+		if not Cache.moving then
 			for i = 1, #Cache.members do
 				if
 					Cache.members[i].hp <= values["HealingSurgeHP"] and ValidUsable(spells.HealingSurge.id, Cache.members[i].unit) and
@@ -588,7 +596,7 @@ local abilities = {
 		end
 	end,
 	["HealingWave"] = function()
-		if enables["HealingWave"] and not Cache.moving and ni.spell.available(spells.HealingWave.id) then
+		if not Cache.moving then
 			for i = 1, #Cache.members do
 				if
 					Cache.members[i].hp <= values["HealingWaveHP"] and ValidUsable(spells.HealingWave.id, Cache.members[i].unit) and
@@ -600,10 +608,11 @@ local abilities = {
 		end
 	end,
 	["GreaterHealingWave"] = function()
-		if enables["GreaterHealingWave"] and not Cache.moving and ni.spell.available(spells.GreaterHealingWave.id) then
+		if not Cache.moving then
 			for i = 1, #Cache.members do
 				if
-					ValidUsable(spells.GreaterHealingWave.id, Cache.members[i].unit) and
+					Cache.members[i].hp <= values["GreaterHealingWave"] and
+						ValidUsable(spells.GreaterHealingWave.id, Cache.members[i].unit) and
 						LosCast(spells.GreaterHealingWave.name, Cache.members[i].unit)
 				 then
 					return true
@@ -612,12 +621,14 @@ local abilities = {
 		end
 	end,
 	["ChainHeal"] = function()
-		if ni.spell.available(spells.ChainHeal.id) and not Cache.moving then
-			GetTableForBestUnit(values["ChainHealHP"], 12, 2)
+		if ni.spell.available(spells.ChainHeal) and not Cache.moving then
+			GetTableForBestUnit(values["ChainHealHP"], 10, 3)
 			if #customtable > 0 then
-				if customtable[1].unitsclose >= 2 and ValidUsable(spells.ChainHeal.id, customtable[1].unit) then
-					LosCast(spells.ChainHeal.name, customtable[1].unit)
-					return true
+				if customtable[1].unitsclose >= 3 and ValidUsable(spells.ChainHeal.id, customtable[1].unit) then
+					if customtable[1].hp <= values["ChainHealHP"] then
+						LosCast(spells.ChainHeal.name, customtable[1].unit)
+						return true
+					end
 				end
 			end
 		end
@@ -661,14 +672,21 @@ local abilities = {
 			return true
 		end
 	end,
+	["SearingTotem"] = function()
+		if
+			not enables["MultiTotem"] and enables["SearingTotem"] and ni.spell.available(spells.SearingTotem.id) and
+				(not HasTotemName(Totem.Fire, spells.SearingTotem.name) or TotemDistance(spells.SearingTotem.name, t) > 38) and
+				IsSpellInRange(spells.LightningBolt.name, t) == 1
+		 then
+			ni.spell.cast(spells.SearingTotem.name)
+		end
+	end,
 	["CalloftheTotems"] = function()
-		if enables["TotemicRecall"] then
-			if (AnyTotemDistance(p) > values["TotemicRecall"]) and ni.spell.available(spells.TotemicRecall.id) then
+		if enables["MultiTotem"] then
+			if (AnyTotemDistance(p) > 30) and ni.spell.available(spells.TotemicRecall.id) then
 				ni.spell.cast(spells.TotemicRecall.name)
 				return true
 			end
-		end
-		if enables["MultiTotem"] then
 			if not HasTotem(Totem.Water) and incombat then
 				if menus.Callofthe == Callofthe.Elements and ni.spell.available(spells.CalloftheElements.id) then
 					ni.spell.cast(spells.CalloftheElements.name)
@@ -687,14 +705,14 @@ local abilities = {
 	end,
 	["CleanseSpirit"] = function()
 		if enables["CleanseSpirit"] and ni.spell.available(spells.CleanseSpirit.id) then
-			local ImprovedCleanseSpirit = (select(5, GetTalentInfo(3, 12)) == 1)
+			local ImprovedCleanseSpirit = GetTalentInfo(3, 12)
 			for c = 1, #Cache.members do
 				local tar = Cache.members[c].unit
 				local i = 1
 				local debuff = UnitDebuff(tar, i)
 				while debuff do
 					local debufftype = select(5, UnitDebuff(tar, i))
-					if debufftype == "Curse" or (ImprovedCleanseSpirit and debufftype == "Magic") then
+					if debufftype == "Curse" or (ImprovedCleanseSpirit == 1 and debufftype == "Magic") then
 						if ValidUsable(spells.CleanseSpirit.id, tar) and LosCast(spells.CleanseSpirit.name, tar) then
 							return true
 						end
