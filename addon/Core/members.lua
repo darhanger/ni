@@ -32,9 +32,11 @@ membersmt.__call = function(_, ...)
 		end
 		for i = 1, groupSize do
 			local groupUnit = group .. i
-			local groupMember = memberssetup:create(groupUnit)
-			if groupMember then
-				tinsert(members, groupMember)
+			if UnitExists(groupunit) then
+				local groupMember = memberssetup:create(groupUnit)
+				if groupMember then
+					tinsert(members, groupMember)
+				end
 			end
 		end
 	else
@@ -97,14 +99,16 @@ function memberssetup:create(unit)
 		return ni.healing.candispel(o.unit)
 	end
 	function o:calculatehp()
-		local hp = ni.unit.hp(o.unit)
-		local hpraw = ni.unit.hpraw(o.unit)
+		local hp = ni.unit.hp(o.unit);
+
+		if hp == 100 then return hp end	  
+		if UnitIsDeadOrGhost(o.unit) == 1 or ni.unit.debuff(o.unit, 8326) then
+			hp = 100
+			return hp
+		end
 
 		if o.istank then
 			hp = hp - 5
-		end
-		if UnitIsDeadOrGhost(o.unit) == 1 or ni.unit.debuff(o.unit, 8326) then
-			hp = 250
 		end
 		if o.dispel then
 			hp = hp - 2
@@ -112,28 +116,36 @@ function memberssetup:create(unit)
 		for i = 1, #ni.tables.cantheal do
 			if ni.unit.debuff(o.unit, ni.tables.cantheal[i]) then
 				hp = 100
-				hpraw = UnitHealthMax(o.unit)
+				return hp
 			end
 		end
 		for i = 1, #ni.tables.notneedheal do
 			if ni.unit.buff(o.unit, ni.tables.notneedheal[i]) then
 				hp = 100
-				hpraw = UnitHealthMax(o.unit)
+				return hp
 			end
 		end
-		return hp, hpraw
+		return hp;
 	end
 	function o:inrange()
-		if ni.unit.exists(o.guid) and ni.player.los(o.guid) then
-			local dist = ni.player.distance(o.guid)
-			if (dist ~= nil and dist < 40) then
-				return true;
-			else
-				return false;
-			end
-		end
-		return false;
+		local dist = ni.player.distance(o.guid)
+		return (dist ~= nil and dist < 40) and true or false;
 	end
+	function o:los()
+		return ni.player.los(o.guid) == true;
+	end
+	function o:valid(spellid, facing, los)
+		if type(spellid) == "string" then
+			spellid = ni.spell.id(spellid)
+		end
+		if spellid > 0 and IsSpellInRange((GetSpellInfo(spellid)), o.guid) == 1 
+		and (not facing or o:facing())
+		and (not los or o:los())
+		and o:canhelp() then
+			return true
+		end
+		return false
+	end  	
 	function o:updatemember()
 		o.name = UnitName(o.unit)
 		o.class = select(2, UnitClass(o.unit))

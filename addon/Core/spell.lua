@@ -1,4 +1,4 @@
-local UnitClass, rawset, setmetatable, GetSpellCooldown, GetTime, math_random, UnitCastingInfo, tonumber, tinsert, IsSpellKnown, IsPlayerSpell, GetSpellInfo, select, GetNetStats, format, ni_getspellidfromactionbar, rawget, random, sqrt, cos, sin, pairs, tContains, tremove, tostring, UnitIsDeadOrGhost, UnitCanAttack, IsSpellInRange, GetShapeshiftForm, UnitChannelInfo = UnitClass, rawset, setmetatable, GetSpellCooldown, GetTime, math.random, UnitCastingInfo, tonumber, tinsert, IsSpellKnown, IsPlayerSpell, GetSpellInfo, select, GetNetStats, format, ni.getspellidfromactionbar, rawget, random, sqrt, cos, sin, pairs, tContains, tremove, tostring, UnitIsDeadOrGhost, UnitCanAttack, IsSpellInRange, GetShapeshiftForm, UnitChannelInfo
+local UnitClass, rawset, setmetatable, GetSpellCooldown, GetTime, random, UnitCastingInfo, tonumber, tinsert, IsSpellKnown, IsPlayerSpell, GetSpellInfo, select, GetNetStats, format, ni_getspellidfromactionbar, rawget, random, sqrt, cos, sin, pairs, tContains, tremove, tostring, UnitIsDeadOrGhost, UnitCanAttack, IsSpellInRange, GetShapeshiftForm, UnitChannelInfo = UnitClass, rawset, setmetatable, GetSpellCooldown, GetTime, random, UnitCastingInfo, tonumber, tinsert, IsSpellKnown, IsPlayerSpell, GetSpellInfo, select, GetNetStats, format, ni.getspellidfromactionbar, rawget, random, sqrt, cos, sin, pairs, tContains, tremove, tostring, UnitIsDeadOrGhost, UnitCanAttack, IsSpellInRange, GetShapeshiftForm, UnitChannelInfo
 
 local _, class = UnitClass("player");
 local casts = {};
@@ -332,7 +332,7 @@ spell.castinterrupt = function(t)
 	end
 end;
 spell.getpercent = function()
-	return math_random(20, 75)
+	return random(20, 75)
 end;
 spell.shouldinterrupt = function(t, p)
 	local InterruptPercent = p or spell.getpercent()

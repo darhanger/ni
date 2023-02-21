@@ -1,3 +1,4 @@
+local ipairs, random, pairs, tinsert, tremove, wipe, tonumber, tostring, rawset = ipairs, random, pairs, tinsert, tremove, wipe, tonumber, tostring, rawset 
 local GUIRan = ni.utils.generaterandomname();
 local GUI = CreateFrame("frame", GUIRan, UIParent);
 -----------------------------------------------
@@ -263,7 +264,7 @@ local function CreateText(frame, text)
 	local TextFrame = frame:CreateFontString(textran, "OVERLAY", "GameFontHighlight");
 	TextFrame:SetPoint("CENTER", 0, 0);
 	local pad = ""
-	for i = 1, math.random(1,255) do pad = pad .. "\124r" end
+	for i = 1, random(1,255) do pad = pad .. "\124r" end
 	TextFrame:SetText(pad .. text);
 	TextFrame:SetTextHeight(12);
 	TextFrame:SetJustifyH("CENTER");

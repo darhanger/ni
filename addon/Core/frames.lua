@@ -1,4 +1,4 @@
-local UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, CreateFrame, math_random, UIFrameFadeOut, print, v, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type = UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, CreateFrame, math.random, UIFrameFadeOut, print, v, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type
+local UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, CreateFrame, UIFrameFadeOut, print, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type = UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, CreateFrame, random, UIFrameFadeOut, print, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type
 ---DR Tracker
 local registeredevents = {
 	["SPELL_AURA_APPLIED"] = true,
@@ -107,7 +107,7 @@ frames.notification.texture:SetAllPoints()
 frames.notification.texture:SetTexture(0, 0, 0, .50)
 function frames.notification:message(message)
 	local pad = ""
-	for i = 1, math_random(1, 255) do pad = pad .. "\124r" end
+	for i = 1, random(1, 255) do pad = pad .. "\124r" end
 	self.text:SetText(pad .. message)
 	self:Show()
 end
@@ -164,7 +164,7 @@ frames.floatingtext.texture = frames.floatingtext:CreateTexture()
 frames.floatingtext.texture:SetAllPoints()
 function frames.floatingtext:message(message)
 	local pad = ""
-	for i = 1, math_random(1,255) do pad = pad .. "\124r" end
+	for i = 1, random(1,255) do pad = pad .. "\124r" end
 	if not ni.vars.stream then	
 		self.text:SetText(pad .. message)
 		UIFrameFadeOut(self, 2.5, 1, 0)
@@ -336,11 +336,12 @@ frames.OnUpdate = function(self, elapsed)
 		end
 
 		if ni.vars.units.followEnabled and ni.vars.units.follow ~= nil and ni.vars.units.follow ~= "" then
-			if ni.objectmanager.contains(ni.vars.units.follow) or UnitExists(ni.vars.units.follow) then
-				local unit = ni.vars.units.follow
-				local uGUID = ni.objectmanager.objectGUID(unit) or UnitGUID(unit)
-				local followTar = nil
-				local distance = nil
+			if UnitExists(ni.vars.units.follow) or ni.objectmanager.contains(ni.vars.units.follow) then
+				local unit = ni.vars.units.follow;
+				local uGUID = UnitGUID(unit) or ni.objectmanager.objectGUID(unit);
+				local mtime = ranvalue(1, 2);
+				local followTar = nil;
+				local distance = nil;
 
 				if UnitAffectingCombat(uGUID) then
 					local oTar = select(6, ni.unit.info(uGUID))
@@ -363,20 +364,16 @@ frames.OnUpdate = function(self, elapsed)
 						ni.player.target(followTar)
 					end
 				end
-
-				if not ni.player.isfacing(uGUID) then
-					ni.player.lookat(uGUID)
+				
+				if not UnitIsDeadOrGhost(uGUID) then
+					if not UnitCastingInfo("player") and not UnitChannelInfo("player") 
+					and distance ~= nil and distance > 1 and distance < 45
+					and GetTime() - lastclick > tonumber(format("%.1f", mtime)) then
+						ni.player.moveto(uGUID)
+						lastclick = GetTime()
+					end
 				end
-
-				if
-					not UnitCastingInfo("player") and not UnitChannelInfo("player") and distance ~= nil and distance > 1 and
-						distance < 50 and
-						GetTime() - lastclick > 1.5
-				 then
-					ni.player.moveto(uGUID)
-					lastclick = GetTime()
-				end
-
+					
 				if distance ~= nil and distance <= 1 and ni.player.ismoving() then
 					ni.player.stopmoving()
 				end

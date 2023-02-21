@@ -1,4 +1,4 @@
-local UnitIsDeadOrGhost, GetTime, math_floor, math_max, UnitHealth, UnitHealthMax = UnitIsDeadOrGhost, GetTime, math.floor, math.max, UnitHealth, UnitHealthMax
+local UnitIsDeadOrGhost, GetTime, floor, math_max, math_huge, UnitHealth, UnitHealthMax = UnitIsDeadOrGhost, GetTime, floor, math.max, math.huge, UnitHealth, UnitHealthMax
 local ttd = {
 	calculate = function(o)
 		if (o:unit() or o:player()) and o:canattack() and not UnitIsDeadOrGhost(o.guid) and o:combat() then
@@ -18,7 +18,7 @@ local ttd = {
 			else
 				death = 0
 			end
-			o.dps = math_floor(_dps)
+			o.dps = floor(_dps)
 
 			if death == math.huge then
 				o.ttd = -1

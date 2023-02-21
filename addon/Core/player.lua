@@ -1,4 +1,4 @@
-local GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable =GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable
+local GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable = GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable
 local CurrentMovingTime, CurrentStationaryTime, ResetMovementTime = 0, 0, 0.5;
 local player = {};
 player.moveto = function(...) --target/x,y,z
@@ -24,6 +24,15 @@ end;
 player.runtext = function(text)
 	ni.debug.print(format("Running: %s", text))
 	ni.functions.runtext(text)
+end;
+player.getskillinfo = function(prof)
+    for i = 1, GetNumSkillLines() do
+        local name, _, _, skillRank = GetSkillLineInfo(i)
+        if name == prof then
+            return skillRank
+        end
+    end
+    return 0
 end;
 player.useitem = function(...) --itemid/name[, target]
 	if #{...} > 1 then
@@ -80,6 +89,9 @@ player.slotcd = function(slotnum)
 		return start + duration - GetTime()
 	end
 	return 0
+end;
+player.slotusable = function(slotnum)
+	return player.slotcastable(slotnum) and player.slotcd(slotnum) == 0
 end;
 player.checkslots = function()
 	local freeslots = 0;

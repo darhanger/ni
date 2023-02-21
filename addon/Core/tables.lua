@@ -1,6 +1,8 @@
 local tables = {
 	blacklistedaoeunits = {},
-	blacklisteddispels = {},
+	blacklisteddispels = {
+	2819, 2824, 11355, 11356, 16427, 20184, 20185, 20186, 25351, 26967, 27186, GetSpellInfo(30129), 31803, 32859, 34616, 34856, 36814, 37132, 37930, 38136, 38141, 38142, 38143, 39042, 41486, GetSpellInfo(47843), GetSpellInfo(48160), 53742, 55360, GetSpellInfo(57970), 57973, 57972, 60667, 60814, 61429, 61840, 68055, 68786, 69674, 70337, 70405, 70867, 70964, 71224, 71889, 72908, 74562, 74567, 74792, 74795
+	},
 	bosses = {
 		-- Ragefire Chasm
 		[11517] = true, -- Oggleflint
@@ -991,6 +993,7 @@ local tables = {
 		[55593] = "Necrotic Aura"
 	},
 	notneedheal = {
+		[8326] = "Ghost",
 		[27827] = "Spirit of Redemption"
 	},
 	classes = {
@@ -1416,6 +1419,20 @@ local tables = {
 		}
 	},
 	whitelistedlosunits = {
+		[36897] = "Little Ooze",
+		[38138] = "Little Ooze",
+		[34797] = "Icehowl",
+		[35447] = "Icehowl",
+		[35448] = "Icehowl",
+		[35449] = "Icehowl",
+		[34799] = "Dreadscale",
+		[35514] = "Dreadscale",
+		[35515] = "Dreadscale",
+		[35516] = "Dreadscale",
+		[35144] = "Acidmaw",
+		[35511] = "Acidmaw",
+		[35512] = "Acidmaw",
+		[35513] = "Acidmaw",
 		[32934] = "Right Arm",
 		[32933] = "Left Arm",
 		[33329] = "Heart of the Deconstructor",

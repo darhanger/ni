@@ -1,4 +1,4 @@
-local math_pow, tonumber, UnitGUID, pairs, string_len, string_lower, string_sub, table_insert, table_wipe, type, UnitLevel, UnitThreatSituation, GetUnitSpeed, math_max, UnitExists, tostring, UnitIsDeadOrGhost, UnitCanAttack, UnitHealth, UnitHealthMax, UnitGetIncomingHeals, select, GetTime, tinsert, UnitReaction, UnitCastingInfo, UnitChannelInfo, UnitBuff, tContains, GetSpellInfo, strupper, strfind, UnitDebuff, UnitClass = math.pow, tonumber, UnitGUID, pairs, string.len, string.lower, string.sub, table.insert, table.wipe, type, UnitLevel, UnitThreatSituation, GetUnitSpeed, math.max, UnitExists, tostring, UnitIsDeadOrGhost, UnitCanAttack, UnitHealth, UnitHealthMax, UnitGetIncomingHeals, select, GetTime, tinsert, UnitReaction, UnitCastingInfo, UnitChannelInfo, UnitBuff, tContains, GetSpellInfo, strupper, strfind, UnitDebuff, UnitClass
+local math_max, tonumber, UnitGUID, pairs, type, tinsert, UnitLevel, UnitThreatSituation, GetUnitSpeed, UnitExists, tostring, strsub, UnitIsDeadOrGhost, UnitCanAttack, UnitHealth, UnitHealthMax, UnitGetIncomingHeals, select, GetTime, math_pow, wipe, UnitReaction, UnitCastingInfo, UnitChannelInfo, UnitBuff, strlower, tContains, GetSpellInfo, strupper, strfind, strlen, UnitDebuff, UnitClass = math.max, tonumber, UnitGUID, pairs, type, tinsert, UnitLevel, UnitThreatSituation, GetUnitSpeed, UnitExists, tostring, strsub, UnitIsDeadOrGhost, UnitCanAttack, UnitHealth, UnitHealthMax, UnitGetIncomingHeals, select, GetTime, math.pow, wipe, UnitReaction, UnitCastingInfo, UnitChannelInfo, UnitBuff, strlower, tContains, GetSpellInfo, strupper, strfind, strlen, UnitDebuff, UnitClass
 local creaturetypes = {
 	[0] = "Unknown",
 	[1] = "Beast",
@@ -17,13 +17,14 @@ local creaturetypes = {
 };
 
 local unitauras = { };
+local lastmovedCache = { };
 local BehindTime = 0;
 local los = ni.functions.los;
-
 local unit = {};
+
 unit.exists = function(t)
 	return ni.functions.objectexists(t)
-end
+end;
 unit.los = function(...) --target, target/x1,y1,z1,x2,y2,z2 [optional, hitflags]
 	local _, t = ...;
 	if tonumber(t) == nil then
@@ -35,10 +36,10 @@ unit.los = function(...) --target, target/x1,y1,z1,x2,y2,z2 [optional, hitflags]
 		end
 	end
 	return los(...)
-end
+end;
 unit.creator = function(t)
 	return unit.exists(t) and ni.functions.unitcreator(t) or nil
-end
+end;
 unit.creations = function(unit)
 	local creationstable = {}
 	if unit then
@@ -46,43 +47,39 @@ unit.creations = function(unit)
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
 				if v:creator() == guid then
-					table_insert(creationstable, {name = v.name, guid = v.guid})
+					tinsert(creationstable, {name = v.name, guid = v.guid})
 				end
 			end
 		end
 	end
 	return creationstable
-end
+end;
 unit.creaturetype = function(t)
 	return ni.functions.creaturetype(t) or 0
-end
+end;
 unit.istotem = function(t)
 	return (unit.exists(t) and unit.creaturetype(t) == 11) or false
-end
+end;
 unit.readablecreaturetype = function(t)
 	return creaturetypes[unit.creaturetype(t)]
-end
+end;
 unit.combatreach = function(t)
 	return ni.functions.combatreach(t) or 0
-end
+end;
 unit.isboss = function(t)
-	local bossId = unit.id(t)
-
+	local bossId = unit.id(t);
 	-- useful for non ?? level training dummies
 	if ni.tables.dummies[bossId] then
-		return true
+		return true;
 	end
-
 	if ni.tables.bosses[bossId] then
-		return true
+		return true;
 	end
-
 	if ni.tables.mismarkedbosses[bossId] then
-		return false
+		return false;
 	end
-
 	return UnitLevel(t) == -1
-end
+end;
 unit.threat = function(t, u)
 	local threat;
 	if u then
@@ -95,16 +92,41 @@ unit.threat = function(t, u)
 	else
 		return -1;
 	end
-end
+end;
 unit.ismoving = function(t)
-	return GetUnitSpeed(t) ~= 0
-end
+	return GetUnitSpeed(t) ~= 0;
+end;
+unit.movingtime = function(target)
+    target = (target == "player" or target:match("^0x")) and target or unit.guid(target)
+    if target == "player" or unit.exists(target) then
+        if lastmovedCache[target] then
+            local is_moving = GetUnitSpeed(target) > 0 or IsFalling(target)
+            if not lastmovedCache[target].is_moving and is_moving then
+                lastmovedCache[target].last = GetTime()
+                lastmovedCache[target].is_moving = true
+                return 0
+            elseif is_moving then
+                lastmovedCache[target].last = GetTime()
+                lastmovedCache[target].is_moving = true
+                return 0
+            elseif not is_moving then
+                lastmovedCache[target].is_moving = false
+                return GetTime() - lastmovedCache[target].last
+            end
+        else
+            lastmovedCache[target] = {}
+            lastmovedCache[target].last = GetTime()
+            lastmovedCache[target].is_moving = GetUnitSpeed(target) > 0 or IsFalling(target)
+            return 0;
+        end
+    end
+    return 0;
+end;
 unit.id = function(t)
 	if unit.exists(t) then
 		if not unit.isplayer(t) then
 			local bitfrom = -7
 			local bitto = -10
-
 			if ni.vars.build == 40300 then
 				bitfrom = -9
 				bitto = -12
@@ -112,7 +134,6 @@ unit.id = function(t)
 				bitfrom = 10
 				bitto = 6
 			end
-
 			if tonumber(t) then
 				return tonumber((t):sub(bitto, bitfrom), 16)
 			else
@@ -120,87 +141,78 @@ unit.id = function(t)
 			end
 		end
 	end
-end
+end;
 unit.shortguid = function(t)
 	if UnitExists(t) then
-		return string_sub(tostring(UnitGUID(t)), -5, -1);
+		return strsub(tostring(UnitGUID(t)), -5, -1);
 	end
 	return "";
-end
+end;
 unit.isdummy = function(t)
 	if unit.exists(t) then
 		t = unit.id(t)
 		return ni.tables.dummies[t]
 	end
-
-	return false
-end
+	return false;
+end;
 unit.ttd = function(t)
 	if unit.isdummy(t) then
-		return 999
+		return 999;
 	end
 	if unit.exists(t) and (not UnitIsDeadOrGhost(t) and UnitCanAttack("player", t) == 1) then
-		t = UnitGUID(t)
+		t = UnitGUID(t);
 	else
-		return -2
+		return -2;
 	end
-
 	if ni.objects[t] and ni.objects[t].ttd ~= nil then
 		return ni.objects[t].ttd
 	end
-
 	return -1
-end
-unit.hp = function(t)
-	if (unit.debuff(t, 30843) or unit.debuff(t, 55593)) then
-		return 100
-	end
-	if UnitIsDeadOrGhost(t) == 1 or unit.debuff(t, 8326) then
-		return 250
-	end
-	
-	return 100 * UnitHealth(t) / UnitHealthMax(t)
 end;
+unit.hp = function(t)
+    if (UnitIsDeadOrGhost(t) == 1 or unit.debuff(t, 8326)) then
+        return 100;
+    end
+    if unit.debuff(t, GetSpellInfo(30843)) or unit.debuff(t, GetSpellInfo(55593)) then
+        return 100;
+    end
+	return 100 * UnitHealth(t) / UnitHealthMax(t)
+end;	
 unit.hpraw = function(t)
-	return UnitHealthMax(t) - UnitHealth(t)
-end
+    return UnitHealth(t);
+end;
 unit.hppredicted = function(t)
-	if ni.vars.build >= 40300 then
-		return (100 * (UnitHealth(t) + UnitGetIncomingHeals(t)) / UnitHealthMax(t))
-	end
-
-	return unit.hpraw(t)
-end
+    local UnitGetIncomingHeals = ni.vars.build >= 40300 and UnitGetIncomingHeals
+    return (100 * (UnitHealth(t) + UnitGetIncomingHeals(t)) / UnitHealthMax(t));
+end;
 unit.power = function(t, type)
-	return ni.power.current(t, type)
-end
+	return ni.power.current(t, type);
+end;
 unit.powerraw = function(t, type)
-	return ni.power.currentraw(t, type)
-end
+	return ni.power.currentraw(t, type);
+end;
 unit.info = function(t)
 	if t == nil then
-		return
+		return;
 	end
 	local tmp = t
-
 	if tonumber(tmp) == nil then
 		t = UnitGUID(tmp)
 		if t == nil then
-			t = ni.objectmanager.objectGUID(tmp)
+			t = ni.objectmanager.objectGUID(tmp);
 		end
 	end
-
 	if unit.exists(t) then
-		return ni.functions.objectinfo(t)
+		return ni.functions.objectinfo(t);
 	end
-end
+end;
 unit.location = function(t)
 	if unit.exists(t) then
 		local x, y, z = unit.info(t)
-		return x, y, z
+		return x, y, z;
 	end
-	return 0, 0, 0
-end
+	return 0, 0, 0;
+end;
 unit.newz = function(...)
 	local nArgs = #{...};
 	if nArgs == 1 or nArgs == 2 then
@@ -213,7 +225,7 @@ unit.newz = function(...)
 		offset = offset or 20;
 		return select(4, los(x, y, z + offset, x, y, z - offset));			
 	end
-end
+end;
 unit.path = function(...)
 	local num = #{...};
 	local t1x, t1y, t1z;
@@ -241,144 +253,32 @@ unit.path = function(...)
 	if t1x and t1x ~= 0 and t2x and t2x ~= 0 then
 		return ni.functions.getpath(t1x, t1y, t1z, t2x, t2y, t2z, includes, excludes);
 	end
-end
-unit.isfacing = function(t1, t2, degrees)
-	return (t1 ~= nil and t2 ~= nil) and ni.functions.isfacing(t1, t2, degrees) or false
-end
-unit.notbehindtarget = function(seconds)
-	local seconds = seconds or 2
-	if BehindTime + seconds > GetTime() then
-		return true
-	else
-		return false
-	end
-end
-unit.isbehind = function(t1, t2, seconds)
-	if unit.notbehindtarget(seconds) then
-		return false;
-	end
-	return (t1 ~= nil and t2 ~= nil) and ni.functions.isbehind(t1, t2) or false
-end
-unit.distance = function(...)
-	if #{...} >= 2 then
-		return ni.functions.getdistance(...) or nil
-	end
-end
-unit.distancesqr = function(t1, t2)
-	local x1, y1, z1 = unit.location(t1)
-	local x2, y2, z2 = unit.location(t2)
-	return math_pow(x1 - x2, 2) + math_pow(y1 - y2, 2) + math_pow(z1 - z2, 2)
-end
-unit.meleerange = function(t1, t2)
-	local cr1 = unit.combatreach(t1)
-	local cr2 = unit.combatreach(t2)
-	return math_max(5.0, cr1 + cr2 + (4 / 3))
-end
-unit.inmelee = function(t1, t2)
-	local meleerange = unit.meleerange(t1, t2)
-	local distancesqr = unit.distancesqr(t1, t2)
-	if distancesqr then
-		return distancesqr < meleerange * meleerange
-	end
-	return false
-end
-unit.enemiesinrange = function(t, n)
-	local enemiestable = {}
-	t = true and UnitGUID(t) or t
-	if t then
-		for k, v in pairs(ni.objects) do
-			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) and unit.readablecreaturetype(k) ~= "Critter" then
-					local distance = v:distance(t)
-					if (distance ~= nil and distance <= n) then
-						tinsert(enemiestable, {guid = k, name = v.name, distance = distance})
-					end
-				end
-			end
-		end
-	end
-	return enemiestable
-end
-unit.friendsinrange = function(t, n)
-	local friendstable = {}
-	t = true and UnitGUID(t) or t
-	if t then
-		for k, v in pairs(ni.objects) do
-			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-				if k ~= t and v:canassist() and not UnitIsDeadOrGhost(k) then
-					local distance = v:distance(t)
-					if (distance ~= nil and distance <= n) then
-						tinsert(friendstable, {guid = k, name = v.name, distance = distance})
-					end
-				end
-			end
-		end
-	end
-	return friendstable
-end
-unit.unitstargeting = function(t, friendlies)
-	t = true and UnitGUID(t) or t
-	local f = true and friendlies or false
-	local targetingtable = {}
-
-	if t then
-		if not f then
-			for k, v in pairs(ni.objects) do
-				if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) <= 4 and not UnitIsDeadOrGhost(k) then
-						local target = v:target()
-						if target ~= nil and target == t then
-							table_insert(targetingtable, {name = v.name, guid = k})
-						end
-					end
-				end
-			end
-		else
-			for k, v in pairs(ni.objects) do
-				if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) > 4 then
-						local target = v:target()
-						if target ~= nil and target == t then
-							table_insert(targetingtable, {name = v.name, guid = k})
-						end
-					end
-				end
-			end
-		end
-	end
-	return targetingtable
-end
-unit.iscasting = function(t)
-	return UnitCastingInfo(t) and true or false
-end
-unit.ischanneling = function(t)
-	return UnitChannelInfo(t) and true or false
-end
+end;
 unit.castingpercent = function(t)
 	local castName, _, _, _, castStartTime, castEndTime = UnitCastingInfo(t)
 	if castName then
-		local timeSinceStart = (GetTime() * 1000 - castStartTime) / 1000
+		local timeSinceStart = GetTime() - castStartTime
 		local castTime = castEndTime - castStartTime
-		local currentPercent = timeSinceStart / castTime * 100000
+		local currentPercent = timeSinceStart / castTime * 100
 		return currentPercent
 	end
 	return 0
-end
+end;
 unit.channelpercent = function(t)
 	local channelName, _, _, _, channelStartTime, channelEndTime = UnitChannelInfo(t)
 	if channelName then
-		local timeSinceStart = (GetTime() * 1000 - channelStartTime) / 1000
+		local timeSinceStart = GetTime() - channelStartTime
 		local channelTime = channelEndTime - channelStartTime
-		local currentPercent = timeSinceStart / channelTime * 100000
+		local currentPercent = timeSinceStart / channelTime * 100
 		return currentPercent
 	end
 	return 0
-end
+end;
 unit.auras = function(t)
-	table_wipe(unitauras);
+	wipe(unitauras);
 	unitauras = ni.functions.auras(t) or { };
 	return unitauras;
-end
+end;
 unit.aura = function(t, s)
 	if tonumber(s) == nil then
 		unit.auras(t);
@@ -391,45 +291,10 @@ unit.aura = function(t, s)
 	else
 		return ni.functions.hasaura(t, s) or false
 	end
-end
-unit.bufftype = function(t, str)
-	if not unit.exists(t) then
-		return false
-	end
-
-	local st = ni.utils.splitstringtolower(str)
-	local has = false
-	local i = 1
-	local buff = UnitBuff(t, i)
-
-	while buff do
-		local bufftype = select(5, UnitBuff(t, i))
-
-		if bufftype ~= nil then
-			if bufftype == "" then
-				bufftype = "Enrage"
-			end
-
-			local dTlwr = string_lower(bufftype)
-			if tContains(st, dTlwr) then
-				has = true
-				break
-			end
-		end
-
-		i = i + 1
-		buff = UnitBuff(t, i)
-	end
-
-	return has
-end
+end;
+--- BUFFS ---
 unit.buff = function(t, id, filter)
-	local spellName;
-	if tonumber(id) ~= nil then
-		spellName = GetSpellInfo(id);
-	else
-		spellName = id
-	end
+	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
 	if filter == nil then
 		return UnitBuff(t, spellName);
 	else
@@ -438,9 +303,8 @@ unit.buff = function(t, id, filter)
 			for i = 1, 40 do
 				local _, _, _, _, _, _, _, buffCaster, _, _, buffSpellID = UnitBuff(t, i);
 				if buffSpellID ~= nil
-				 and buffSpellID == id
-				 and (not caster
-				 or buffCaster == "player") then
+				and buffSpellID == id
+				and (not caster or buffCaster == "player") then
 					return UnitBuff(t, i);
 				end
 			end
@@ -448,18 +312,17 @@ unit.buff = function(t, id, filter)
 			return UnitBuff(t, spellName, nil, filter)
 		end
 	end
-end
+end;
 unit.buffs = function(t, ids, filter)
 	local ands = ni.utils.findand(ids)
 	local results = false
-	if ands ~= nil or (ands == nil and string_len(ids) > 0) then
+	if ands ~= nil or (ands == nil and strlen(ids) > 0) then
 		local tmp
 		if ands then
 			tmp = ni.utils.splitstringbydelimiter(ids, "&&")
 			for i = 0, #tmp do
 				if tmp[i] ~= nil then
 					local id = tonumber(tmp[i])
-
 					if id ~= nil then
 						if not unit.buff(t, id, filter) then
 							results = false
@@ -499,41 +362,94 @@ unit.buffs = function(t, ids, filter)
 		end
 	end
 	return results
-end
-unit.debufftype = function(t, str)
+end;
+unit.bufftype = function(t, str)
 	if not unit.exists(t) then
-		return false
+		return false;
 	end
-
-	local st = ni.utils.splitstringtolower(str)
-	local has = false
-	local i = 1
-	local debuff = UnitDebuff(t, i)
-
-	while debuff do
-		local debufftype = select(5, UnitDebuff(t, i))
-
-		if debufftype ~= nil then
-			local dTlwr = string_lower(debufftype)
+	local st = ni.utils.splitstringtolower(str);
+	local has = false;
+	local i = 1;
+	local buff = UnitBuff(t, i);
+	while buff do
+		local bufftype = select(5, UnitBuff(t, i))
+		if bufftype ~= nil then
+			if bufftype == "" then
+				bufftype = "Enrage"
+			end
+			local dTlwr = strlower(bufftype)
 			if tContains(st, dTlwr) then
 				has = true
 				break
 			end
 		end
-
 		i = i + 1
-		debuff = UnitDebuff(t, i)
+		buff = UnitBuff(t, i)
 	end
-
-	return has
-end
-unit.debuff = function(t, id, filter)
-	local spellName;
-	if tonumber(id) ~= nil then
-		spellName = GetSpellInfo(id);
+	return has;
+end;
+unit.bufftypetimer = function(t, str)
+	if not unit.exists(t) then
+		return false;
+	end
+	local st = ni.utils.splitstringtolower(str);
+	local has = false;
+	local i = 1;
+	local buff = UnitBuff(t, i);
+	while buff do
+		local bufftype = select(5, UnitBuff(t, i))
+		if bufftype ~= nil then
+			if bufftype == "" then
+				bufftype = "Enrage"
+			end
+			local dTlwr = strlower(bufftype)
+			if tContains(st, dTlwr) then
+				has = true
+				local remaining = select(7, UnitBuff(t, i))
+				if remaining == 0 then
+					return "infinite";
+				else
+					return remaining;
+				end
+			end
+		end
+		i = i + 1
+		buff = UnitBuff(t, i)
+	end
+	return false;
+end;
+unit.buffstacks = function (target, spell, filter)
+	local stacks = select(4, unit.buff(target, spell, filter))
+	return stacks and stacks or 0
+end;
+unit.bufftimer = function(t, id, filter)
+	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
+	local _, _, _, _, _, duration, expirationTime = UnitBuff(t, spellName, filter)
+	if expirationTime then
+		return duration - (expirationTime - GetTime());
 	else
-		spellName = id
+		return 0;
 	end
+end;
+unit.buffremaining = function(target, spell, filter)
+	local expires = select(7, unit.buff(target, spell, filter))
+	if expires ~= nil then
+		return expires - GetTime() - ni.vars.combat.currentcastend
+	else
+		return 0
+	end
+end;
+unit.buffduration = function(target, spell, filter)
+	local name = select(1, unit.buff(target, spell, filter))
+	local duration = select(6, unit.buff(target, spell, filter))
+	if name then
+		return duration == 0 and 9999 or duration
+	end
+	return 0
+end;
+--- DEBUFFS ---
+unit.debuff = function(t, id, filter)
+	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
 	if filter == nil then
 		return UnitDebuff(t, spellName);
 	else
@@ -542,9 +458,8 @@ unit.debuff = function(t, id, filter)
 			for i = 1, 40 do
 				local _, _, _, _, _, _, _, debuffCaster, _, _, debuffSpellID = UnitDebuff(t, i);
 				if debuffSpellID ~= nil
-				 and debuffSpellID == id
-				 and (not caster
-				 or debuffCaster == "player") then
+				and debuffSpellID == id
+				and (not caster or debuffCaster == "player") then
 					return UnitDebuff(t, i);
 				end
 			end
@@ -552,15 +467,14 @@ unit.debuff = function(t, id, filter)
 			return UnitDebuff(t, spellName, nil, filter);
 		end
 	end
-end
+end;
 unit.debuffs = function(t, spellIDs, filter)
 	local ands = ni.utils.findand(spellIDs)
 	local results = false
-	if ands ~= nil or (ands == nil and string_len(spellIDs) > 0) then
+	if ands ~= nil or (ands == nil and strlen(spellIDs) > 0) then
 		local tmp
 		if ands then
 			tmp = ni.utils.splitstringbydelimiter(spellIDs, "&&")
-
 			for i = 0, #tmp do
 				if tmp[i] ~= nil then
 					local id = tonumber(tmp[i])
@@ -599,40 +513,231 @@ unit.debuffs = function(t, spellIDs, filter)
 			end
 		end
 	end
-	return results
-end
-unit.buffstacks = function (target, spell, filter)
-	local stacks = select(4, unit.buff(target, spell, filter))
-	if stacks ~= nil then
-		return stacks
-	else
-		return 0
+	return results;
+end;
+unit.debufftype = function(t, str)
+	if not unit.exists(t) then
+		return false;
 	end
-end
+	local st = ni.utils.splitstringtolower(str)
+	local has = false
+	local i = 1
+	local debuff = UnitDebuff(t, i)
+	while debuff do
+		local debufftype = select(5, UnitDebuff(t, i));	
+		if debufftype ~= nil then
+			local dTlwr = strlower(debufftype)
+			if tContains(st, dTlwr) then
+				has = true
+				break
+			end
+		end
+		i = i + 1
+		debuff = UnitDebuff(t, i)	
+	end
+	return has;
+end;
+unit.debufftypetimer = function(t, str)
+	if not unit.exists(t) then
+		return false;
+	end
+	local st = ni.utils.splitstringtolower(str);
+	local i = 1;
+	local debuff = UnitDebuff(t, i);
+	while debuff do
+		local debufftype = select(5, UnitDebuff(t, i));
+		if debufftype ~= nil then
+			local dTlwr = strlower(debufftype)
+			if tContains(st, dTlwr) then
+				local duration, expires = select(6, UnitDebuff(t, i)), select(7, UnitDebuff(t, i));
+				if expires then
+					return (expires - GetTime()), duration;
+				end
+				break
+			end
+		end
+		i = i + 1
+		debuff = UnitDebuff(t, i)
+	end
+	return false;
+end;
 unit.debuffstacks = function (target, spell, filter)
 	local stacks = select(4, unit.debuff(target, spell, filter))
-	if stacks ~= nil then
-		return stacks
+	return stacks and stacks or 0
+end;
+unit.debufftimer = function(t, id, filter)
+	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
+	local _, _, _, _, _, duration, expirationTime = UnitDebuff(t, spellName, filter)
+	if expirationTime then
+		return duration - (expirationTime - GetTime());
 	else
-		return 0
+		return 0;
 	end
-end
+end;
 unit.debuffremaining = function(target, spell, filter)
 	local expires = select(7, unit.debuff(target, spell, filter))
 	if expires ~= nil then
-		return expires - GetTime() - ni.vars.combat.currentcastend
+		return expires - GetTime() - ni.vars.combat.currentcastend;
 	else
-		return 0
+		return 0;
 	end
-end
-unit.buffremaining = function(target, spell, filter)
-	local expires = select(7, unit.buff(target, spell, filter))
-	if expires ~= nil then
-		return expires - GetTime() - ni.vars.combat.currentcastend
+end;
+unit.debuffduration = function(target, spell, filter)
+	local name = select(1, unit.debuff(target, spell, filter))
+	local duration = select(6, unit.debuff(target, spell, filter))
+	if name then
+		return duration == 0 and 9999 or duration
+	end
+	return 0
+end;
+unit.isfacing = function(t1, t2, degrees)
+	return (t1 ~= nil and t2 ~= nil) and ni.functions.isfacing(t1, t2, degrees) or false
+end;
+unit.notbehindtarget = function(seconds)
+	local seconds = seconds or 2
+	if BehindTime + seconds > GetTime() then
+		return true
 	else
-		return 0
+		return false
 	end
-end
+end;
+unit.isbehind = function(t1, t2, seconds)
+	if unit.notbehindtarget(seconds) then
+		return false;
+	end
+	return (t1 ~= nil and t2 ~= nil) and ni.functions.isbehind(t1, t2) or false
+end;
+unit.distance = function(...)
+	if #{...} >= 2 then
+		return ni.functions.getdistance(...) or nil
+	end
+end;
+unit.distancesqr = function(t1, t2)
+	local x1, y1, z1 = unit.location(t1)
+	local x2, y2, z2 = unit.location(t2)
+	return math_pow(x1 - x2, 2) + math_pow(y1 - y2, 2) + math_pow(z1 - z2, 2)
+end;
+unit.meleerange = function(t1, t2)
+	local cr1 = unit.combatreach(t1)
+	local cr2 = unit.combatreach(t2)
+	return math_max(5.0, cr1 + cr2 + (4 / 3))
+end;
+unit.inmelee = function(t1, t2)
+	local meleerange = unit.meleerange(t1, t2)
+	local distancesqr = unit.distancesqr(t1, t2)
+	if distancesqr then
+		return distancesqr < meleerange * meleerange
+	end
+	return false
+end;
+unit.enemiesinrange = function(t, n)
+	local enemiestable = {}
+	t = true and UnitGUID(t) or t
+	if t then
+		for k, v in pairs(ni.objects) do
+			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
+				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) and unit.readablecreaturetype(k) ~= "Critter" and unit.readablecreaturetype(k) ~= "NotSpecified" then
+					local distance = v:distance(t)
+					if (distance ~= nil and distance <= n) then
+						tinsert(enemiestable, {guid = k, name = v.name, distance = distance})
+					end
+				end
+			end
+		end
+	end
+	return enemiestable
+end;
+unit.enemiesinrangewithbufftype = function(t, n, str)
+	local enemiestablebufftype = {}
+	t = true and UnitGUID(t) or t
+	if t then
+		for k, v in pairs(ni.objects) do
+			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
+				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) 
+				and unit.bufftype(k, str) and unit.readablecreaturetype(k) ~= "Critter" 
+				and unit.readablecreaturetype(k) ~= "Totem" 
+				and unit.readablecreaturetype(k) ~= "NotSpecified" then
+					local distance = v:distance(t)
+					if (distance ~= nil and distance <= n) then
+						tinsert(enemiestablebufftype, {guid = k, name = v.name, distance = distance})
+					end
+				end
+			end
+		end
+	end
+	return enemiestablebufftype
+end;
+unit.friendsinrange = function(t, n)
+	local friendstable = {}
+	t = true and UnitGUID(t) or t
+	if t then
+		for k, v in pairs(ni.objects) do
+			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
+				if k ~= t and v:canassist() and not UnitIsDeadOrGhost(k) then
+					local distance = v:distance(t)
+					if (distance ~= nil and distance <= n) then
+						tinsert(friendstable, {guid = k, name = v.name, distance = distance})
+					end
+				end
+			end
+		end
+	end
+	return friendstable
+end;
+unit.unitstargeting = function(t, friendlies)
+	t = true and UnitGUID(t) or t
+	local f = true and friendlies or false
+	local targetingtable = {}
+
+	if t then
+		if not f then
+			for k, v in pairs(ni.objects) do
+				if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
+					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) <= 4 and not UnitIsDeadOrGhost(k) then
+						local target = v:target()
+						if target ~= nil and target == t then
+							tinsert(targetingtable, {name = v.name, guid = k})
+						end
+					end
+				end
+			end
+		else
+			for k, v in pairs(ni.objects) do
+				if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
+					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) > 4 then
+						local target = v:target()
+						if target ~= nil and target == t then
+							tinsert(targetingtable, {name = v.name, guid = k})
+						end
+					end
+				end
+			end
+		end
+	end
+	return targetingtable
+end;
+unit.iscasting = function(t)
+	return UnitCastingInfo(t) and true or false;
+end;
+unit.ischanneling = function(t)
+	return UnitChannelInfo(t) and true or false;
+end;
+unit.target = function(t)
+    if unit.exists(t) then
+        return select(6, unit.info(t));
+    end
+end;
+unit.incombatwithme = function(t)
+    local enemyTarget = unit.target(t)
+    if enemyTarget then
+        for i = 1, #ni.members do
+            local ally = ni.members[i].guid;
+            if enemyTarget == ally then
+                return true;
+            end
+        end
+    end
+end;
 unit.flags = function(t)
 	return ni.functions.unitflags(t)
 end;
@@ -719,19 +824,17 @@ unit.facing = function(t)
 end;
 unit.hasheal = function(t)
 	if UnitExists(t) then
-		local _, class = UnitClass(t)
-
+		local _, class = UnitClass(t);
 		if class == "PALADIN" then
-			return true
+			return true;
 		elseif class == "PRIEST" then
-			return true
+			return true;
 		elseif class == "DRUID" then
-			return true
+			return true;
 		elseif class == "SHAMAN" then
-			return true
+			return true;
 		end
-
-		return false
+		return false;
 	end
 end;
 local function UnitEvents(event, ...)

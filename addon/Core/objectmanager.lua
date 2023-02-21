@@ -1,4 +1,4 @@
-local GetLocale, UnitName, pairs, type, tonumber, UnitGUID, setmetatable, UnitCanAttack, UnitCanAssist, UnitAffectingCombat, select, GetTime, math_random = GetLocale, UnitName, pairs, type, tonumber, UnitGUID, setmetatable, UnitCanAttack, UnitCanAssist, UnitAffectingCombat, select, GetTime, math.random
+local GetLocale, UnitName, pairs, type, tonumber, UnitGUID, setmetatable, UnitCanAttack, UnitCanAssist, UnitAffectingCombat, select, GetTime, random = GetLocale, UnitName, pairs, type, tonumber, UnitGUID, setmetatable, UnitCanAttack, UnitCanAssist, UnitAffectingCombat, select, GetTime, random
 local locale = GetLocale();
 local unknown = locale == "ruRU" and "Неизвестно" or "Unknown"
 
@@ -186,7 +186,7 @@ end;
 function objects:updateobjects()
 	for k, v in pairs(objects) do
 		if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-			if v.lastupdate == nil or GetTime() >= (v.lastupdate + (math_random(1, 12) / 100)) then
+			if v.lastupdate == nil or GetTime() >= (v.lastupdate + (random(1, 12) / 100)) then
 				v.lastupdate = GetTime()
 				if not v:exists() then
 					objectsetup.cache[k] = nil
