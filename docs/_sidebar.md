@@ -4,13 +4,6 @@
   - [How to contribute](getting-started/how-to-contribute.md)
   - [FAQ](getting-started/faq.md)
 
-- Profiles
-
-  - [Wrath of the Lich King](profiles/wotlk.md)
-  - [Cataclysm](profiles/cataclysm.md)
-  - [Mists of Pandaria](profiles/mop.md)
-  - [Generic](profiles/generic.md)
-
 - Api
 
   - [Spell](api/spell.md)
