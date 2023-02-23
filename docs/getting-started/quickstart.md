@@ -38,44 +38,44 @@ addon
 ```lua
 local queue = {
 	"Print Hello"
-}
+};
 
 local abilities = {
 	["Print Hello"] = function()
-		ni.debug.log("Hello")
+		print("Hello")
 	end
-}
+};
 
-ni.bootstrap.rotation("Warlock_Example", queue, abilities)
+ni.bootstrap.profile("Warlock_Example", queue, abilities)
 ```
 
-!> Make sure that the name of file matches the name passed to `ni.bootstrap.rotation`
+!> Make sure that the name of file matches the name passed to `ni.bootstrap.profile`
 
-This is all that **ni** needs to run a profile. Presss `F12` and see if the word `Hello` is being printed to the console.
+This is all that **ni** needs to run a profile. Presss `F1` and see if the word `Hello` is being printed to the console.
 
 #### 4. In case we would like to have a dynamic queue, multiple queues which can change in real time, we can also pass a `function`.
 
 ```lua
-local ishelloprinted = false
+local ishelloprinted = false;
 
 local queue = {
 	"Print Hello"
-}
+};
 
 local queue2 = {
 	"Print Hello World"
-}
+};
 
 local abilities = {
 	["Print Hello"] = function()
 		ishelloprinted = true
-		ni.debug.log("Hello")
+		print("Hello")
 	end,
 	["Print Hello World"] = function()
 		ishelloprinted = false
-		ni.debug.log("Hello World")
+		print("Hello World")
 	end
-}
+};
 
 local dynamicqueue = function()
 	if ishelloprinted then
@@ -83,14 +83,13 @@ local dynamicqueue = function()
 	end
 
 	return queue2
-end
+end;
 
-ni.bootstrap.rotation("Warlock_Example", dynamicqueue, abilities)
+ni.bootstrap.profile("Warlock_Example", dynamicqueue, abilities)
 ```
+!> This example work only if you make profile without `Data` files.
 
 !> It's possible to only use one way to set the priority queue (either static or dynamic).
-
-!> The following method for loading data files is deprecated and should be avoided. Please look at the newer method [here](https://github.com/darhanger/ni/blob/main/addon/Rotations/Generic/GUIExample.lua#L1)
 
 #### 5. In case we have some common functions or variables that we would like to share among multiple profiles - we can do it by creating Lua files in `Data` folder. Lets create `Data_Example.lua`.
 
@@ -110,43 +109,47 @@ addon
 #### 6. Passing variables and functions between Data and Profile files can be done in two ways:
 
 - by declaring and assigning globals (not recommended)
-- by using `ni.data` and having a new unique namespace (`table`)
+- by using `data` and having a new unique namespace (`table`)
 
 Lets use the second way and add the following to `Rotations/Data/Data_Example.lua`.
 
 ```lua
-ni.data.example = {
- ishelloprinted = false
-}
-```
+local data = {};
 
-!> The following method for loading the data file or GUI is deprecated and should be avoided. Please look at the examples [here](https://github.com/darhanger/ni/blob/main/addon/Rotations/Generic/GUIExample.lua)
+data.example = function()
+	return select(2, UnitClass("player"));
+end;
+
+return data;
+```
 
 #### 7. Loading Data files can be done by creating a table which contains strings of file names and passing that table as 4th argument to `ni.bootstrap.rotation`.
 
 ```lua
-local data = {
-	"Data_Example.lua"
-}
+local data = ni.utils.require("Data_Example");
 
 local queue = {
 	"Print Hello"
-}
+};
 
 local queue2 = {
 	"Print Hello World"
-}
+};
 
 local abilities = {
 	["Print Hello"] = function()
-		ni.data.example.ishelloprinted = true
-		ni.debug.log("Hello")
+		if data.example() == "WARLOCK" then
+			print("Hello")
+			return true;
+		end
 	end,
 	["Print Hello World"] = function()
-		ni.data.example.ishelloprinted = false
-		ni.debug.log("Hello World")
+		if data.example() ~= "WARLOCK" then
+			print("Hello World")
+			return true;
+		end
 	end
-}
+};
 
 local dynamicqueue = function()
 	if ni.data.example.ishelloprinted then
@@ -154,7 +157,10 @@ local dynamicqueue = function()
 	end
 
 	return queue2
-end
+end;
 
 ni.bootstrap.rotation("Warlock_Example", dynamicqueue, abilities, data)
 ```
+
+#### 8. Creating profile GUI:
+Please look at the examples [here](https://github.com/darhanger/ni/blob/main/addon/Rotations/Generic/GUIExample.lua)
