@@ -102,7 +102,7 @@ player.checkslots = function()
 	end
 	return freeslots
 end;
-player.getitemicon = function(itemid, width, height)
+player.itemicon = function(itemid, width, height)
     return "\124T"..(GetItemIcon(itemid) or select(3, GetSpellInfo(24720)))..":"..(height or 25)..":"..(width or 25).."\124t"	
 end;	
 player.itemcd = function(item)
