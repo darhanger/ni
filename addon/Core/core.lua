@@ -109,6 +109,7 @@ if not ni.loaded then
 	end;
 	local dir = ni.functions.getbasefolder();
 	local json = require(dir.."addon\\core\\json.lua");
+	ni.C_Timer = require(dir.."addon\\core\\c_timer.lua"); -- MoRBiDuS
 	local vars = ni.functions.loadcontent(dir.."addon\\settings\\"..UnitName("player")..".json");
 	ni.vars = vars and json.decode(vars) or require(dir.."addon\\core\\vars.lua");
 	ni.vars.profiles.enabled = false;

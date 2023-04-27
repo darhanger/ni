@@ -1,358 +1,410 @@
-local setmetatable, IsInRaid, GetNumGroupMembers, tinsert, GetNumRaidMembers, GetNumPartyMembers, type, UnitClass, select, UnitGroupRolesAssigned, UnitIsDeadOrGhost, UnitHealthMax, UnitName, UnitGUID, tostring, sort, wipe, ipairs, UnitIsUnit, tremove = setmetatable, IsInRaid, GetNumGroupMembers, tinsert, GetNumRaidMembers, GetNumPartyMembers, type, UnitClass, select, UnitGroupRolesAssigned, UnitIsDeadOrGhost, UnitHealthMax, UnitName, UnitGUID, tostring, sort, wipe, ipairs, UnitIsUnit, tremove
+local setmetatable, type, select, sort, wipe, ipairs, tremove = setmetatable, type, select, sort, wipe, ipairs, tremove
+local UnitGroupRolesAssigned, UnitIsGhost, UnitHealthMax, UnitName, UnitGUID, UnitIsUnit = UnitGroupRolesAssigned, UnitIsGhost, UnitHealthMax, UnitName, UnitGUID, UnitIsUnit
+local IsInRaid, GetNumRaidMembers, GetNumPartyMembers, GetNumGroupMembers, UnitClass, UnitCanAssist = IsInRaid, GetNumRaidMembers, GetNumPartyMembers, GetNumGroupMembers, UnitClass, UnitCanAssist
+local UnitAffectingCombat, UnitHealth, UnitHealthMax = UnitAffectingCombat, UnitHealth, UnitHealthMax
+
 local members = {};
-local memberssetup = {}
-memberssetup.cache = {}
-memberssetup.__index = {
-	unit = "noob",
-	name = "noob",
-	class = "noob",
-	guid = 0,
-	shortguid = 0,
-	role = "NOOB",
-	range = false,
-	dispel = false,
-	hp = 100,
-	threat = 0,
-	target = "noobtarget",
-	istank = false
-}
-memberssetup.cache.__index = {
-	guid = 0,
-	name = "Unknown",
-	type = 0
-}
-local membersmt = {}
-setmetatable(members, membersmt)
-membersmt.__call = function(_, ...)
-	if ni.vars.build == 50400 then
-		local group = IsInRaid() and "raid" or "party"
-		local groupSize = IsInRaid() and GetNumGroupMembers() or GetNumGroupMembers() - 1
-		if group == "party" then
-			tinsert(members, memberssetup:create("player"))
+local memberssetup = { cache = { _cache = {} } };
+local _cache = memberssetup.cache._cache
+setmetatable(members, {
+	__call = function(_, ...)
+		local pGuid = UnitGUID("player");
+		members[#members + 1] = memberssetup:create("player", pGuid)
+		local groupType, nRaidMembers, nPartyMembers
+		if ni.vars.build == 50400 then
+			nRaidMembers = GetNumGroupMembers()
+			nPartyMembers = nRaidMembers - 1
+			groupType = IsInRaid() and "raid" or "party"
+		else
+			nRaidMembers = GetNumRaidMembers()
+			nPartyMembers = GetNumPartyMembers()
+			groupType = nRaidMembers > 0 and "raid" or "party"
 		end
-		for i = 1, groupSize do
-			local groupUnit = group .. i
-			if UnitExists(groupunit) then
-				local groupMember = memberssetup:create(groupUnit)
-				if groupMember then
-					tinsert(members, groupMember)
+		local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
+		for i = 1, groupsize do
+			local unit = groupType .. i
+			local guid = UnitGUID(unit)
+			if guid and guid ~= pGuid then
+				local o = memberssetup:create(unit, guid)
+				if o then
+					members[#members+1] = o;
 				end
 			end
 		end
-	else
-		local group = GetNumRaidMembers() > 0 and "raid" or "party"
-		local groupsize = group == "raid" and GetNumRaidMembers() or GetNumPartyMembers()
-		if group == "party" then
-			tinsert(members, memberssetup:create("player"))
+	end,
+	__index = { name = "members", author = "MoRBiDuS", version = "1.0.5a" };
+});
+
+local dontCache = {
+	["updatemember"]	= true,
+	["updatemembers"]	= true,
+	["reset"]			= true,
+	["addcustom"]		= true,
+	["removecustom"]	= true
+};
+local function addCache(t)
+	for n,v in pairs(t) do
+		if type(v) == "function" and not dontCache[n] then
+			t[n] = memberssetup.Do(t[n], _cache)
 		end
-		for i = 1, groupsize do
-			local groupunit = group .. i
-			local groupmember = memberssetup:create(groupunit)
-			if groupmember then
-				tinsert(members, groupmember)
+	end
+end;
+local function take(c, args)
+	local n = c
+	for _,a in ipairs(args) do
+		n = n[a]
+		if not n then return end
+	end
+	return n.res;
+end;
+local function give(c, args, res)
+	local n, param = c
+	for _,a in ipairs(args) do
+		n[a] = n[a] or {}
+		n = n[a]
+	end
+	n.res = res;
+end;
+function memberssetup.Clean(c)
+	for k,a in pairs(c) do
+		if type(a) == "table" then
+			if k == "res" then
+				c.res = nil
+			else
+				memberssetup.Clean(a)
 			end
 		end
 	end
-end
-membersmt.__index = {
-	name = "members",
-	author = "bubba"
-}
-
-function memberssetup:create(unit)
-	if memberssetup.cache[ni.unit.shortguid(unit)] then
-		return false
+end;
+function memberssetup.Do(f, c)
+	return function (...)
+		c[f] = c[f] or {}
+		local args = {...}
+		local res = take(c[f], args)
+		if not res then
+			res = { f(...) }
+			give(c[f], args, res)
+		end
+		return unpack(res);
 	end
+end;
+setmetatable(memberssetup, { __call = function(_, ...) return Do(...) end });
+
+function memberssetup:create(unit, guid)
+	if memberssetup.cache[unit] then return end
 	local o = {}
 	setmetatable(o, memberssetup)
-	if unit and type(unit) == "string" then
-		o.unit = unit
-	end
-	function o:calculateistank()
-		local oclass = select(2, UnitClass(o.unit));
-		if oclass == "WARRIOR" and ni.unit.aura(o.guid, 71) then
-			return true;
-		elseif oclass == "DRUID" and (ni.unit.buff(o.unit, 9634, "EXACT") or ni.unit.buff(o.unit, 5487, "EXACT"))	then
-			return true;
-		elseif oclass == "PALADIN" and (ni.unit.buff(o.unit, 25780) and ni.power.currentraw(o.unit, 0) < 14000) then
-			return true;
-		elseif ni.unit.aura(o.guid, 57340) then
-			return true;
-		elseif UnitGroupRolesAssigned(o.guid) == "TANK" then
-			return true;
+	
+	function o:istank()
+		return (o.class == "WARRIOR" and o:aura(71))
+		or (o.class == "DRUID" and o:auras("9634||5487"))
+		or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
+		or (o.class == "DEATHKNIGHT" and o:aura(48263))
+		or (o:aura(57339) or o:aura(57340))
+		or (o:role() == "TANK")
+		or false
+	end;
+	function o:location()
+		local x, y, z, r = ni.functions.objectinfo(o.guid);
+		if x then
+			return x, y, z, r;
 		end
-		return false
+		return 0, 0, 0, 0;
+	end;
+	function o:distanceto(o2)
+		local x1, y1, z1 = o:location()
+		local x2, y2, z2
+		if type(o2) == "string" then
+			x2, y2, z2 = ni.functions.objectinfo(o2)
+		else
+			x2, y2, z2 = o2:location()
+		end
+		if x1 and x2 then
+			return (x1 - x2)^2 + (y1 - y2)^2 + (z1 - z2)^2
+		end
+		return 999;
+	end;
+	function o:combat()
+		return UnitAffectingCombat(o.unit) == 1;
 	end
+	function o:aura(aura)
+		return ni.unit.aura(o.unit, aura);
+	end;	
+	function o:auras(auras)
+		return ni.unit.auras(o.unit, auras);
+	end;	
+	function o:buffs(buffs, filter)
+		return ni.unit.buffs(o.unit, buffs, filter);
+	end;
+	function o:debuffs(debuffs, filter)
+		return ni.unit.debuffs(o.unit, debuffs, filter);
+	end;
 	function o:debufftype(str)
-		return ni.unit.debufftype(o.guid, str)
-	end
+		return ni.unit.debufftype(o.unit, str);
+	end;
 	function o:bufftype(str)
-		return ni.unit.bufftype(o.guid, str)
-	end
+		return ni.unit.bufftype(o.unit, str);
+	end;
 	function o:buff(buff, filter)
-		return ni.unit.buff(o.guid, buff, filter)
-	end
+		return ni.unit.buff(o.unit, buff, filter) or false;
+	end;
 	function o:debuff(debuff, filter)
-		return ni.unit.debuff(o.guid, debuff, filter)
-	end
-	function o:candispel()
-		return ni.healing.candispel(o.unit)
-	end
-	function o:calculatehp()
-		local hp = ni.unit.hp(o.unit);
-
-		if hp == 100 then return hp end	  
-		if UnitIsDeadOrGhost(o.unit) == 1 or ni.unit.debuff(o.unit, 8326) then
-			hp = 100
-			return hp
-		end
-
-		if o.istank then
-			hp = hp - 5
-		end
-		if o.dispel then
-			hp = hp - 2
-		end
-		for i = 1, #ni.tables.cantheal do
-			if ni.unit.debuff(o.unit, ni.tables.cantheal[i]) then
-				hp = 100
-				return hp
-			end
-		end
-		for i = 1, #ni.tables.notneedheal do
-			if ni.unit.buff(o.unit, ni.tables.notneedheal[i]) then
-				hp = 100
-				return hp
-			end
-		end
+		return ni.unit.debuff(o.unit, debuff, filter) or false;
+	end;
+	function o:dispel()
+		return ni.healing.candispel(o.unit) or false;
+	end;
+	function o:hpraw()
+		return UnitHealth(o.unit);
+	end;		
+	function o:hpmax()
+		return UnitHealthMax(o.unit);
+	end;
+	function o:hp()
+		local hp = ni.unit.hppredicted(o.unit) or o:hpraw()/o:hpmax() * 100
+		local val = random(16, 24);
+		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
+			return 100;
+		end	
+		for _,id in ipairs(ni.tables.cantheal) do
+			if o:debuff(id) then return 100	end
+		end;
+		for _,id in ipairs(ni.tables.notneedheal) do
+			if o:buff(id) then return 100 end
+		end;
+		hp = o:istank() and (hp - 5) or hp;
+		hp = o:dispel() and (hp - 2) or hp;
 		return hp;
-	end
-	function o:inrange()
-		local dist = ni.player.distance(o.guid)
-		return (dist ~= nil and dist < 40) and true or false;
-	end
+	end;
+	function o:range()
+		local dist = ni.player.distance(o.unit) or 999;
+		return dist < 40 or false;
+	end;
 	function o:los()
-		return ni.player.los(o.guid) == true;
-	end
-	function o:valid(spellid, facing, los)
-		if type(spellid) == "string" then
-			spellid = ni.spell.id(spellid)
-		end
-		if spellid > 0 and IsSpellInRange((GetSpellInfo(spellid)), o.guid) == 1 
+		return ni.player.los(o.unit) == true;
+	end;
+	function o:facing()
+		return ni.player.facing(o.unit) == true;
+	end;
+	function o:valid(spell, facing, los)
+		local spellid = tonumber(spell)
+		spellid = spellid or ni.spell.id(spell)
+		return (spellid > 0
+		and IsSpellInRange(GetSpellInfo(spellid), o.unit) == 1
 		and (not facing or o:facing())
-		and (not los or o:los())
-		and o:canhelp() then
-			return true
-		end
-		return false
-	end  	
+		and (not los or o:los()))
+		or false
+	end;
+	function o:threat()
+		return ni.unit.threat(o.unit) or false;
+	end;
+	function o:role()
+		return UnitGroupRolesAssigned(o.unit) or "";
+	end;
 	function o:updatemember()
-		o.name = UnitName(o.unit)
-		o.class = select(2, UnitClass(o.unit))
-		o.guid = UnitGUID(o.unit)
-		o.shortguid = ni.unit.shortguid(o.unit)
-		o.range = o:inrange()
-		o.dispel = o:candispel()
-		o.hp = o:calculatehp()
-		o.threat = ni.unit.threat(o.unit)
-		o.target = tostring(o.unit) .. "target"
-		o.istank = o:calculateistank()
-		memberssetup.cache[ni.unit.shortguid(o.unit)] = o
-	end
-	memberssetup.cache[ni.unit.shortguid(o.unit)] = o
-	return o
-end
-local membersrange = { };
-local membersbelow = { };
-local memberswithbuff = { };
-local memberswithbuffbelow = { };
-local memberswithoutbuff = { };
-local memberswithoutbuffbelow = { };
-local memberswithdebuff = { };
-local memberswithdebuffbelow = { };
-local memberswithoutdebuff = { };
-local memberswithoutdebuffbelow = { };
+		o.name = o.name or UnitName(o.unit);
+		o.class = o.class or select(2, UnitClass(o.unit));
+		memberssetup.cache[o.unit] = true;
+	end;
+
+	-- Attributes
+	o.unit		= unit
+	o.guid		= guid
+	o.name		= UnitName(unit)
+	o.class		= select(2, UnitClass(unit))
+	o.target	= unit .. "target"
+	
+	memberssetup.cache[unit] = true
+	addCache(o)
+	return o;
+end;
 
 memberssetup.set = function()
-	function members:updatemembers()
-		for i = 1, #members do
-			members[i]:updatemember()
+	function members.updatemembers()
+		memberssetup.Clean(_cache)
+		for _,o in ipairs(members) do
+			o:updatemember()
 		end
-
-		sort(
-			members,
-			function(x, y)
-				if x.range and y.range then
-					return x.hp < y.hp
-				elseif x.range then
-					return true
-				elseif y.range then
-					return false
-				else
-					return x.hp < y.hp
-				end
-			end
-		)
-	end
+	end;
 	function members.reset()
 		wipe(members)
 		wipe(memberssetup.cache)
 		memberssetup.set()
-	end
+	end;
+	function members.sort()
+		if #members > 1 then
+			sort(members, function(a,b) return a:range() and not b:range() or a:range() == b:range() and a:hp() < b:hp() end)
+		end
+		return members;
+	end;
 	function members.below(percent)
 		local total = 0;
-		for i = 1, #members do
-			if members[i].hp < percent then
+		for _,o in ipairs(members) do
+			if o:hp() < percent then
 				total = total + 1;
 			end
 		end
 		return total;
-	end
-	function members.average()
-		local count = #members;
+	end;
+	function members.average(unit, distance)
+		unit = unit or "player"
+		distance = distance or 40
 		local average = 0;
-		for i = 1, count do
-			average = average + members[i].hp;
+		for _,o in ipairs(members.inrange(unit, distance)) do
+			average = average + o:hp()
 		end
-		return average/count;
-	end
-	function members.averageof(count)
-		local m = count;
-		local average = 0;
-		if #members < m then
-			for i = m, 0, -1 do
-				if #members >= i then
-					m = i;
-					break;
-				end
-			end
+		return average / #members;
+	end;
+	function members.averageof(count, unit, distance)
+		if not count or count <= 0 then return 0 end
+		unit = unit or "player"
+		distance = distance or 40		
+		local n, average = 0, 0
+		for i, o in ipairs(members.inrange(unit, distance)) do
+			average = average + o:hp()
+			if i >= count then n = i break end	
 		end
-		for i = 1, m do
-			average = average + members[i].hp;
-		end
-		return average/m;
-	end
+		return n > 0 and average/n or 0;
+	end;
 	function members.inrange(unit, distance)
-		wipe(membersrange);
-		for _, v in ipairs(members) do
-			if not UnitIsUnit(v.unit, unit) then
-				local unitdistance = ni.unit.distance(v.unit, unit);
-				if unitdistance ~= nil and unitdistance <= distance then
-					tinsert(membersrange, v);
-				end
+		local tmp = {};
+		if type(unit) ~= "string" then return tmp end
+		for _,o in ipairs(members) do
+			local unitdistance = o:distanceto(unit)
+			if unitdistance <= distance then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return membersrange;
-	end
+		return tmp;
+	end;
 	function members.inrangebelow(unit, distance, hp)
-		wipe(membersbelow);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if v.hp < hp then
-				tinsert(membersbelow, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrange(unit, distance)) do
+			local aux = o:hp()
+			if aux < hp then
+				local idx = #tmp + 1
+				tmp[idx] = o;
+				tmp[idx].aux = aux;
 			end
 		end
-		return membersbelow;
-	end
+		if #tmp > 1 then
+			sort(tmp, function(a,b) return a.aux < b.aux end)
+		end
+		return tmp;
+	end;
 	function members.inrangewithbuff(unit, distance, buff, filter)
-		wipe(memberswithbuff);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if v:buff(buff, filter) then
-				tinsert(memberswithbuff, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrange(unit, distance)) do
+			if o:buff(buff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithbuff;
-	end
-	function members.inrangewithbuffbelow(unit, distance, buff, hp, filter)
-		wipe(memberswithbuffbelow);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if v:buff(buff, filter) 
-			 and v.hp < hp then
-				tinsert(memberswithbuffbelow, v);
-			end
-		end
-		return memberswithbuffbelow;
-	end
+		return tmp;
+	end;
+	function members.inrangewithdebufftype(unit, distance, str)
+        local tmp = {};
+        for _,o in ipairs(members.inrange(unit, distance)) do
+            if o:debufftype(str) then
+                tmp[#tmp + 1] = o;
+            end
+        end
+        return tmp;
+    end;
+	function members.inrangewithbufftype(unit, distance, str)
+        local tmp = {};
+        for _,o in ipairs(members.inrange(unit, distance)) do
+            if o:bufftype(str) then
+                tmp[#tmp + 1] = o;
+            end
+        end
+        return tmp;
+    end;
 	function members.inrangewithoutbuff(unit, distance, buff, filter)
-		wipe(memberswithoutbuff);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if not v:buff(buff, filter) then
-				tinsert(memberswithoutbuff, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrange(unit, distance)) do
+			if not o:buff(buff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithoutbuff
-	end
+		return tmp;
+	end;
+	function members.inrangewithbuffbelow(unit, distance, buff, hp, filter)
+		local tmp = {};
+		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
+			if o:buff(buff, filter) then
+				tmp[#tmp + 1] = o;
+			end
+		end
+		return tmp;
+	end;
 	function members.inrangewithoutbuffbelow(unit, distance, buff, hp, filter)
-		wipe(memberswithoutbuffbelow);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if not v:buff(buff, filter) 
-			 and v.hp < hp then
-				tinsert(memberswithoutbuffbelow, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
+			if not o:buff(buff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithoutbuffbelow
-	end
+		return tmp;
+	end;
 	function members.inrangewithdebuff(unit, distance, debuff, filter)
-		wipe(memberswithdebuff);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if v:debuff(debuff, filter) then
-				tinsert(memberswithdebuff, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrange(unit, distance)) do
+			if o:debuff(debuff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithdebuff;
-	end
+		return tmp;
+	end;
 	function members.inrangewithdebuffbelow(unit, distance, debuff, hp, filter)
-		wipe(memberswithdebuffbelow);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if v:debuff(debuff, filter) 
-			 and v.hp < hp then
-				tinsert(memberswithdebuffbelow, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
+			if o:debuff(debuff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithdebuffbelow;
-	end
+		return tmp;
+	end;
 	function members.inrangewithoutdebuff(unit, distance, debuff, filter)
-		wipe(memberswithoutdebuff);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if not v:debuff(debuff, filter) then
-				tinsert(memberswithoutdebuff, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrange(unit, distance)) do
+			if not o:debuff(debuff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithoutdebuff
-	end
+		return tmp;
+	end;
 	function members.inrangewithoutdebuffbelow(unit, distance, debuff, hp, filter)
-		wipe(memberswithoutdebuffbelow);
-		members.inrange(unit, distance);
-		for _, v in ipairs(membersrange) do
-			if not v:debuff(debuff, filter) 
-			 and v.hp < hp then
-				tinsert(memberswithoutdebuffbelow, v);
+		local tmp = {};
+		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
+			if not o:debuff(debuff, filter) then
+				tmp[#tmp + 1] = o;
 			end
 		end
-		return memberswithoutdebuffbelow
-	end
-	function members.addcustom(unit)
-		local groupMember = memberssetup:create(unit);
-		if groupMember then
-			tinsert(members, groupMember);
+		return tmp;
+	end;
+	function members.addcustom(unit, guid)
+		if type(unit) == "string" then
+			local groupMember = memberssetup:create(unit, guid or UnitGUID(unit));
+			if groupMember then
+				members[#members + 1] = groupMember;
+				members:updatemembers()
+			end
 		end
-	end
+	end;
 	function members.removecustom(unit)
-		for k, v in ipairs(members) do
-			if v.unit == unit then
-				memberssetup.cache[ni.unit.shortguid(unit)] = nil;
-				tremove(members, k);
+		if type(unit) == "string" then
+			for i,o in ipairs(members) do
+				if o.unit == unit then
+					memberssetup.cache[o.unit] = nil;
+					tremove(members, o)
+					members:updatemembers()
+				end
 			end
 		end
 	end
 	members()
-end
+end;
 memberssetup.set()
-return members;
+addCache(members)
+
+return members, memberssetup.cache;

@@ -23,7 +23,7 @@ local los = ni.functions.los;
 local unit = {};
 
 unit.exists = function(t)
-	return ni.functions.objectexists(t)
+    return UnitExists(t) or (ni.functions.objectexists(t) or false);
 end;
 unit.los = function(...) --target, target/x1,y1,z1,x2,y2,z2 [optional, hitflags]
 	local _, t = ...;
@@ -257,40 +257,56 @@ end;
 unit.castingpercent = function(t)
 	local castName, _, _, _, castStartTime, castEndTime = UnitCastingInfo(t)
 	if castName then
-		local timeSinceStart = GetTime() - castStartTime
+		local timeSinceStart = (GetTime() * 1000 - castStartTime) / 1000
 		local castTime = castEndTime - castStartTime
-		local currentPercent = timeSinceStart / castTime * 100
+		local currentPercent = timeSinceStart / castTime * 100000
 		return currentPercent
 	end
 	return 0
-end;
+end
 unit.channelpercent = function(t)
 	local channelName, _, _, _, channelStartTime, channelEndTime = UnitChannelInfo(t)
 	if channelName then
-		local timeSinceStart = GetTime() - channelStartTime
+		local timeSinceStart = (GetTime() * 1000 - channelStartTime) / 1000
 		local channelTime = channelEndTime - channelStartTime
-		local currentPercent = timeSinceStart / channelTime * 100
+		local currentPercent = timeSinceStart / channelTime * 100000
 		return currentPercent
 	end
 	return 0
-end;
-unit.auras = function(t)
-	wipe(unitauras);
-	unitauras = ni.functions.auras(t) or { };
-	return unitauras;
+end
+local function buildAurasTable(t)
+    wipe(unitauras);
+    unitauras = ni.functions.auras(t) or { };
+    return unitauras;
 end;
 unit.aura = function(t, s)
-	if tonumber(s) == nil then
-		unit.auras(t);
-		for k, v in pairs(unitauras) do
-			if v.name == s then
-				return true;
-			end
-		end
-		return false;
-	else
-		return ni.functions.hasaura(t, s) or false
-	end
+    if tonumber(s) == nil then
+        buildAurasTable(t);
+        for k, v in pairs(unitauras) do
+            if v.name == s then
+                return true;
+            end
+        end
+        return false;
+    else
+        return ni.functions.hasaura(t, s) or false
+    end
+end;
+unit.auras = function(target, str)
+    str = tostring(str)
+    local OP = str:match("&&") or "||"
+    local array, counter, id = ni.utils.splitstringbydelimiter(str, OP), 0
+    buildAurasTable(target)
+    for _, tbl in pairs(unitauras) do
+        for _, aura in ipairs(array) do
+            id = tonumber(aura)
+            counter = (id and tbl.ID == id or tbl.name == aura) and counter + 1 or counter
+        end
+    end
+    if OP == "&&" then
+        return counter > 0 and counter == #array
+    end
+    return counter > 0
 end;
 --- BUFFS ---
 unit.buff = function(t, id, filter)
@@ -608,9 +624,10 @@ unit.isbehind = function(t1, t2, seconds)
 	return (t1 ~= nil and t2 ~= nil) and ni.functions.isbehind(t1, t2) or false
 end;
 unit.distance = function(...)
-	if #{...} >= 2 then
-		return ni.functions.getdistance(...) or nil
-	end
+    if #{...} >= 2 then
+        return ni.functions.getdistance(...) or 9999
+    end
+    return 9999
 end;
 unit.distancesqr = function(t1, t2)
 	local x1, y1, z1 = unit.location(t1)
