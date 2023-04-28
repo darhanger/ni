@@ -571,7 +571,8 @@ function bitwise.clearbit(x, p)
 end;
 --Resource tracking menu
 CreateText(resourcesettings, Localization.Resource, 0, -8, 0.2, 0.7, 1, 1);
-local currentresources = 0;
+local currentresources = ni.vars.currentresources or 0;
+ni.functions.setresourcetracking(currentresources);
 local boxes = {
 	resource_none,
 	resource_all,
@@ -610,6 +611,7 @@ local function update_boxes(c_bit)
 		end
 	end
 	ni.functions.setresourcetracking(c_bit);
+	ni.vars.currentresources = c_bit;
 end;
 local function checkbox_clicked(self)
 	if self:GetChecked() then
@@ -697,7 +699,8 @@ local cboxes = {
 	gascloud,
 	all
 };
-local currentcreatures = 0;
+local currentcreatures = ni.vars.currentcreatures or 0;
+ni.functions.setcreaturetracking(currentcreatures);
 local function update_cboxes(c_bit)
 	for k, v in pairs(cboxes) do
 		if c_bit == -1 and v.value ~= 0 then
@@ -711,6 +714,7 @@ local function update_cboxes(c_bit)
 		end
 	end
 	ni.functions.setcreaturetracking(c_bit);
+	ni.vars.currentcreatures = c_bit;
 end;
 local function checkbox_clickedc(self)
 	if self:GetChecked() then

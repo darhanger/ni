@@ -88,15 +88,22 @@ MarkOfTheWild = GetSpellInfo(48469),
 GiftOfTheWild = GetSpellInfo(48470),
 TreeOfLife = GetSpellInfo(33891),
 Thorns = GetSpellInfo(53307),
+Innervate = GetSpellInfo(29166),
 Barkskin = GetSpellInfo(22812),
+Lifebloom = GetSpellInfo(48451),
 Rejuvenation = GetSpellInfo(48441),
+Regrowth = GetSpellInfo(48443),
 Nourish = GetSpellInfo(50464),
 WildGrowth = GetSpellInfo(53251),
+Tranquility = GetSpellInfo(48447),
 HealingTouch = GetSpellInfo(48378),
 NatureSwiftness = GetSpellInfo(17116),
 Swiftmend = GetSpellInfo(18562),
 RemoveCurse = GetSpellInfo(2782),
 AbolishPoison = GetSpellInfo(2893),
+Cyclone = GetSpellInfo(33786),
+	-- Proc --
+Clearcasting = GetSpellInfo(16870),
 };
 local cache = {
 IsMoving = false,
@@ -122,7 +129,7 @@ local queue = {
 local abilities = {
 -----------------------------------
 	["Cache"] = function()
-		if GetTime() - AntiAFKTime > 100 then
+		if GetTime() - AntiAFKTime > 80 then
 			ni.utils.resetlasthardwareaction();
 			AntiAFKTime = GetTime();
 		end
@@ -144,59 +151,63 @@ local abilities = {
 -----------------------------------
 	["Gift of the Wild"] = function()
 		local _, enabled = GetSetting("AutoBuff");
-		if enabled then
-			if cache.PlayerCombat
-			or ni.player.buff(spells.MarkOfTheWild)
-			or ni.player.buff(spells.GiftOfTheWild) then 
-				return false;
-			end
-			if UsableSilence(spells.GiftOfTheWild) then
-				ni.spell.cast(spells.GiftOfTheWild, "player")	
-				return true;
-			end
-			if UsableSilence(spells.MarkOfTheWild)
-			and not UsableSilence(spells.GiftOfTheWild) then
-				ni.spell.cast(spells.MarkOfTheWild, "player")
-				return true;
-			end
+		if not enabled then
+			return false;
+		end
+		if cache.PlayerCombat
+		or ni.player.buff(spells.MarkOfTheWild)
+		or ni.player.buff(spells.GiftOfTheWild) then 
+			return false;
+		end
+		if UsableSilence(spells.GiftOfTheWild) then
+			ni.spell.cast(spells.GiftOfTheWild, "player")	
+			return true;
+		end
+		if UsableSilence(spells.MarkOfTheWild)
+		and not UsableSilence(spells.GiftOfTheWild) then
+			ni.spell.cast(spells.MarkOfTheWild, "player")
+			return true;
 		end
 	end,
 -----------------------------------
 	["Thorns"] = function()
 		local _, enabled = GetSetting("AutoBuff");
-		if enabled then
-			if cache.PlayerCombat then
-				return false;
-			end
-			if UsableSilence(spells.Thorns)
-			and not ni.player.buff(spells.Thorns) then
-				ni.spell.cast(spells.Thorns, "player")
-				return true;
-			end
+		if not enabled then
+			return false;
+		end
+		if cache.PlayerCombat then
+			return false;
+		end
+		if UsableSilence(spells.Thorns)
+		and not ni.player.buff(spells.Thorns) then
+			ni.spell.cast(spells.Thorns, "player")
+			return true;
 		end
 	end,
 -----------------------------------	
 	["Tree of Life"] = function()
 		local _, enabled = GetSetting("autoform");
-		if enabled then
-			if UsableSilence(spells.TreeOfLife)
-			and not ni.unit.buff("player", spells.TreeOfLife, "EXACT") then
-				ni.spell.cast(spells.TreeOfLife)
-				return true;
-			end
+		if not enabled then
+			return false;
+		end
+		if UsableSilence(spells.TreeOfLife)
+		and not ni.unit.buff("player", 33891, "EXACT") then
+			ni.spell.cast(spells.TreeOfLife)
+			return true;
 		end
 	end,
 -----------------------------------	
 	["Barkskin"] = function()
 		local value, enabled = GetSetting("barkskin");
-		if enabled then
-			if cache.PlayerCombat
-			and ni.player.hp() <= value
-			and ni.spell.available(spells.Barkskin) 
-			and not ni.player.buff(spells.Barkskin) then
-				ni.spell.cast(spells.Barkskin)
-				return true;
-			end
+		if not enabled
+		or cache.PlayerCombat then
+			return false;
+		end
+		if ni.player.hp() <= value
+		and ni.spell.available(spells.Barkskin) 
+		and not ni.player.buff(spells.Barkskin) then
+			ni.spell.cast(spells.Barkskin)
+			return true;
 		end
 	end,
 -----------------------------------	
@@ -205,8 +216,8 @@ local abilities = {
 			return false;
 		end
 		for i = 1, #ni.members do
-		local ally = ni.members[i].unit;
-		if UnitAffectingCombat(ally) then
+		local ally = ni.members[i];
+		if ally:combat() then
 				return false;
 			end
 		end
@@ -215,35 +226,37 @@ local abilities = {
 -----------------------------------
 	["Swiftmend"] = function()
 		local value, enabled = GetSetting("swift");
-		if enabled then
-			if ni.spell.available(spells.Swiftmend) then
-				for i = 1, #ni.members do
-				local ally = ni.members[i].unit;
-					if ni.members[i].hp <= value
-					and ni.unit.buff(ally, spells.Rejuvenation)
-					and ni.spell.valid(ally, spells.Swiftmend, false, true, true) then
-						ni.spell.cast(spells.Swiftmend, ally)
-						return true;				
-					end					
-				end
+		if not enabled then
+			return false;
+		end
+		if ni.spell.available(spells.Swiftmend) then
+			for i = 1, #ni.members do
+			local ally = ni.members[i];
+				if ally:hp() <= value
+				and ally.auras(spells.Rejuvenation.."||"..spells.Regrowth)
+				and ally:valid(ally, spells.Swiftmend, false, true) then
+					ni.spell.cast(spells.Swiftmend, ally.unit)
+					return true;				
+				end					
 			end
 		end
 	end,
 -----------------------------------
 	["Nature's Swiftness"] = function()
 		local value, enabled = GetSetting("natureswift");
-		if enabled then
-			if UsableSilence(spells.NatureSwiftness)
-			and UsableSilence(spells.HealingTouch) 
-			and (ni.spell.cd(spells.Swiftmend) ~= 0 
-			and ni.spell.cd(spells.Swiftmend) > 1.5) then
-				local allyOne = ni.members[1].unit;
-				if ni.members[1].hp <= value
-				and ni.spell.valid(allyOne, spells.HealingTouch, false, true, true) then
-					ni.spell.cast(spells.NatureSwiftness)
-					ni.spell.cast(spells.HealingTouch, allyOne)
-					return true;
-				end
+		if not enabled then
+			return false;
+		end
+		if UsableSilence(spells.NatureSwiftness)
+		and UsableSilence(spells.HealingTouch) 
+		and (ni.spell.cd(spells.Swiftmend) ~= 0 
+		and ni.spell.cd(spells.Swiftmend) > 1.5) then
+			local allyOne = ni.members[1];
+			if allyOne:hp() <= value
+			and allyOne:valid(allyOne, spells.HealingTouch, false, true) then
+				ni.spell.cast(spells.NatureSwiftness)
+				ni.spell.cast(spells.HealingTouch, allyOne.unit)
+				return true;
 			end
 		end
 	end,
@@ -256,45 +269,49 @@ local abilities = {
 		if not enabled then
 			return false;
 		end
-		if mainTank ~= nil
-		and ni.spell.valid(mainTank, spells.HealingTouch, false, true, true) then	
-			if nourEnable then
-				if not cache.IsMoving
-				and ni.unit.hp(mainTank) <= nourVal
-				and UsableSilence(spells.Nourish) then
-					if (ni.unit.buff(mainTank, spells.Rejuvenation)
-					or ni.unit.buff(mainTank, spells.WildGrowth)) then
-						ni.spell.cast(spells.Nourish, mainTank) 
-						return true;
+		if mainTank then
+			if UnitExists(mainTank.unit)
+			and ni.spell.valid(mainTank.unit, spells.HealingTouch, false, true, true) then	
+				if nourEnable then
+					if not cache.IsMoving
+					and ni.unit.hp(mainTank.unit) <= nourVal
+					and UsableSilence(spells.Nourish) then
+						if (ni.unit.buff(mainTank.unit, spells.Rejuvenation)
+						or ni.unit.buff(mainTank.unit, spells.WildGrowth)) then
+							ni.spell.cast(spells.Nourish, mainTank.unit) 
+							return true;
+						end
 					end
 				end
-			end
-			if rejEnable then
-				if UsableSilence(spells.Rejuvenation)
-				and not ni.unit.buff(mainTank, spells.Rejuvenation, "player") then
-					ni.spell.cast(spells.Rejuvenation, mainTank)
-					return true;
+				if rejEnable then
+					if UsableSilence(spells.Rejuvenation)
+					and not ni.unit.buff(mainTank.unit, spells.Rejuvenation, "player") then
+						ni.spell.cast(spells.Rejuvenation, mainTank.unit)
+						return true;
+					end
 				end
 			end
 		end
-		if offTank ~= nil
-		and ni.spell.valid(offTank, spells.HealingTouch, false, true, true) then	
-			if nourEnable then
-				if not cache.IsMoving
-				and ni.unit.hp(offTank) <= nourVal
-				and UsableSilence(spells.Nourish) then
-					if (ni.unit.buff(offTank, spells.Rejuvenation)
-					or ni.unit.buff(offTank, spells.WildGrowth)) then
-						ni.spell.cast(spells.Nourish, offTank) 
-						return true;
+		if offTank then
+			if UnitExists(offTank.unit) 
+			and ni.spell.valid(offTank.unit, spells.HealingTouch, false, true, true) then	
+				if nourEnable then
+					if not cache.IsMoving
+					and ni.unit.hp(offTank.unit) <= nourVal
+					and UsableSilence(spells.Nourish) then
+						if (ni.unit.buff(offTank.unit, spells.Rejuvenation)
+						or ni.unit.buff(offTank.unit, spells.WildGrowth)) then
+							ni.spell.cast(spells.Nourish, offTank.unit) 
+							return true;
+						end
 					end
 				end
-			end
-			if rejEnable then
-				if UsableSilence(spells.Rejuvenation)
-				and not ni.unit.buff(offTank, spells.Rejuvenation, "player") then
-					ni.spell.cast(spells.Rejuvenation, offTank)
-					return true;
+				if rejEnable then
+					if UsableSilence(spells.Rejuvenation)
+					and not ni.unit.buff(offTank.unit, spells.Rejuvenation, "player") then
+						ni.spell.cast(spells.Rejuvenation, offTank.unit)
+						return true;
+					end
 				end
 			end
 		end
@@ -302,69 +319,73 @@ local abilities = {
 -----------------------------------			
 	["Remove Curse (Ally)"] = function()
 		local _, enabled = GetSetting("removecurse");
-		if enabled
-		and UsableSilence(spells.RemoveCurse) then
-			for i = 1, #ni.members do
-			local ally = ni.members[i].unit;
-				if ni.unit.debufftype(ally, "Curse")	 
-				and ni.healing.candispel(ally)
-				and ni.spell.lastcast(spells.RemoveCurse, 1.8)
-				and ni.spell.valid(ally, spells.RemoveCurse, false, true, true) then
-					ni.spell.cast(spells.RemoveCurse, ally)
-					return true;
-				end
+		if not enabled
+		or not UsableSilence(spells.RemoveCurse) then
+			return false;
+		end
+		for i = 1, #ni.members.sort() do
+		local ally = ni.members[i];
+			if ally:debufftype("Curse")	 
+			and ally:dispel()
+			and ni.spell.lastcast(spells.RemoveCurse, 1.8)
+			and ally:valid(spells.RemoveCurse, false, true) then
+				ni.spell.cast(spells.RemoveCurse, ally.unit)
+				return true;
 			end
 		end
 	end,
 -----------------------------------	
 	["Abolish Poison (Ally)"] = function()
 		local _, enabled = GetSetting("removecurse");	
-		if enabled 
-		and UsableSilence(spells.AbolishPoison) then
-			for i = 1, #ni.members do
-			local ally = ni.members[i].unit;
-				if ni.unit.debufftype(ally, "Poison")	 
-				and ni.healing.candispel(ally)
-				and not ni.unit.buff(ally, spells.AbolishPoison)
-				and ni.spell.lastcast(spells.AbolishPoison, 1.8)
-				and ni.spell.valid(ally, spells.AbolishPoison, false, true, true) then
-					ni.spell.cast(spells.AbolishPoison, ally)
-					return true;
-				end
+		if not enabled 
+		or not UsableSilence(spells.AbolishPoison) then
+			return false;
+		end
+		for i = 1, #ni.members.sort() do
+		local ally = ni.members[i];
+			if ally:debufftype("Poison")	 
+			and ally:dispel()
+			and not ally:aura(spells.AbolishPoison)
+			and ni.spell.lastcast(spells.AbolishPoison, 1.8)
+			and ally:valid(spells.AbolishPoison, false, true) then
+				ni.spell.cast(spells.AbolishPoison, ally.unit)
+				return true;
 			end
 		end
 	end,
 -----------------------------------	
 	["Rejuvenation"] = function()
 		local value, enabled = GetSetting("rejuall");
-		if enabled then
-			if UsableSilence(spells.Rejuvenation) then
-				for i = 1, #ni.members do
-				local ally = ni.members[i].unit;
-					if ni.members[i].hp <= value
-					and not ni.unit.buff(ally, spells.Rejuvenation, "player")
-					and ni.spell.valid(ally, spells.Rejuvenation, false, true, true) then
-						ni.spell.cast(spells.Rejuvenation, ally)
-						return true;
-					end	
-				end
+		if not enabled then
+			return false;
+		end
+		if UsableSilence(spells.Rejuvenation) then
+			for i = 1, #ni.members do
+			local ally = ni.members[i];
+				if ally:hp() <= value
+				and not ally:buff(spells.Rejuvenation, "player")
+				and ally:valid(spells.Rejuvenation, false, true) then
+					ni.spell.cast(spells.Rejuvenation, ally.unit)
+					return true;
+				end	
 			end
 		end
 	end,
 -----------------------------------	
 	["Nourish"] = function()
 		local value, enabled = GetSetting("nourish");
-		if enabled then
-			if not cache.IsMoving
-			and UsableSilence(spells.Nourish) then
-				for i = 1, #ni.members do
-				local ally = ni.members[i].unit;
-					if ni.members[i].hp <= value
-					and (ni.unit.buff(ally, spells.Rejuvenation) or ni.unit.buff(ally, spells.WildGrowth))
-					and ni.spell.valid(ally, spells.Nourish, false, true, true) then
-						ni.spell.cast(spells.Nourish, ally)
-						return true;
-					end
+		if not enabled
+		or cache.IsMoving then
+			return false;
+		end
+		if UsableSilence(spells.Nourish) then
+			for i = 1, #ni.members do
+			local ally = ni.members[i];
+				if ally:hp() <= value
+				and ally:auras(spells.Rejuvenation.."||"..spells.Regrowth.."||"..spells.Lifebloom.."||"..spells.WildGrowth)
+				and ally:valid(spells.Nourish, false, true) then
+					ni.spell.cast(spells.Nourish, ally.unit)
+					return true;
 				end
 			end
 		end
@@ -372,17 +393,17 @@ local abilities = {
 -----------------------------------	
 	["Wild Growth"] = function()
 		local value, enabled = GetSetting("growth");
-		if enabled then
-			if UsableSilence(spells.WildGrowth) then 
-				local allyOne = ni.members[1].unit;
-				local ally = ni.members.inrangewithoutbuffbelow(allyOne, 14, spells.WildGrowth, value);
-				if #ally >= 3	 
-				and ni.members[1].hp <= value
-				and ni.spell.valid(allyOne, spells.WildGrowth, false, true, true) then
-					ni.spell.cast(spells.WildGrowth, allyOne)
-					return true;
-				end
-			end
+		if not enabled
+		or not UsableSilence(spells.WildGrowth) then
+			return false;
+		end
+		local allyOne = ni.members[1];
+		local ally = ni.members.inrangewithoutbuffbelow(allyOne.unit, 14, spells.WildGrowth, value);
+		if #ally >= 3	 
+		and allyOne:hp() <= value
+		and allyOne:valid(spells.WildGrowth, false, true) then
+			ni.spell.cast(spells.WildGrowth, allyOne.unit)
+			return true;
 		end
 	end,
 };
