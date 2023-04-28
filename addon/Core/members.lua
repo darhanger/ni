@@ -161,7 +161,7 @@ function memberssetup:create(unit, guid)
 		return UnitHealthMax(o.unit);
 	end;
 	function o:hp()
-		local hp = ni.unit.hppredicted(o.unit) or o:hpraw()/o:hpmax() * 100
+		local hp = o:hpraw()/o:hpmax() * 100 or ni.unit.hppredicted(o.unit)
 		local val = random(16, 24);
 		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
 			return 100;
@@ -396,7 +396,7 @@ memberssetup.set = function()
 			for i,o in ipairs(members) do
 				if o.unit == unit then
 					memberssetup.cache[o.unit] = nil;
-					tremove(members, o)
+					tremove(members, i)
 					members:updatemembers()
 				end
 			end
