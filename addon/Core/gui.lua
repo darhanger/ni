@@ -648,8 +648,8 @@ local function CreateMenuFrame(frame, t, settings, callback)
 	local Frame = CreateFrame("frame", menran, frame);
 	Frame:SetBackdrop({
 		bgFile = "Interface/Buttons/WHITE8X8",
-		edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",
-		edgeSize = 12,
+		edgeFile = "Interface/Buttons/WHITE8X8",
+		edgeSize = 0.5,
 	});
 	Frame:SetPoint("TOP", frame, "BOTTOM");
     Frame:SetBackdropColor(0,0,0,1);
@@ -710,13 +710,15 @@ end
 local function CreateMenu(frame, t, settings, callback)
 	local dropran = ni.utils.generaterandomname();
 	local DropDownMenu = CreateFrame("Button", dropran, frame);
+	local ONUPDATE_INTERVAL = 1;
+	local TimeSinceLastUpdate = 0;
 	DropDownMenu:SetBackdrop({
 		bgFile = "Interface/Buttons/WHITE8X8",
 		edgeFile = "Interface/Buttons/WHITE8X8",
 		edgeSize = 1,
 	});
     DropDownMenu:SetBackdropColor(0,0,0,0.5);
-    DropDownMenu:SetBackdropBorderColor(.8,.8,.8,.5);	
+    DropDownMenu:SetBackdropBorderColor(.8,.8,.8,.5);
 	DropDownMenu:Show();
 	DropDownMenu.text = CreateText(DropDownMenu, "");
 	local submenu = CreateMenuFrame(DropDownMenu, t, settings, callback);
@@ -724,13 +726,26 @@ local function CreateMenu(frame, t, settings, callback)
 	DropDownMenu:SetScript("OnLeave", GUI_OnLeave);
 	DropDownMenu:SetScript("OnClick", function(self, ...)
 		if submenu.isshown then
+			PopOut(GUI, ...);
 			submenu.isshown = false;
-			submenu:Hide();
+			submenu:Hide();		
 		else
+			PopBack(GUI, ...);
 			submenu.isshown = true;
-			submenu:Show();
+			submenu:Show();	
 		end
 	end);
+	DropDownMenu:SetScript("OnUpdate", function(self, elapsed)
+		TimeSinceLastUpdate = TimeSinceLastUpdate + elapsed
+		if TimeSinceLastUpdate >= ONUPDATE_INTERVAL then
+			if submenu.isshown
+			and not GUI.isOpen then
+				submenu.isshown = false;
+				submenu:Hide();	
+				TimeSinceLastUpdate = 0;						
+			end
+		end
+	end);	
 	local width = 0;
 	for k, v in pairs(submenu.items) do
 		local temp = v:GetWidth();
@@ -738,9 +753,9 @@ local function CreateMenu(frame, t, settings, callback)
 			width = temp;
 		end
 	end
-	DropDownMenu:SetSize(width, 16);
+	DropDownMenu:SetSize(width, 25);
 	return DropDownMenu;
-end
+end;
 local function CreateEntry(frame, t, settingsfile, callback)
 	local f;
 	local distance = -16;
@@ -1160,10 +1175,10 @@ GUI:SetHeight(main_height);
 GUI:EnableMouse(true);
 GUI:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
 				edgeFile = "Interface/Buttons/WHITE8X8", 
-				tile = true, tileSize = 16, edgeSize = 4, 
-				insets = { left = 4, right = 4, top = 4, bottom = 4 }});
-GUI:SetBackdropColor(0,0,0,1);
-GUI:SetBackdropBorderColor(.3,.3,.3,.7)
+				tile = true, tileSize = 16, edgeSize = 2, 
+				insets = { left = 2, right = 2, top = 2, bottom = 2 }});
+GUI:SetBackdropColor(.1,.1,.1,1);
+GUI:SetBackdropBorderColor(.3,.3,.3,.75, 15)
 GUI:SetPoint("TOP", UIParent, "TOP", 0, main_y);
 GUI:SetScript("OnEnter", function(self, ...)
 	PopOut(self, ...);

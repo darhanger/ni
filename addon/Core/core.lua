@@ -137,6 +137,11 @@ if not ni.loaded then
 		local content = ni.functions.loadcontent(dir.."addon\\Settings\\"..filename);
 		return content and json.decode(content) or { };
 	end;
+	ni.lib = {};	
+	ni.lib.LibStub = require(dir.."addon\\core\\libs\\LibStub.lua");
+	ni.lib.CallbackHandler = require(dir.."addon\\core\\libs\\CallbackHandler-1.0.lua");
+	ni.lib.LibDataBroker = require(dir.."addon\\core\\libs\\LibDataBroker-1.1.lua");
+	ni.lib.LibDBIcon = require(dir.."addon\\core\\libs\\LibDBIcon-1.0.lua");
 	ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = require(dir.."addon\\core\\frames.lua");
 	ni.spell = require(dir.."addon\\core\\spell.lua");
 	ni.power = require(dir.."addon\\core\\power.lua");

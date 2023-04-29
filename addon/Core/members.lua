@@ -161,8 +161,7 @@ function memberssetup:create(unit, guid)
 		return UnitHealthMax(o.unit);
 	end;
 	function o:hp()
-		local hp = o:hpraw()/o:hpmax() * 100 or ni.unit.hppredicted(o.unit)
-		local val = random(16, 24);
+		local hp = o:hpraw()/o:hpmax() * 100
 		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
 			return 100;
 		end	

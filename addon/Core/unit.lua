@@ -294,19 +294,19 @@ unit.aura = function(t, s)
 end;
 unit.auras = function(target, str)
     str = tostring(str)
-    local OP = str:match("&&") or "||"
-    local array, counter, id = ni.utils.splitstringbydelimiter(str, OP), 0
+    local And = str:match("&&")
+    local array, counter, id = ni.utils.splitstringbydelimiter(str, And or "||"), 0
     buildAurasTable(target)
     for _, tbl in pairs(unitauras) do
         for _, aura in ipairs(array) do
             id = tonumber(aura)
             counter = (id and tbl.ID == id or tbl.name == aura) and counter + 1 or counter
+            if not And and counter > 0 then
+                return true;
+            end
         end
     end
-    if OP == "&&" then
-        return counter > 0 and counter == #array
-    end
-    return counter > 0
+    return And and counter>0 and counter == #array or false;
 end;
 --- BUFFS ---
 unit.buff = function(t, id, filter)

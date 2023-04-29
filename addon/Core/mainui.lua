@@ -73,7 +73,10 @@ local Localization = {
 	OffTankOverride = "Off Tank Override:",
 	IsMelee = "Is Melee:",
 	All = "All Classes",
-	Coin = "Remove Icon:"
+	Coin = "Remove Icon:",
+	LeftClick = "|cffC0C0C0Left click:|r Open Main Menu.",
+	RightClick = "|cffC0C0C0Right click:|r Check updates.",
+	MidleClick = "|cffC0C0C0Midle click:|r Open Discord Server."	
 };
 if ru then
 	Localization.Assistant = "Помошник Ротации"
@@ -149,6 +152,9 @@ if ru then
 	Localization.IsMelee = "Ближний бой:"
 	Localization.All = "Все Классы"
 	Localization.Coin = "Убрать иконку:"
+	Localization.LeftClick = "|cffC0C0C0Левый щелчок:|r Открыть основное меню."
+	Localization.RightClick = "|cffC0C0C0Правый щелчок щелчок:|r Проверить обновления."
+	Localization.MidleClick = "|cffC0C0C0Cредний щелчок:|r Открыть сервер Discord."	
 end;
 
 local ui = {
@@ -181,12 +187,13 @@ local function moveIcon(self)
 	ni.vars.ui.icon.x = centerX;
 	ni.vars.ui.icon.y = centerY;
 end;
+local r, g, b, a, slid = .3,.3,.3,.75, 15;
 local uiScale = GetCVar("uiScale") or 1;
 local backdrop = {
 	bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
-	edgeFile = "Interface/Tooltips/UI-Tooltip-Border", 
-	tile = true, tileSize = 16, edgeSize = 16, 
-	insets = { left = 4, right = 4, top = 4, bottom = 4 }
+	edgeFile = "Interface/Buttons/WHITE8X8", 
+	tile = true, tileSize = 16, edgeSize = 3, 
+	insets = { left = 2, right = 2, top = 2, bottom = 2 }
 };
 local mframeran = ni.utils.generaterandomname();
 main_ui.main = CreateFrame("frame", mframeran, UIParent);
@@ -209,7 +216,8 @@ frame:SetWidth(320);
 frame:SetHeight(300);
 frame:SetBackdrop(backdrop);
 frame:SetPoint(ni.vars.ui.main.point, WorldFrame, ni.vars.ui.main.relativePoint, ni.vars.ui.main.x, ni.vars.ui.main.y);
-frame:SetBackdropColor(0,0,0,1);
+frame:SetBackdropColor(.1,.1,.1, 1);
+frame:SetBackdropBorderColor(r,g,b,a);
 frame:Hide();
 local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)
 	local textran = ni.utils.generaterandomname();	
@@ -351,10 +359,11 @@ local mainsettings = CreateFrame("frame", msetran, frame);
 mainsettings:ClearAllPoints();
 mainsettings:SetWidth(220);
 mainsettings:SetHeight(530);
-mainsettings:SetPoint("TOPRIGHT", frame, 215, 0);
+mainsettings:SetPoint("TOPRIGHT", frame, 220, 0);
 mainsettings:SetBackdrop(backdrop);
 mainsettings:EnableMouse(true);
-mainsettings:SetBackdropColor(0,0,0,1);
+mainsettings:SetBackdropColor(.1,.1,.1, 1);
+mainsettings:SetBackdropBorderColor(r,g,b,a);
 mainsettings:Hide();
 
 local setran = ni.utils.generaterandomname();
@@ -362,10 +371,11 @@ local settings = CreateFrame("frame", setran, frame);
 settings:ClearAllPoints();
 settings:SetWidth(200);
 settings:SetHeight(380);
-settings:SetPoint("TOPLEFT", frame, -195, 0);
+settings:SetPoint("TOPLEFT", frame, -200, 0);
 settings:SetBackdrop(backdrop);
 settings:EnableMouse(true);
-settings:SetBackdropColor(0,0,0,1);
+settings:SetBackdropColor(.1,.1,.1, 1);
+settings:SetBackdropBorderColor(r,g,b,a);
 settings:Hide();
 
 local ressetran = ni.utils.generaterandomname();
@@ -376,7 +386,8 @@ resourcesettings:SetHeight(280);
 resourcesettings:SetPoint("BOTTOM", frame, 0, -275);
 resourcesettings:SetBackdrop(backdrop);
 resourcesettings:EnableMouse(true);
-resourcesettings:SetBackdropColor(0, 0, 0, 1);
+resourcesettings:SetBackdropColor(.1,.1,.1, 1);
+resourcesettings:SetBackdropBorderColor(r,g,b,a);
 resourcesettings:Hide();
 
 local creatsetran = ni.utils.generaterandomname();
@@ -387,7 +398,8 @@ creaturesettings:SetHeight(200);
 creaturesettings:SetPoint("BOTTOM", frame, 0, -195);
 creaturesettings:SetBackdrop(backdrop);
 creaturesettings:EnableMouse(true);
-creaturesettings:SetBackdropColor(0, 0, 0, 1);
+creaturesettings:SetBackdropColor(.1,.1,.1, 1);
+creaturesettings:SetBackdropBorderColor(r,g,b,a);
 creaturesettings:Hide();
 
 local function CreateMainButton(frame, width, height, text, offset_x, offset_y, func)
@@ -926,9 +938,10 @@ slider:SetValueStep(5);
 slider:SetValue(ni.vars.latency);
 slider_components[latency_name.."Low"]:SetText(20);
 slider_components[latency_name.."High"]:SetText(1000);
+slider_components[latency_name.."Text"]:SetPoint("TOP", slider, "TOP", 0, slid);
 slider_components[latency_name.."Text"]:SetText(Localization.Latency);
 slider:SetScript("OnValueChanged", function(self, value)
-	slider_components[latency_name.."Text"]:SetText(Localization.LatencySlider.."("..value.." ms)");	
+	slider_components[latency_name.."Text"]:SetText(Localization.LatencySlider.. "("..value.." ms)");	
 	ni.vars.latency = value;
 end);
 
@@ -965,45 +978,53 @@ CreateCheckBox(settings, -78, -339, ni.vars.units.offTankEnabled, function(self)
 end);
 
 local mmb_name = ni.utils.generaterandomname();
-main_ui.minimap_icon = CreateFrame("Button", mmb_name, Minimap);
-local mm = main_ui.minimap_icon;
-mm:SetHeight(25); mm:SetWidth(25);
-mm:SetFrameStrata("MEDIUM");
-mm:SetMovable(true);
-mm:SetUserPlaced(true);
-main_ui.minimap_toggle = function(bool)
-	if not ni.vars.stream and not ni.vars.coin then
-		if bool then 
-			mm:SetNormalTexture("Interface\\BUTTONS\\UI-GroupLoot-Pass-Up.blp");
-			mm:SetPushedTexture("Interface\\BUTTONS\\UI-GroupLoot-Pass-Down.blp");
-			mm:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-Background.blp");
-		else
-			mm:SetNormalTexture("Interface\\BUTTONS\\UI-GroupLoot-Coin-Up.blp");
-			mm:SetPushedTexture("Interface\\BUTTONS\\UI-GroupLoot-Coin-Down.blp");
-			mm:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-Background.blp");
-		end
-	else
-		if bool then
-		end
-	end
-end;
+local ldb = ni.lib.LibStub:GetLibrary("LibDataBroker-1.1", true)
+local MiniMap = MiniMap or {};
+local miniMapEnabled = not ni.vars.stream and not ni.vars.coin
 
-main_ui.minimap_toggle(ni.vars.profiles.enabled or ni.vars.profiles.genericenabled);
-mm:SetPoint("CENTER", ni.vars.ui.icon.x, ni.vars.ui.icon.y);
-mm:SetScript("OnMouseDown", function(self, button)
-	if button == "LeftButton" then
-		if main_ui.main:IsShown() then
-			main_ui.main:Hide();
-		else
-			main_ui.main:Show();
-		end
-	elseif button == "RightButton" then
-		self:SetScript("OnUpdate", moveIcon);
-	end
-end);
-mm:SetScript("OnMouseUp", function(self)
-	self:SetScript("OnUpdate", nil);
-end);
+local MiniMapLDB = ldb:NewDataObject(mmb_name, {
+    icon = "none",
+    RegisterForDrag = "LeftButton",
+});
+main_ui.minimap_toggle = function(bool)
+    if not bool then 
+        MiniMapLDB.icon = "Interface\\Icons\\achievement_character_orc_male"; -- When profiles off
+    else
+        MiniMapLDB.icon = "Interface\\Icons\\ability_warrior_endlessrage" -- When profiles on
+    end
+end;
+main_ui.minimap_toggle(ni.vars.profiles.enabled or ni.vars.profiles.genericenabled)
+function MiniMapLDB:OnClick(button)
+    if button == "LeftButton" then
+        if main_ui.main:IsShown() then
+            main_ui.main:Hide();
+        else
+            main_ui.main:Show();
+        end
+    end
+    if button == "RightButton" then
+        ni.functions.open("https://github.com/darhanger/ni-v2/releases")
+    end 	
+    if button == "MiddleButton" then
+        ni.functions.open("https://discord.gg/xBFKJc6QRr")
+    end        
+end;
+function MiniMapLDB:OnDragStop()
+    ni.vars.ui.iconPos = self.db.minimapPos
+end;
+function MiniMapLDB:OnTooltipShow()
+    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.58")
+    self:AddLine(" ")
+    self:AddLine(Localization.LeftClick)
+	self:AddLine(Localization.RightClick)
+    self:AddLine(Localization.MidleClick)
+end;
+local icon = ni.lib.LibStub("LibDBIcon-1.0", true)
+MiniMapLDBIconDB = {
+    hide = not miniMapEnabled,
+    minimapPos = ni.vars.ui.iconPos or ui.iconPos,
+};
+icon:Register(mmb_name, MiniMapLDB, MiniMapLDBIconDB)
 local function SetClick(key, frame, button)
 	if key == Localization.None or key == nil then
 		return;
