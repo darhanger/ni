@@ -223,24 +223,6 @@ for i = 1, #ni.members do
 end
 ```
 
-## shortguid
-
-Type:
-
-- **variable**
-
-Returns: `string`
-
-This is the variable that returns the shorthand GUID of the member accessed.
-
-```lua
-for i = 1, #ni.members do
-	if ni.members[i].shortguid == "8AB5D" then
-		--I don't know the applicability of this honestly, it's just there from old stuff
-	end
-end
-```
-
 ## range
 
 Type:
@@ -253,7 +235,7 @@ This is the variable that returns true or false of the member accessed if they'r
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i].range then
+	if ni.members[i]:range() then
 		--This member is in range of most spells and in line of sight
 	end
 end
@@ -271,7 +253,7 @@ This is the variable that returns true or false of the member accessed if you ca
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i].dispel then
+	if ni.members[i]:dispel() then
 		--This member has a debuff that can be dispelled by you
 	end
 end
@@ -289,7 +271,7 @@ This is the variable that returns the health percentage of the member accessed.
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i].hp < 20 then
+	if ni.members[i]:hp() < 20 then
 		--This member is below 20% health
 	end
 end
@@ -307,7 +289,7 @@ This is the variable that returns the threat (number between -1 and 3) of the me
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i].threat == -1 then
+	if ni.members[i]:threat() == -1 then
 		--This member is not on any mobs threat list (99% chance just out of combat)
 	end
 end
@@ -343,7 +325,7 @@ This is the variable that returns true or false if the member accessed is a tank
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i].istank then
+	if ni.members[i]:istank() then
 		--This member is a tank
 	end
 end
@@ -387,7 +369,7 @@ Returns true or false if the member accessed has the debuff type passed.
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i]:debufftype("Magic") then
+	if ni.members[i]:bufftype("Magic") then
 		--This member has a buff type that is Magic on them
 	end
 end
