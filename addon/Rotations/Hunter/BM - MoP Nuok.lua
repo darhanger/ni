@@ -1,3 +1,6 @@
+local build = select(4, GetBuildInfo());
+local mop = build == 50400 or false;
+if mop then
 local queue = {
 	"MendPet",
 	"Pause",
@@ -416,4 +419,18 @@ local abilities = {
 		end
 	end
 }
-ni.bootstrap.profile("BM - MoP Nuok", queue, abilities, OnLoad, OnUnload)
+	ni.bootstrap.profile("BM - MoP Nuok", queue, abilities, OnLoad, OnUnload)
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not mop then
+				ni.frames.floatingtext:message("This profile for MoP!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("BM - MoP Nuok", queue, abilities);
+end;

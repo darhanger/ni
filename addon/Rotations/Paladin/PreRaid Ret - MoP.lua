@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local mop = build == 50400 or false;
+if mop then
+
 local queue = {
 	"Buffs",
 	"Pause",
@@ -396,4 +400,18 @@ local abilities = {
 
 	end
 }
-ni.bootstrap.profile("PreRaid Ret - MoP", queue, abilities, OnLoad, OnUnload);
+	ni.bootstrap.profile("PreRaid Ret - MoP", queue, abilities, OnLoad, OnUnload);
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not mop then
+				ni.frames.floatingtext:message("This profile for MoP!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("PreRaid Ret - MoP", queue, abilities);
+end;

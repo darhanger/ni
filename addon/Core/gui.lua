@@ -441,7 +441,7 @@ local function CreateInput(frame, t, settingsfile, callback)
 	local up;
 	local down;
 	if t.wordwrap then
-		scroll_frame_name = ni.utils.GenerateRandomName();
+		scroll_frame_name = ni.utils.generaterandomname();
 		scroll_frame = CreateFrame("ScrollFrame", scroll_frame_name, TempFrame, "UIPanelScrollFrameTemplate");
 		scroll_frame:SetHeight(TempFrame:GetHeight());
 		scroll_frame:SetWidth(width);

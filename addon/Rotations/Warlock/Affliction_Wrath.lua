@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local wotlk = build == 30300 or false;
+if wotlk then
+
 local queue = {
 	"Pause",
 	"SummonImp",
@@ -224,4 +228,18 @@ local abilities = {
 		end
 	end
 }
-ni.bootstrap.profile("Affliction_Wrath", queue, abilities, OnLoad, OnUnload)
+	ni.bootstrap.profile("Affliction_Wrath", queue, abilities, OnLoad, OnUnload)
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not wotlk then
+				ni.frames.floatingtext:message("This profile for WotLK 3.3.5a!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Free_Restoration_DarhangeR", queue, abilities);
+end;

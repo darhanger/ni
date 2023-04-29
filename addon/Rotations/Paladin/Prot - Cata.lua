@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local cata = build == 40300 or false;
+if cata then
+
 local queue = {
 	"Crusader Aura",
 	"Pause",
@@ -467,4 +471,18 @@ local abilities = {
 		end
 	end
 }
-ni.bootstrap.profile("Prot - Cata", queue, abilities, OnLoad, OnUnload)
+	ni.bootstrap.profile("Prot - Cata", queue, abilities, OnLoad, OnUnload)
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not cata then
+				ni.frames.floatingtext:message("This profile for Cata!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Prot - Cata", queue, abilities);
+end;

@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local mop = build == 50400 or false;
+if mop then
+
 local queue = {
 	"Dark Intent",
 	"Curse of the Elements",
@@ -72,4 +76,18 @@ local abilities = {
 	end,
 
 };
-ni.bootstrap.rotation("Brecherbernd_Destruction", queue, abilities)
+	ni.bootstrap.rotation("Brecherbernd_Destruction", queue, abilities)
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not mop then
+				ni.frames.floatingtext:message("This profile for MoP!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Brecherbernd_Destruction", queue, abilities);
+end;

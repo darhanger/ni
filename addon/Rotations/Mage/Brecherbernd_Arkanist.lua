@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local mop = build == 50400 or false;
+if mop then
+
 ------- Rewritten for the new ni. Big Credits to Cartman, Darhanger and Scott!
 
 local ConjureManaGem = GetSpellInfo(759)
@@ -246,4 +250,18 @@ local _, enabled = GetSetting("magearmor")
 	   end
    end,	
 };
-ni.bootstrap.profile("Brecherbernd_Arkanist", queue, abilities, OnLoad, OnUnLoad);	
+	ni.bootstrap.profile("Brecherbernd_Arkanist", queue, abilities, OnLoad, OnUnLoad);	
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not mop then
+				ni.frames.floatingtext:message("This profile for MoP!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Brecherbernd_Arkanist", queue, abilities);
+end;

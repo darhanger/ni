@@ -22,7 +22,7 @@ local items2 = {
 	settingsfile = "GUIExampleLow.json", -- Add name for file with settings from GUI;
 	{ type = "title", text = "Example GUI Low Level" }, -- Call title; 
 	{ type = "separator" }, -- Call line ("seperator");
-	{ type = "entry", text = ni.player.getitemicon(21353).." Perform Action", tooltip = "Enable for Auto pick-up healthstoneuse from soulwell", enabled = false, value = 3, min = 1.5, max = 10, step = .5, width = 40, key = "Action" },	-- Call entry with field;
+	{ type = "entry", text = ni.player.itemicon(21353).." Perform Action", tooltip = "Enable for Auto pick-up healthstoneuse from soulwell", enabled = false, value = 3, min = 1.5, max = 10, step = .5, width = 40, key = "Action" },	-- Call entry with field;
 };
 -- You can call multiply GUI's (GUI only loads when you enter the game or /reload)
 local function items()

@@ -1,3 +1,6 @@
+local build = select(4, GetBuildInfo());
+local wotlk = build == 30300 or false;
+if wotlk then
 local queue = {
 	"Pause",
 	"FrostArmor",
@@ -147,4 +150,18 @@ local abilities = {
 		end
 	end,
 }
-ni.bootstrap.profile("Frost_Wrath", queue, abilities, OnLoad, OnUnload);
+	ni.bootstrap.profile("Frost_Wrath", queue, abilities, OnLoad, OnUnload);
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not wotlk then
+				ni.frames.floatingtext:message("This profile for WotLK 3.3.5a!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Frost_Wrath", queue, abilities);
+end;

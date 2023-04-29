@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local mop = build == 50400 or false;
+if mop then
+
 -- Big credits to Bulletin and Nemo for helping me develop my first Script, many more will come!
 local queue = {
 	"Dark Intent",
@@ -93,4 +97,18 @@ local abilities = {
 	end,
 
 };
-ni.bootstrap.rotation("Brecherbernd_TheSuffering", queue, abilities)
+	ni.bootstrap.rotation("Brecherbernd_TheSuffering", queue, abilities)
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not mop then
+				ni.frames.floatingtext:message("This profile for MoP!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Brecherbernd_TheSuffering", queue, abilities);
+end;

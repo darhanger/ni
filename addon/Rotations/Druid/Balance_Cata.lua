@@ -1,3 +1,6 @@
+local build = select(4, GetBuildInfo());
+local cata = build == 40300 or false;
+if cata then
 local queue = {
 	"Pause",
 	"MoonkinForm",
@@ -175,4 +178,18 @@ local abilities = {
 		end
 	end,
 }
-ni.bootstrap.rotation("Balance_Cata", queue, abilities)
+	ni.bootstrap.rotation("Balance_Cata", queue, abilities)
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not cata then
+				ni.frames.floatingtext:message("This profile for Cata!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Balance_Cata", queue, abilities);
+end;

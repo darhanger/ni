@@ -1,3 +1,6 @@
+local build = select(4, GetBuildInfo());
+local wotlk = build == 30300 or false;
+if wotlk then
 local items = {
 	settingsfile = "Mage - Fire PvE by Dreams.json",
 	{ type = "title", text = "Mage - Fire PvE by |c0000CED1Dreams" },
@@ -189,4 +192,18 @@ local abilities = {
 		end
 	end,
 };
-ni.bootstrap.profile("Mage - Fire PvE by Dreams", queue, abilities, OnLoad, OnUnLoad);	
+	ni.bootstrap.profile("Mage - Fire PvE by Dreams", queue, abilities, OnLoad, OnUnLoad);	
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not wotlk then
+				ni.frames.floatingtext:message("This profile for WotLK 3.3.5a!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("Mage - Fire PvE by Dreams", queue, abilities);
+end;
