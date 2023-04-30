@@ -173,7 +173,7 @@ unit.hp = function(t)
     if (UnitIsDeadOrGhost(t) == 1 or unit.debuff(t, 8326)) then
         return 100;
     end
-    if unit.debuff(t, GetSpellInfo(30843)) or unit.debuff(t, GetSpellInfo(55593)) then
+    if unit.debuff(t, 30843) or unit.debuff(t, 55593) then
         return 100;
     end
 	return 100 * UnitHealth(t) / UnitHealthMax(t)
