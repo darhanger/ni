@@ -91,7 +91,7 @@ local mainTank, offTank = ni.tanks()
 ```
 
 
-### Example
+## Example
 
 Apart from functions listed below, it's possible to call `mainTank` or `offTank` as a shorthand for calling any function in [Members](api/members.md) and passing `mainTank` or `offTank` as the first argument.
 

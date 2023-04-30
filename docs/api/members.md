@@ -724,7 +724,7 @@ local members_without_curse_below_50_percent_hp = ni.members.inrangewithoutdebuf
 -- and do not have the Curse of Tongues debuff cast by the player
 ```
 
-### addcustom
+## addcustom
 
 Arguments:
 
@@ -733,7 +733,7 @@ Arguments:
 
 This function adds a custom member to the members table. It creates a new GroupMember object with the provided unit and guid and adds it to the members table. If the custom member was successfully added, the members table is updated using the `updatemembers` function.
 
-### removecustom
+## removecustom
 
 Arguments:
 - **unit** `string`: the name of the unit to remove from the members table.
