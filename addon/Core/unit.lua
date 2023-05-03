@@ -329,13 +329,13 @@ unit.buff = function(t, id, filter)
 		end
 	end
 end;
-unit.buffs = function(t, ids, filter)
-	local ands = ni.utils.findand(ids)
+unit.buffs = function(t, spellIDs, filter)
+	local ands = ni.utils.findand(spellIDs)
 	local results = false
-	if ands ~= nil or (ands == nil and strlen(ids) > 0) then
+	if ands ~= nil or (ands == nil and strlen(spellIDs) > 0) then
 		local tmp
 		if ands then
-			tmp = ni.utils.splitstringbydelimiter(ids, "&&")
+			tmp = ni.utils.splitstringbydelimiter(spellIDs, "&&")
 			for i = 0, #tmp do
 				if tmp[i] ~= nil then
 					local id = tonumber(tmp[i])
@@ -357,11 +357,10 @@ unit.buffs = function(t, ids, filter)
 				end
 			end
 		else
-			tmp = ni.utils.splitstringbydelimiter(ids, "||")
+			tmp = ni.utils.splitstringbydelimiter(spellIDs, "||")
 			for i = 0, #tmp do
 				if tmp[i] ~= nil then
 					local id = tonumber(tmp[i])
-
 					if id ~= nil then
 						if unit.buff(t, id, filter) then
 							results = true
@@ -514,16 +513,18 @@ unit.debuffs = function(t, spellIDs, filter)
 		else
 			tmp = ni.utils.splitstringbydelimiter(spellIDs, "||")
 			for i = 0, #tmp do
-				local id = tonumber(tmp[i])
-				if id ~= nil then
-					if unit.debuff(t, id, filter) then
-						results = true
-						break
-					end
-				else
-					if unit.debuff(t, tmp[i], filter) then
-						results = true
-						break
+				if tmp[i] ~= nil then
+					local id = tonumber(tmp[i])
+					if id ~= nil then
+						if unit.debuff(t, id, filter) then
+							results = true
+							break
+						end
+					else
+						if unit.debuff(t, tmp[i], filter) then
+							results = true
+							break
+						end
 					end
 				end
 			end
