@@ -55,28 +55,6 @@ for i = 1, #ni.members do
 end
 ```
 
-## distanceto
-
-Arguments:
-
-- **o2** `unitID` or `string`
-
-Returns: `number`
-
-Returns the distance between the unit and the specified target as a squared value.
-
-```lua
-for i = 1, #ni.members do
-	local distance = ni.members[i]:distanceto("target")
-	if distance < 35 then
-		-- The target is within 35 yards of the unit
-	end
-end
-```
-
-Note: The value returned by `distanceto` is squared because it avoids an expensive square root calculation, which is unnecessary for simple comparisons. If you need the actual distance between two units, you should take the square root of the value returned by `distanceto`.
-Sure, here are the documentation examples for each of the functions you provided:
-
 ## combat
 
 Returns: `boolean`
