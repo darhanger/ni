@@ -1,19 +1,19 @@
 local setmetatable, type, select, sort, wipe, ipairs, tremove, tos = setmetatable, type, select, sort, wipe, ipairs, tremove, tostring
 local UnitGroupRolesAssigned, UnitIsGhost, UnitHealthMax, UnitName, UnitGUID, UnitIsUnit = UnitGroupRolesAssigned, UnitIsGhost, UnitHealthMax, UnitName, UnitGUID, UnitIsUnit
 local IsInRaid, GetNumRaidMembers, GetNumPartyMembers, GetNumGroupMembers, UnitClass, UnitCanAssist = IsInRaid, GetNumRaidMembers, GetNumPartyMembers, GetNumGroupMembers, UnitClass, UnitCanAssist
-local UnitAffectingCombat, UnitHealth, UnitHealthMax = UnitAffectingCombat, UnitHealth, UnitHealthMax
+local UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance = UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance
 local CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange = CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange
 local GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents = GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents
 --[[WARNING: Don't put NotifyInspect as local]]
 
 local members = {};
 local memberssetup = { cache = { _cache = {} } };
-local roster = memberssetup.cache
-local _cache = roster._cache
+local roster = memberssetup.cache;
+local _cache = roster._cache;
 local tankTalents, BuildTalents, inspectFrame, DoInspect
-local INSPECT_TIMEOUT = 3 -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
-local INSPECT_DELAY	= 10  -- NotifyInspect delay per unit.
-local wotlk = ni.vars.build == 30300
+local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
+local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
+local wotlk = ni.vars.build == 30300;
 setmetatable(members, {
 	__call = function(_, ...)
 		local pGuid = UnitGUID("player");
@@ -22,7 +22,7 @@ setmetatable(members, {
 		if wotlk then
 			nRaidMembers = GetNumRaidMembers()
 			nPartyMembers = GetNumPartyMembers()
-			groupType = nRaidMembers > 0 and "raid" or "party"		
+			groupType = nRaidMembers > 0 and "raid" or "party"
 		else
 			nRaidMembers = GetNumGroupMembers()
 			nPartyMembers = nRaidMembers - 1
@@ -40,7 +40,7 @@ setmetatable(members, {
 			end
 		end
 	end,
-	__index = { name = "members", author = "MoRBiDuS", version = "1.1.0a" };
+	__index = { name = "members", author = "MoRBiDuS", version = "1.1.2a" };
 });
 
 local dontCache = {	["updatemember"] = true, ["updatemembers"] = true, ["reset"] = true, ["addcustom"] = true, ["removecustom"] = true };
@@ -53,7 +53,7 @@ local function addCache(t)
 end;
 function memberssetup.Do(f, c)
     return function(...)
-		local a, res = tos(f);
+		local a, res = tos(f)
 		for n = 2, select('#', ...) do
 			a = a.."»"..tos(select(n,...))
 		end
@@ -75,6 +75,7 @@ if wotlk then
 		SurvivalOfTheFittest	= GetSpellInfo(33853),
 		ProtectorOfThePack		= GetSpellInfo(57873)
 	};
+
 	BuildTalents = function(unit)
 		local notMe = unit ~= "player"
 		local NumTalentTabs = GetNumTalentTabs(notMe)
@@ -98,28 +99,29 @@ if wotlk then
 					}
 				end
 				roster[unit]["t"..tab] = pointsSpent
-				if pointsSpent>maxPointsSpent then
+				if pointsSpent > maxPointsSpent then
 					maxPointsSpent = pointsSpent
 					roster[unit].specName = SpecName
 				end
 			end
 		end
 	end;
+
 	hooksecurefunc("NotifyInspect", function(unit)
-		if UnitGUID("mouseover") ~= UnitGUID(unit) then
+		if not UnitIsUnit("mouseover", unit) then
 			roster.inspectUnit = unit
 			roster.inspectTainted = true
 			ni.delayfor(INSPECT_TIMEOUT, function()
 				if roster.inspectTainted then
 					roster.inspectTainted = false
-					roster[unit].lastInspTime = 5*roster[unit].inspAttempts + GetTime()
-					if roster[unit].inspAttempts<3 then
+					roster[unit].lastInspTime = 5 * roster[unit].inspAttempts + GetTime()
+					if roster[unit].inspAttempts < 3 then
 						roster[unit].inspAttempts = roster[unit].inspAttempts + 1
 					end
 				end
 			end)
 		end
-	end)
+	end);
 	
 	inspectFrame = CreateFrame("frame")
 	DoInspect = function(unit)
@@ -127,7 +129,7 @@ if wotlk then
 			NotifyInspect(unit)
 			inspectFrame:RegisterEvent("INSPECT_TALENT_READY")
 		end
-	end;
+	end
 
 	inspectFrame:SetScript("OnEvent", function(self)
 		self:UnregisterEvent("INSPECT_TALENT_READY")
@@ -144,25 +146,35 @@ end;
 function memberssetup:create(unit, guid)
 	if roster[unit] then return end
 	local o = {};
-	setmetatable(o, memberssetup)
+	setmetatable(o, memberssetup);
 	
 	function o:istank()
-		return o.class == "WARRIOR" and o:aura(71)
-		or (o.class == "DRUID" and o:auras("9634||5487"))
-		or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
-		or (o.class == "DEATHKNIGHT" and o:aura(48263))
-		or (o:aura(57339) or o:aura(57340))
-		or (o:role() == "TANK")
-		or false;
+		if wotlk then
+			return o:role()=="TANK";
+		else
+			return o.class == "WARRIOR" and o:aura(71)
+			or (o.class == "DRUID" and o:auras("9634||5487"))
+			or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
+			or (o.class == "DEATHKNIGHT" and o:aura(48263))
+			or (o:aura(57340))
+			or (o:role() == "TANK")
+			or false;		
+		end
 	end;
 	if wotlk then	
 		function o:ishealer()
-			return o:role() == "HEALER";
+			return o:role()=="HEALER"
 		end;
 		function o:isdps()
-			return o:role() == "DAMAGER";
+			return o:role()=="MELEE" or o:role()=="CASTER"
 		end;
-	end
+		function o:iscaster()
+			return o:role()=="CASTER"
+		end;
+		function o:ismelee()
+			return o:role()=="MELEE"
+		end;		
+	end;
 	function o:location()
 		local x, y, z, r = ni.functions.objectinfo(o.guid);
 		if x then
@@ -207,15 +219,15 @@ function memberssetup:create(unit, guid)
 		return UnitHealthMax(o.unit);
 	end;
 	function o:hp()
-		local hp = o:hpraw()/o:hpmax() * 100 
+		local hp = o:hpraw()/o:hpmax() * 100;
 		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
 			return 100;
-		end
+		end;
 		for _,id in ipairs(ni.tables.cantheal) do
-			if o:debuff(id) then return 100	end
+			if o:debuff(id) then return 100 end
 		end;
 		for _,id in ipairs(ni.tables.notneedheal) do
-			if o:buff(id) then return 100	end
+			if o:buff(id) then return 100 end
 		end;
 		hp = o:istank() and (hp - 5) or hp;
 		hp = o:dispel() and (hp - 2) or hp;
@@ -238,7 +250,7 @@ function memberssetup:create(unit, guid)
 		and IsSpellInRange(GetSpellInfo(spellid), o.unit) == 1
 		and (not facing or o:facing())
 		and (not los or o:los()))
-		or false
+		or false;
 	end;
 	function o:threat()
 		return ni.unit.threat(o.unit) or false;
@@ -248,37 +260,42 @@ function memberssetup:create(unit, guid)
 			return UnitGroupRolesAssigned(o.unit) or "NONE";
 		elseif not roster[o.unit].talents then
 			return "NONE"
-		elseif roster[o.unit].role then
-			return roster[o.unit].role
-		end
-		
+		else
+			if roster[o.unit].role then
+				return roster[o.unit].role
+			elseif not CheckInteractDistance(o.unit, 1) then
+				return roster[o.unit].lastRole
+			end
+		end;
+
 		local class, role, t = o.class, "none", tankTalents
-		if class == "ROGUE" or class == "HUNTER" or class == "MAGE" or class == "WARLOCK" then
-			role = "DAMAGER"
+		if class == "ROGUE" or class == "HUNTER" then
+			role = "MELEE"
+		elseif class == "MAGE" or class == "WARLOCK" then
+			role = "CASTER"
 		elseif class == "DEATHKNIGHT" then
 			local score = o:talent(t.BladeBarrier) > 0 and 1 or 0
 			score = score + (o:talent(t.Toughness) > 0 and 1 or 0)
 			score = score + (o:talent(t.Anticipation) > 0 and 1 or 0)
-			role = score >= 2 and "TANK" or "DAMAGER"	-- if has 2 of the 3 tanking talents then is a tank
+			role = score >= 2 and "TANK" or "MELEE"	-- if has 2 of the 3 tanking talents then is a tank
 		else
 			local t1, t2, t3 = roster[o.unit].t1, roster[o.unit].t2, roster[o.unit].t3
 			if class == "PRIEST" then
-				role = ((t1 + t2) > t3) and "HEALER" or "DAMAGER"
+				role = (t1 + t2) > t3 and "HEALER" or "CASTER"
 			elseif class == "WARRIOR" then
-				role = (t1 + t2) > t3 and "DAMAGER" or "TANK" 
+				role = (t1 + t2) > t3 and "MELEE" or "TANK" 
 			else
 				local weight = (t1 > t2 and t1 > t3 and 1) or (t2 > t1 and t2 > t3 and 2) or (t3 > t1 and t3 > t2 and 3) or 0
 				if class == "PALADIN" then
-					role = weight == 1 and "HEALER" or weight == 2 and "TANK" or weight == 3 and "DAMAGER"
+					role = weight == 1 and "HEALER" or weight==2 and "TANK" or weight==3 and "MELEE"
 				elseif class == "DRUID" then
 					if weight == 2 then
-						role = o:talent(t.SurvivalOfTheFittest) > 0 and o:talent(t.ProtectorOfThePack) > 0 and "TANK" or "DAMAGER"
+						role = o:talent(t.SurvivalOfTheFittest) > 0 and o:talent(t.ProtectorOfThePack) > 0 and "TANK" or "MELEE"
 					else
-						role = weight == 1 and "DAMAGER" or "HEALER"
+						role = weight == 1 and "CASTER" or "HEALER"
 					end
-
 				elseif class == "SHAMAN" then
-					role = weight == 3 and "HEALER" or "DAMAGER"
+					role = weight == 1 and "CASTER" or weight == 2 and "MELEE" or weight == 3 and "HEALER"
 				end
 			end
 		end
@@ -296,15 +313,15 @@ function memberssetup:create(unit, guid)
 					if type(tbl) == "table" then
 						for k,v in pairs(tbl) do
 							if k == talent then
-								return v.currentRank
+								return v.currentRank;
 							end
 						end
 					end
 				end
 			end
-			return 0
+			return 0;
 		end;
-	end
+	end;
 
 	function o:updatemember()
 		o.name = o.name or UnitName(o.unit);
@@ -316,7 +333,10 @@ function memberssetup:create(unit, guid)
 		
 		if wotlk then
 			local now = GetTime()
-			if now-roster[o.unit].lastInspTime>INSPECT_DELAY then
+			if now-roster[o.unit].lastInspTime > INSPECT_DELAY then
+				if roster[o.unit].role then
+					roster[o.unit].lastRole = roster[o.unit].role
+				end
 				roster[o.unit].role = nil
 				if o.unit == "player" then
 					BuildTalents("player")
@@ -339,9 +359,10 @@ function memberssetup:create(unit, guid)
 	roster[unit].name			= o.name
 	roster[unit].class			= o.class
 	roster[unit].guid			= o.guid
+	roster[unit].role			= "NONE"
+	roster[unit].lastRole		= "NONE"
 	roster[unit].lastInspTime	= 0
 	roster[unit].inspAttempts	= 0
-	
 	addCache(o)
 	return o;
 end;
@@ -534,4 +555,4 @@ end;
 memberssetup.set()
 addCache(members)
 
-return members
+return members;

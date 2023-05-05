@@ -35,7 +35,63 @@ Returns true if the unit is a tank or has the capability to tank, and false othe
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:istank() then
-		-- The unit is tank
+		-- The unit is tank, do stuff...
+	end
+end
+```
+
+## ishealer
+
+Returns: `boolean`
+
+Returns true if the unit is a healer or has the capability to healer, and false otherwise.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:ishealer() then
+		-- The unit is healer, do stuff... 
+	end
+end
+```
+
+## isdps
+
+Returns: `boolean`
+
+Returns true if the unit is a DPS or has the capability to DPS, and false otherwise.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:isdps() then
+		-- The unit is DPS, do stuff... 
+	end
+end
+```
+
+## iscaster
+
+Returns: `boolean`
+
+Returns true if the unit is a Caster DPS or has the capability to Caster DPS, and false otherwise.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:iscaster() then
+		-- The unit is Caster DPS, do stuff... 
+	end
+end
+```
+
+## ismelee
+
+Returns: `boolean`
+
+Returns true if the unit is a Melee DPS or has the capability to Melee DPS, and false otherwise.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:ismelee() then
+		-- The unit is Melee DPS, do stuff... 
 	end
 end
 ```
