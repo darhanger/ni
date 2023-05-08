@@ -1,24 +1,23 @@
 local setmetatable, type, select, sort, wipe, ipairs, tremove, tos = setmetatable, type, select, sort, wipe, ipairs, tremove, tostring
 local UnitGroupRolesAssigned, UnitIsGhost, UnitHealthMax, UnitName, UnitGUID, UnitIsUnit = UnitGroupRolesAssigned, UnitIsGhost, UnitHealthMax, UnitName, UnitGUID, UnitIsUnit
 local IsInRaid, GetNumRaidMembers, GetNumPartyMembers, GetNumGroupMembers, UnitClass, UnitCanAssist = IsInRaid, GetNumRaidMembers, GetNumPartyMembers, GetNumGroupMembers, UnitClass, UnitCanAssist
-local UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance = UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance
-local CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange = CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange
+local UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance, UnitAffectingCombat = UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance, UnitAffectingCombat
+local CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange, GetRaidRosterInfo = CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange, GetRaidRosterInfo
 local GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents = GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents
 --[[WARNING: Don't put NotifyInspect as local]]
 
 local members = {};
 local memberssetup = { cache = { _cache = {} } };
-local roster = memberssetup.cache;
-local _cache = roster._cache;
+local roster = memberssetup.cache
+local _cache = roster._cache
 local tankTalents, BuildTalents, inspectFrame, DoInspect
-local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
+local INSPECT_TIMEOUT = 3;-- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
 local wotlk = ni.vars.build == 30300;
+local playerInCombat = UnitAffectingCombat("player");
 setmetatable(members, {
 	__call = function(_, ...)
-		local pGuid = UnitGUID("player");
-		members[#members + 1] = memberssetup:create("player", pGuid)
-		local groupType, nRaidMembers, nPartyMembers
+		local groupType, nRaidMembers, nPartyMembers, subgroup
 		if wotlk then
 			nRaidMembers = GetNumRaidMembers()
 			nPartyMembers = GetNumPartyMembers()
@@ -29,18 +28,27 @@ setmetatable(members, {
 			groupType = IsInRaid() and "raid" or "party"
 		end
 		local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
+		local pGuid = UnitGUID("player");
 		for i = 1, groupsize do
 			local unit = groupType .. i
 			local guid = UnitGUID(unit)
-			if guid and guid ~= pGuid then
-				local o = memberssetup:create(unit, guid)
-				if o then
-					members[#members+1] = o;
+			if guid then
+				subgroup = groupType == "raid" and select(3, GetRaidRosterInfo(i)) or 1
+				if guid ~= pGuid then
+					local o = memberssetup:create(unit, guid, subgroup)
+					if o then
+						members[#members+1] = o;
+					end
+				else
+					members[#members + 1] = memberssetup:create("player", pGuid, subgroup)
 				end
 			end
 		end
+		if groupsize<1 then
+			members[#members + 1] = memberssetup:create("player", pGuid, 1)
+		end
 	end,
-	__index = { name = "members", author = "MoRBiDuS", version = "1.1.2a" };
+	__index = { name = "members", author = "MoRBiDuS", version = "1.1.5a" };
 });
 
 local dontCache = {	["updatemember"] = true, ["updatemembers"] = true, ["reset"] = true, ["addcustom"] = true, ["removecustom"] = true };
@@ -77,7 +85,8 @@ if wotlk then
 	};
 
 	BuildTalents = function(unit)
-		local notMe = unit ~= "player"
+		if not unit then return end
+		local notMe = unit~="player"
 		local NumTalentTabs = GetNumTalentTabs(notMe)
 		if NumTalentTabs > 0 then
 			local group = GetActiveTalentGroup(notMe)
@@ -96,7 +105,7 @@ if wotlk then
 						column		= column,
 						currentRank	= currentRank,
 						maxRank		= maxRank
-					}
+					};
 				end
 				roster[unit]["t"..tab] = pointsSpent
 				if pointsSpent > maxPointsSpent then
@@ -129,50 +138,57 @@ if wotlk then
 			NotifyInspect(unit)
 			inspectFrame:RegisterEvent("INSPECT_TALENT_READY")
 		end
-	end
-
-	inspectFrame:SetScript("OnEvent", function(self)
-		self:UnregisterEvent("INSPECT_TALENT_READY")
-		if roster.inspectTainted then
-			BuildTalents(roster.inspectUnit)
-			roster[roster.inspectUnit].lastInspTime = GetTime()
-			roster[roster.inspectUnit].inspAttempts = 0
-			roster.inspectTainted = false
+	end;
+	inspectFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+	inspectFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+	
+	inspectFrame:SetScript("OnEvent", function(self, event, ...)
+		if event == "INSPECT_TALENT_READY" then
+			self:UnregisterEvent("INSPECT_TALENT_READY")
+			if roster.inspectTainted then
+				BuildTalents(roster.inspectUnit)
+				roster[roster.inspectUnit].lastInspTime = GetTime()
+				roster[roster.inspectUnit].inspAttempts = 0
+				roster.inspectTainted = false
+			end
+		elseif event == "PLAYER_REGEN_ENABLED" then
+			playerInCombat = false
+		elseif event == "PLAYER_REGEN_DISABLED" then
+			playerInCombat = true
 		end
 	end)
 end;
 
-
-function memberssetup:create(unit, guid)
-	if roster[unit] then return end
+function memberssetup:create(unit, guid, subgroup)
+	if roster[unit] then return end;
 	local o = {};
 	setmetatable(o, memberssetup);
 	
 	function o:istank()
 		if wotlk then
-			return o:role()=="TANK";
+			return o:role() == "TANK";
 		else
-			return o.class == "WARRIOR" and o:aura(71)
+			return (o:role() == "TANK"
+			and ((o.class == "WARRIOR" and o:aura(71))
 			or (o.class == "DRUID" and o:auras("9634||5487"))
 			or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
 			or (o.class == "DEATHKNIGHT" and o:aura(48263))
-			or (o:aura(57340))
-			or (o:role() == "TANK")
+			or (o:aura(57339) or o:aura(57340))))
 			or false;		
 		end
 	end;
 	if wotlk then	
 		function o:ishealer()
-			return o:role()=="HEALER"
+			return o:role() == "HEALER"
 		end;
 		function o:isdps()
-			return o:role()=="MELEE" or o:role()=="CASTER"
+			return o:role() == "MELEE" or o:role() == "CASTER"
 		end;
 		function o:iscaster()
-			return o:role()=="CASTER"
+			return o:role() == "CASTER"
 		end;
 		function o:ismelee()
-			return o:role()=="MELEE"
+			return o:role() == "MELEE"
 		end;		
 	end;
 	function o:location()
@@ -184,7 +200,7 @@ function memberssetup:create(unit, guid)
 	end;
 	function o:combat()
 		return UnitAffectingCombat(o.unit) == 1;
-	end
+	end;
 	function o:aura(auras)
 		return ni.unit.aura(o.unit, aura);
 	end;	
@@ -287,7 +303,7 @@ function memberssetup:create(unit, guid)
 			else
 				local weight = (t1 > t2 and t1 > t3 and 1) or (t2 > t1 and t2 > t3 and 2) or (t3 > t1 and t3 > t2 and 3) or 0
 				if class == "PALADIN" then
-					role = weight == 1 and "HEALER" or weight==2 and "TANK" or weight==3 and "MELEE"
+					role = weight == 1 and "HEALER" or weight == 2 and "TANK" or weight == 3 and "MELEE"
 				elseif class == "DRUID" then
 					if weight == 2 then
 						role = o:talent(t.SurvivalOfTheFittest) > 0 and o:talent(t.ProtectorOfThePack) > 0 and "TANK" or "MELEE"
@@ -310,7 +326,7 @@ function memberssetup:create(unit, guid)
 			if roster[o.unit] and roster[o.unit].talents then
 				local talents = roster[o.unit].talents
 				for tab,tbl in pairs(talents) do
-					if type(tbl) == "table" then
+					if type(tbl)=="table" then
 						for k,v in pairs(tbl) do
 							if k == talent then
 								return v.currentRank;
@@ -330,8 +346,9 @@ function memberssetup:create(unit, guid)
 		roster[o.unit].name		= o.name
 		roster[o.unit].class	= o.class
 		roster[o.unit].guid		= o.guid
+		roster[o.unit].subgroup	= o.subgroup
 		
-		if wotlk then
+		if wotlk and not playerInCombat then
 			local now = GetTime()
 			if now-roster[o.unit].lastInspTime > INSPECT_DELAY then
 				if roster[o.unit].role then
@@ -351,6 +368,7 @@ function memberssetup:create(unit, guid)
 	-- Attributes
 	o.unit			= unit
 	o.guid			= guid
+	o.subgroup		= subgroup
 	o.name			= UnitName(unit)
 	o.class			= select(2, UnitClass(unit))
 	o.target		= unit .. "target"
@@ -359,6 +377,7 @@ function memberssetup:create(unit, guid)
 	roster[unit].name			= o.name
 	roster[unit].class			= o.class
 	roster[unit].guid			= o.guid
+	roster[unit].subgroup		= o.subgroup
 	roster[unit].role			= "NONE"
 	roster[unit].lastRole		= "NONE"
 	roster[unit].lastInspTime	= 0
