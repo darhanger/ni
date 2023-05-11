@@ -18,3 +18,8 @@
   - [Spell](api/spell.md)
   - [Unit](api/unit.md)
   - [Vars](api/vars.md)
+
+- Usefull
+
+  - [Discord](https://discord.com/invite/xBFKJc6QRr)
+  - [YouTube](https://youtube.com/playlist?list=PLvjnPqMPbgyoq7rM8bHr3rdcRTVZ5cXuy)

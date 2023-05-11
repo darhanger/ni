@@ -7,7 +7,7 @@ local items = {
 	settingsfile = "DruidRestoEN_Free_Darhanger.json",
 	{ type = "title", text = "Free Restoration Druid by |c0000CED1DarhangeR|r" },
 	{ type = "separator" },
-	{ type = "title", text = "|cffFF7C0AProfile version 0.0.1|r" },
+	{ type = "title", text = "|cffFF7C0AProfile version 0.0.2|r" },
 	{ type = "separator" },
 	{ type = "page", number = 1, text = "|cffFFFF00Main Settings" },
 	{ type = "separator" },	
@@ -19,6 +19,10 @@ local items = {
 	{ type = "entry", text = ni.spell.icon(18562).." Swiftmend", tooltip = "Use spell when ally |cff00D700HP|r < %.", enabled = true, value = 60, min = 10, max = 100, step = 1, width = 40, key = "swift" },
 	{ type = "entry", text = ni.spell.icon(17116).." Nature's Swiftness", tooltip = "Use spell when ally |cff00D700HP|r < %.\nWith Nature Swiftness also will be used [Healing Touch].", enabled = true, value = 40, min = 10, max = 100, step = 1, width = 40, key = "natureswift" },	
 	{ type = "separator" },
+	{ type = "entry", text = ni.spell.icon(48447).." Tranquility", tooltip = "Spell will be used when average |cff00D700HP|r\nof specified number allies is lower < %.", enabled = true, key = "tranquil" },
+	{ type = "entry", text = "Tranquility (Ally HP)", tooltip = "Adjust ally average |cff00D700HP|r < %.", value = 37, min = 25, max = 100, step = 1, width = 40, key = "tranquilhp" },
+	{ type = "entry", text = "Tranquility (Ally Count)", tooltip = "Adjust ally count in your party.", value = 4, min = 2, max = 5, step = 1, width = 40, key = "tranquilcount" },
+	{ type = "separator" },	
 	{ type = "title", text = "Dispel" },
 	{ type = "separator" },
 	{ type = "entry", text = ni.spell.icon(2782).." Remove Curse (Ally)", tooltip = "Auto dispel debuffs from ally.", enabled = true, key = "removecurse" },
@@ -258,6 +262,20 @@ local abilities = {
 				ni.spell.cast(spells.HealingTouch, allyOne.unit)
 				return true;
 			end
+		end
+	end,
+-----------------------------------			
+    ["Tranquility"] = function()
+		if not ui("tranquil")[2]
+		or cache.IsMoving then 
+			return false;
+		end
+		local value = ui("tranquilhp")[1];
+		local total = members.subgroupbelow(value, 30, true);
+		if total >= ui("tranquilcount")[1]
+		and usableSilence(spells.Tranquility) then
+			spellCast(spells.Tranquility)
+			return true;
 		end
 	end,
 -----------------------------------		

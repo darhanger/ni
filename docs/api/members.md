@@ -539,6 +539,34 @@ if ni.members.averageof(4) < 20 then
 	--4 of the group members average the hp below 20%
 end
 
+## subgroupbelow
+
+Arguments:
+
+- `percent` (`number`): The percentage of health below which members are considered to have low health.
+- `radius` (`number`): The maximum radius (in yards) within which to search for low health members.
+- `owngroup` (`boolean`, optional): If `true`, search only within the player's subgroup. Otherwise, search within all subgroups.
+
+Returns: 
+- `near` (`number`): The number of members in the subgroup with low health.
+- `lowestMember` (`table`): A table containing information about the subgroup member with the lowest health and closest to the player. The table contains the following keys:
+    - `unit` (`string`): The name of the unit.
+    - `hp` (`number`): The health percentage of the unit.
+    - `near` (`number`): The number of other members within the specified radius that also have low health.
+
+```lua
+-- Search for the subgroup member with the lowest health below 20% within 10 yards.
+local total, lowestMember = ni.members.subgroupbelow(20, 10)
+
+if lowest and total >= 3
+and lowest:valid(48072, false, true) then
+	spellCast(48072, lowest.unit)
+	return true;	
+end
+```
+
+Note: This function searches for the lowest health member(s) in a player's subgroup and returns the number of members with low health and the one with the lowest health within a certain radius.
+
 ## inrange
 
 Arguments:

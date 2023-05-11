@@ -11,10 +11,10 @@ local memberssetup = { cache = { _cache = {} } };
 local roster = memberssetup.cache
 local _cache = roster._cache
 local tankTalents, BuildTalents, inspectFrame, DoInspect
-local INSPECT_TIMEOUT = 3;-- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
+local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
-local wotlk = ni.vars.build == 30300;
 local playerInCombat = UnitAffectingCombat("player");
+local wotlk = ni.vars.build == 30300;
 setmetatable(members, {
 	__call = function(_, ...)
 		local groupType, nRaidMembers, nPartyMembers, subgroup
@@ -37,14 +37,14 @@ setmetatable(members, {
 				if guid ~= pGuid then
 					local o = memberssetup:create(unit, guid, subgroup)
 					if o then
-						members[#members+1] = o;
+						members[#members + 1] = o;
 					end
 				else
 					members[#members + 1] = memberssetup:create("player", pGuid, subgroup)
 				end
 			end
 		end
-		if groupsize<1 then
+		if groupsize < 1 or groupType == "party" then
 			members[#members + 1] = memberssetup:create("player", pGuid, 1)
 		end
 	end,
@@ -61,7 +61,7 @@ local function addCache(t)
 end;
 function memberssetup.Do(f, c)
     return function(...)
-		local a, res = tos(f)
+		local a, res = tos(f);
 		for n = 2, select('#', ...) do
 			a = a.."»"..tos(select(n,...))
 		end
@@ -168,12 +168,12 @@ function memberssetup:create(unit, guid, subgroup)
 		if wotlk then
 			return o:role() == "TANK";
 		else
-			return (o:role() == "TANK"
+			return o:role() == "TANK"
 			and ((o.class == "WARRIOR" and o:aura(71))
 			or (o.class == "DRUID" and o:auras("9634||5487"))
 			or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
 			or (o.class == "DEATHKNIGHT" and o:aura(48263))
-			or (o:aura(57339) or o:aura(57340))))
+			or (o:aura(57339) or o:aura(57340)))
 			or false;		
 		end
 	end;
@@ -433,6 +433,50 @@ memberssetup.set = function()
 		end
 		return n > 0 and average/n or 0;
 	end;
+	function members.tsubgroup()
+		local temp = {};
+		for _,o in ipairs(members) do
+			if not tContains(temp, o.subgroup) then
+				tinsert(temp, o.subgroup)
+			end
+		end
+		return temp;
+	end;	
+    function members.subgroupbelow(percent, radius, owngroup)
+        local total, temp, temp2, aux = 0, {}, {};
+        if owngroup then
+            aux = members.inrange("player", 0)[1]
+        end
+        owngroup = aux and aux.subgroup
+        for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
+            for _,o in ipairs(members) do
+                if o.subgroup == group and o:range()
+                  and o:hp() < percent and o:los() then
+                    total = 1
+                    for _,o2 in ipairs(members) do
+                        if o.guid ~= o2.guid
+						and o2.subgroup == group
+						and o2:hp() < percent
+						and ni.unit.distance(o.unit, o2.unit) <= radius
+						and ni.unit.los(o.unit, o2.unit) then
+                            total = total + 1
+                        end
+                    end
+                end
+                tmp[#tmp + 1] = { unit = o.unit, hp = o:hp(), near = total };
+            end
+            table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end );
+            if temp[1] then
+                temp2[#temp2 + 1] = {unit = temp[1].unit, hp = temp[1].hp, near = temp[1].near };
+            end
+        end
+        table.sort( temp2, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end );
+        if temp2[1] then
+            return temp2[1].near, temp2[1];
+        else
+            return 0;
+        end
+    end;	
 	function members.inrange(unit, distance)
 		local tmp = {};
 		if type(unit) ~= "string" then return tmp end
