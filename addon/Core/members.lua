@@ -121,7 +121,7 @@ if wotlk then
 			roster.inspectUnit = unit
 			roster.inspectTainted = true
 			ni.delayfor(INSPECT_TIMEOUT, function()
-				if roster.inspectTainted then
+				if roster[unit] and roster.inspectTainted then
 					roster.inspectTainted = false
 					roster[unit].lastInspTime = 5 * roster[unit].inspAttempts + GetTime()
 					if roster[unit].inspAttempts < 3 then
@@ -451,7 +451,7 @@ memberssetup.set = function()
         for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
             for _,o in ipairs(members) do
                 if o.subgroup == group and o:range()
-                  and o:hp() < percent and o:los() then
+				and o:hp() < percent and o:los() then
                     total = 1
                     for _,o2 in ipairs(members) do
                         if o.guid ~= o2.guid
@@ -463,7 +463,7 @@ memberssetup.set = function()
                         end
                     end
                 end
-                tmp[#tmp + 1] = { unit = o.unit, hp = o:hp(), near = total };
+                temp[#temp + 1] = { unit = o.unit, hp = o:hp(), near = total };
             end
             table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end );
             if temp[1] then
@@ -476,7 +476,7 @@ memberssetup.set = function()
         else
             return 0;
         end
-    end;	
+    end;
 	function members.inrange(unit, distance)
 		local tmp = {};
 		if type(unit) ~= "string" then return tmp end
