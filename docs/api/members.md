@@ -538,6 +538,7 @@ Returns the average health of the lowest members, averaged by the argument passe
 if ni.members.averageof(4) < 20 then
 	--4 of the group members average the hp below 20%
 end
+```
 
 ## subgroupbelow
 
