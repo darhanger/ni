@@ -29,10 +29,10 @@ player.getskillinfo = function(prof)
     for i = 1, GetNumSkillLines() do
         local name, _, _, skillRank = GetSkillLineInfo(i)
         if name == prof then
-            return skillRank
+            return skillRank;
         end
     end
-    return 0
+    return 0;
 end;
 player.useitem = function(...) --itemid/name[, target]
 	if #{...} > 1 then
@@ -148,6 +148,13 @@ player.ismoving = function()
 		return true
 	end
 	return false
+end;
+player.guid = function()
+	local p = ni.objects["player"]
+	if p then
+		return p.guid;
+	end
+	return p and p.guid or UnitGUID("player");
 end;
 
 setmetatable(

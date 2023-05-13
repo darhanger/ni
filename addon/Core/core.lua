@@ -300,9 +300,19 @@ if not ni.loaded then
 			end
 		end
 	end;
+
+	local old_UnitGUID = UnitGUID
+	function UnitGUID(unit)
+		local guid = old_UnitGUID(unit)
+		if not guid and (unit == "player" or unit == "0x0") then
+			return "0x0";
+		end
+		return guid;
+	end;
+	
 	ni.functionsregistered = function()
 		return %%ToggleConsole%% ~= nil;
-	end
+	end;
 	ni.frames.main:SetScript("OnUpdate", ni.frames.OnUpdate);
 	ni.frames.main:SetScript("OnEvent", ni.frames.OnEvent);
 

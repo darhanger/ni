@@ -1,36 +1,31 @@
 local UnitIsDeadOrGhost, GetTime, floor, math_max, math_huge, UnitHealth, UnitHealthMax = UnitIsDeadOrGhost, GetTime, floor, math.max, math.huge, UnitHealth, UnitHealthMax
 local ttd = {
-	calculate = function(o)
-		if (o:unit() or o:player()) and o:canattack() and not UnitIsDeadOrGhost(o.guid) and o:combat() then
-			if o.timeincombat == nil then
-				o.timeincombat = GetTime()
-			end
+    calculate = function(o)
+        if (o:unit() or o:player()) and o:canattack() and not UnitIsDeadOrGhost(o.guid) and o:combat() then
+            if o.timeincombat == nil then
+                o.timeincombat = GetTime()
+            end
 
-			local currenthp = UnitHealth(o.guid)
-			local maxhp = UnitHealthMax(o.guid)
-			local diff = maxhp - currenthp
-			local duration = GetTime() - o.timeincombat
-			local _dps = diff / duration
-			local death = 0
+            local currenthp = UnitHealth(o.guid)
+            local maxhp = UnitHealthMax(o.guid)
+            local diff = maxhp - currenthp
+            local duration = GetTime() - o.timeincombat
+            local _dps = diff / duration
+            o.dps = math_floor(_dps)
 
-			if _dps ~= 0 then
-				death = math_max(0, currenthp) / _dps
-			else
-				death = 0
-			end
-			o.dps = floor(_dps)
+            local death = 0
+            if _dps ~= 0 then
+                death = math_max(0, currenthp) / _dps
+            end
 
-			if death == math.huge then
-				o.ttd = -1
-			elseif death < 0 then
-				o.ttd = 0
-			else
-				o.ttd = death
-			end
-			if maxhp - currenthp == 0 then
-				o.ttd = -1
-			end
-		end
-	end
+            if death == math.huge or maxhp - currenthp == 0 then
+                o.ttd = -1
+            elseif death < 0 then
+                o.ttd = 0
+            else
+                o.ttd = death
+            end
+        end
+    end
 };
 return ttd;

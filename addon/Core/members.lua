@@ -74,7 +74,6 @@ function memberssetup.Do(f, c)
     end
 end;
 setmetatable(memberssetup, { __call = function(_, ...) return Do(...) end });
-
 if wotlk then
 	tankTalents = {
 		BladeBarrier			= GetSpellInfo(49182),
@@ -83,10 +82,9 @@ if wotlk then
 		SurvivalOfTheFittest	= GetSpellInfo(33853),
 		ProtectorOfThePack		= GetSpellInfo(57873)
 	};
-
 	BuildTalents = function(unit)
 		if not unit then return end
-		local notMe = unit~="player"
+		local notMe = unit ~= "player"
 		local NumTalentTabs = GetNumTalentTabs(notMe)
 		if NumTalentTabs > 0 then
 			local group = GetActiveTalentGroup(notMe)
@@ -131,17 +129,17 @@ if wotlk then
 			end)
 		end
 	end);
-	
-	inspectFrame = CreateFrame("frame")
+		
+	inspectFrame = CreateFrame("frame");
 	DoInspect = function(unit)
 		if CanInspect(unit) then
 			NotifyInspect(unit)
 			inspectFrame:RegisterEvent("INSPECT_TALENT_READY")
 		end
 	end;
-	inspectFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-	inspectFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-	
+	inspectFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
+	inspectFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
+
 	inspectFrame:SetScript("OnEvent", function(self, event, ...)
 		if event == "INSPECT_TALENT_READY" then
 			self:UnregisterEvent("INSPECT_TALENT_READY")
@@ -156,8 +154,8 @@ if wotlk then
 		elseif event == "PLAYER_REGEN_DISABLED" then
 			playerInCombat = true
 		end
-	end)
-end;
+	end);
+end;	
 
 function memberssetup:create(unit, guid, subgroup)
 	if roster[unit] then return end;
@@ -179,17 +177,17 @@ function memberssetup:create(unit, guid, subgroup)
 	end;
 	if wotlk then	
 		function o:ishealer()
-			return o:role() == "HEALER"
+			return o:role() == "HEALER";
 		end;
 		function o:isdps()
-			return o:role() == "MELEE" or o:role() == "CASTER"
+			return o:role() == "MELEE" or o:role() == "CASTER";
 		end;
 		function o:iscaster()
-			return o:role() == "CASTER"
+			return o:role() == "CASTER";
 		end;
 		function o:ismelee()
-			return o:role() == "MELEE"
-		end;		
+			return o:role() == "MELEE";
+		end;
 	end;
 	function o:location()
 		local x, y, z, r = ni.functions.objectinfo(o.guid);
@@ -200,30 +198,30 @@ function memberssetup:create(unit, guid, subgroup)
 	end;
 	function o:combat()
 		return UnitAffectingCombat(o.unit) == 1;
-	end;
-	function o:aura(auras)
+	end
+	function o:aura(aura)
 		return ni.unit.aura(o.unit, aura);
 	end;	
 	function o:auras(auras)
 		return ni.unit.auras(o.unit, auras);
 	end;	
-	function o:buffs(str, filter)
-		return ni.unit.buffs(o.unit, str, filter);
+	function o:buffs(buffs, filter)
+		return ni.unit.buffs(o.unit, buffs, filter);
 	end;
-	function o:debuffs(str, filter)
-		return ni.unit.debuffs(o.unit, str, filter) or false;
+	function o:debuffs(debuffs, filter)
+		return ni.unit.debuffs(o.unit, debuffs, filter);
 	end;
 	function o:debufftype(str)
-		return ni.unit.debufftype(o.unit, str) or false;
+		return ni.unit.debufftype(o.unit, str);
 	end;
 	function o:bufftype(str)
-		return ni.unit.bufftype(o.unit, str) or false;
+		return ni.unit.bufftype(o.unit, str);
 	end;
 	function o:buff(buff, filter)
-		return ni.unit.buff(o.unit, buff, filter)~=nil;
+		return ni.unit.buff(o.unit, buff, filter) or false;
 	end;
 	function o:debuff(debuff, filter)
-		return ni.unit.debuff(o.unit, debuff, filter)~=nil;
+		return ni.unit.debuff(o.unit, debuff, filter) or false;
 	end;
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
@@ -234,13 +232,14 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:hpmax()
 		return UnitHealthMax(o.unit);
 	end;
+	--------------------------------------
 	function o:hp()
 		local hp = o:hpraw()/o:hpmax() * 100;
 		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
 			return 100;
-		end;
+		end		
 		for _,id in ipairs(ni.tables.cantheal) do
-			if o:debuff(id) then return 100 end
+			if o:debuff(id) then return 100	end
 		end;
 		for _,id in ipairs(ni.tables.notneedheal) do
 			if o:buff(id) then return 100 end
@@ -282,8 +281,7 @@ function memberssetup:create(unit, guid, subgroup)
 			elseif not CheckInteractDistance(o.unit, 1) then
 				return roster[o.unit].lastRole
 			end
-		end;
-
+		end
 		local class, role, t = o.class, "none", tankTalents
 		if class == "ROGUE" or class == "HUNTER" then
 			role = "MELEE"
@@ -326,7 +324,7 @@ function memberssetup:create(unit, guid, subgroup)
 			if roster[o.unit] and roster[o.unit].talents then
 				local talents = roster[o.unit].talents
 				for tab,tbl in pairs(talents) do
-					if type(tbl)=="table" then
+					if type(tbl) == "table" then
 						for k,v in pairs(tbl) do
 							if k == talent then
 								return v.currentRank;
@@ -604,7 +602,7 @@ memberssetup.set = function()
 	end;
 	function members.removecustom(unit)
 		if type(unit) == "string" then
-			for i,o in ipairs(members) do
+			for i, o in ipairs(members) do
 				if o.unit == unit then
 					roster[o.unit] = nil;
 					tremove(members, i)

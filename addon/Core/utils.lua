@@ -47,15 +47,25 @@ utils.generaterandomname = function()
 	return name;
 end;
 utils.mergetables = function(firsttable, secondtable)
-	local tmp = {}
-	for _, v in pairs(firsttable) do
-		tinsert(tmp, v)
-	end
-
-	for _, v in pairs(secondtable) do
-		tinsert(tmp, v)
-	end
-
-	return tmp
+    for k, v in pairs(secondtable) do
+        firsttable[k] = v
+    end
+end;
+utils.deepcopytable = function(o, seen)
+    seen = seen or {};
+    if o == nil then return nil end
+    if seen[o] then return seen[o] end
+    local no
+    if type(o) == 'table' then
+        no = {}
+        seen[o] = no
+        for k, v in next, o, nil do
+            no[utils.deepcopytable(k, seen)] = utils.deepcopytable(v, seen)
+        end
+        setmetatable(no, utils.deepcopytable(getmetatable(o), seen))
+    else -- number, string, boolean, etc
+        no = o
+    end
+    return no;
 end;
 return utils;
