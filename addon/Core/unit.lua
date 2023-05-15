@@ -31,14 +31,14 @@ unit.los = function(...) --target, target/x1,y1,z1,x2,y2,z2 [optional, hitflags]
 		local unitid = unit.id(t)
 		if unitid then
 			if (ni.tables.whitelistedlosunits[unitid]) then
-				return true
+				return true;
 			end
 		end
 	end
-	return los(...)
+	return los(...);
 end;
 unit.creator = function(t)
-	return unit.exists(t) and ni.functions.unitcreator(t) or nil
+	return unit.exists(t) and ni.functions.unitcreator(t) or nil;
 end;
 unit.creations = function(unit)
 	local creationstable = {}
@@ -47,24 +47,24 @@ unit.creations = function(unit)
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
 				if v:creator() == guid then
-					tinsert(creationstable, {name = v.name, guid = v.guid})
+					tinsert(creationstable, {name = v.name, guid = v.guid});
 				end
 			end
 		end
 	end
-	return creationstable
+	return creationstable;
 end;
 unit.creaturetype = function(t)
-	return ni.functions.creaturetype(t) or 0
+	return ni.functions.creaturetype(t) or 0;
 end;
 unit.istotem = function(t)
-	return (unit.exists(t) and unit.creaturetype(t) == 11) or false
+	return (unit.exists(t) and unit.creaturetype(t) == 11) or false;
 end;
 unit.readablecreaturetype = function(t)
-	return creaturetypes[unit.creaturetype(t)]
+	return creaturetypes[unit.creaturetype(t)];
 end;
 unit.combatreach = function(t)
-	return ni.functions.combatreach(t) or 0
+	return ni.functions.combatreach(t) or 0;
 end;
 unit.isboss = function(t)
 	local bossId = unit.id(t);
@@ -78,7 +78,7 @@ unit.isboss = function(t)
 	if ni.tables.mismarkedbosses[bossId] then
 		return false;
 	end
-	return UnitLevel(t) == -1
+	return UnitLevel(t) == -1;
 end;
 unit.threat = function(t, u)
 	local threat;
@@ -88,7 +88,7 @@ unit.threat = function(t, u)
 		threat = UnitThreatSituation(t);
 	end
 	if threat ~= nil then
-		return threat
+		return threat;
 	else
 		return -1;
 	end
@@ -104,14 +104,14 @@ unit.movingtime = function(target)
             if not lastmovedCache[target].is_moving and is_moving then
                 lastmovedCache[target].last = GetTime()
                 lastmovedCache[target].is_moving = true
-                return 0
+                return 0;
             elseif is_moving then
                 lastmovedCache[target].last = GetTime()
                 lastmovedCache[target].is_moving = true
-                return 0
+                return 0;
             elseif not is_moving then
                 lastmovedCache[target].is_moving = false
-                return GetTime() - lastmovedCache[target].last
+                return GetTime() - lastmovedCache[target].last;
             end
         else
             lastmovedCache[target] = {}
@@ -135,9 +135,9 @@ unit.id = function(t)
 				bitto = 6
 			end
 			if tonumber(t) then
-				return tonumber((t):sub(bitto, bitfrom), 16)
+				return tonumber((t):sub(bitto, bitfrom), 16);
 			else
-				return tonumber((UnitGUID(t)):sub(bitto, bitfrom), 16)
+				return tonumber((UnitGUID(t)):sub(bitto, bitfrom), 16);
 			end
 		end
 	end
@@ -165,17 +165,20 @@ unit.ttd = function(t)
 		return -2;
 	end
 	if ni.objects[t] and ni.objects[t].ttd ~= nil then
-		return ni.objects[t].ttd
+		return ni.objects[t].ttd;
 	end
-	return -1
+	return -1;
 end;
 unit.hp = function(t)
     if (UnitIsDeadOrGhost(t) == 1 or unit.debuff(t, 8326)) then
         return 100;
     end
-    if unit.debuff(t, 30843) or unit.debuff(t, 55593) then
-        return 100;
-    end
+	for _, spellId in ipairs(ni.tables.cantheal) do
+		if unit.debuff(t, spellId) then return 100	end
+	end
+	for _, spellId in ipairs(ni.tables.notneedheal) do
+		if unit.buff(t, spellId) then return 100 end
+	end
 	return 100 * UnitHealth(t) / UnitHealthMax(t)
 end;	
 unit.hpraw = function(t)
@@ -260,20 +263,20 @@ unit.castingpercent = function(t)
 		local timeSinceStart = (GetTime() * 1000 - castStartTime) / 1000
 		local castTime = castEndTime - castStartTime
 		local currentPercent = timeSinceStart / castTime * 100000
-		return currentPercent
+		return currentPercent;
 	end
-	return 0
-end
+	return 0;
+end;
 unit.channelpercent = function(t)
 	local channelName, _, _, _, channelStartTime, channelEndTime = UnitChannelInfo(t)
 	if channelName then
 		local timeSinceStart = (GetTime() * 1000 - channelStartTime) / 1000
 		local channelTime = channelEndTime - channelStartTime
 		local currentPercent = timeSinceStart / channelTime * 100000
-		return currentPercent
+		return currentPercent;
 	end
-	return 0
-end
+	return 0;
+end;
 local function buildAurasTable(t)
     wipe(unitauras);
     unitauras = ni.functions.auras(t) or { };
@@ -302,34 +305,34 @@ unit.auras = function(target, str)
             id = tonumber(aura)
             counter = (id and tbl.ID == id or tbl.name == aura) and counter + 1 or counter
             if not And and counter > 0 then
-                return true;
+                return true
             end
         end
     end
-    return And and counter>0 and counter == #array or false;
+    return And and counter > 0 and counter == #array or false
 end;
 --- BUFFS ---
-unit.buff = function(t, id, filter)
-	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
+unit.buff = function(target, spellID, filter)
+	local spellName = type(spellID) == "number" and GetSpellInfo(spellID) or spellID;
 	if filter == nil then
-		return UnitBuff(t, spellName);
+		return UnitBuff(target, spellName);
 	else
 		if strfind(strupper(filter), "EXACT") then
 			local caster = strfind(strupper(filter), "PLAYER");
 			for i = 1, 40 do
-				local _, _, _, _, _, _, _, buffCaster, _, _, buffSpellID = UnitBuff(t, i);
+				local _, _, _, _, _, _, _, buffCaster, _, _, buffSpellID = UnitBuff(target, i);
 				if buffSpellID ~= nil
-				and buffSpellID == id
+				and buffSpellID == spellID
 				and (not caster or buffCaster == "player") then
-					return UnitBuff(t, i);
+					return UnitBuff(target, i);
 				end
 			end
 		else
-			return UnitBuff(t, spellName, nil, filter)
+			return UnitBuff(target, spellName, nil, filter);
 		end
 	end
 end;
-unit.buffs = function(t, spellIDs, filter)
+unit.buffs = function(target, spellIDs, filter)
 	local ands = ni.utils.findand(spellIDs)
 	local results = false
 	if ands ~= nil or (ands == nil and strlen(spellIDs) > 0) then
@@ -340,18 +343,18 @@ unit.buffs = function(t, spellIDs, filter)
 				if tmp[i] ~= nil then
 					local id = tonumber(tmp[i])
 					if id ~= nil then
-						if not unit.buff(t, id, filter) then
+						if not unit.buff(target, id, filter) then
 							results = false
-							break
+							break;
 						else
 							results = true
 						end
 					else
-						if not unit.buff(t, tmp[i], filter) then
-							results = false
-							break
+						if not unit.buff(target, tmp[i], filter) then
+							results = false;
+							break;
 						else
-							results = true
+							results = true;
 						end
 					end
 				end
@@ -362,168 +365,14 @@ unit.buffs = function(t, spellIDs, filter)
 				if tmp[i] ~= nil then
 					local id = tonumber(tmp[i])
 					if id ~= nil then
-						if unit.buff(t, id, filter) then
-							results = true
-							break
+						if unit.buff(target, id, filter) then
+							results = true;
+							break;
 						end
 					else
-						if unit.buff(t, tmp[i], filter) then
-							results = true
-							break
-						end
-					end
-				end
-			end
-		end
-	end
-	return results
-end;
-unit.bufftype = function(t, str)
-	if not unit.exists(t) then
-		return false;
-	end
-	local st = ni.utils.splitstringtolower(str);
-	local has = false;
-	local i = 1;
-	local buff = UnitBuff(t, i);
-	while buff do
-		local bufftype = select(5, UnitBuff(t, i))
-		if bufftype ~= nil then
-			if bufftype == "" then
-				bufftype = "Enrage"
-			end
-			local dTlwr = strlower(bufftype)
-			if tContains(st, dTlwr) then
-				has = true
-				break
-			end
-		end
-		i = i + 1
-		buff = UnitBuff(t, i)
-	end
-	return has;
-end;
-unit.bufftypetimer = function(t, str)
-	if not unit.exists(t) then
-		return false;
-	end
-	local st = ni.utils.splitstringtolower(str);
-	local has = false;
-	local i = 1;
-	local buff = UnitBuff(t, i);
-	while buff do
-		local bufftype = select(5, UnitBuff(t, i))
-		if bufftype ~= nil then
-			if bufftype == "" then
-				bufftype = "Enrage"
-			end
-			local dTlwr = strlower(bufftype)
-			if tContains(st, dTlwr) then
-				has = true
-				local remaining = select(7, UnitBuff(t, i))
-				if remaining == 0 then
-					return "infinite";
-				else
-					return remaining;
-				end
-			end
-		end
-		i = i + 1
-		buff = UnitBuff(t, i)
-	end
-	return false;
-end;
-unit.buffstacks = function (target, spell, filter)
-	local stacks = select(4, unit.buff(target, spell, filter))
-	return stacks and stacks or 0
-end;
-unit.bufftimer = function(t, id, filter)
-	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
-	local _, _, _, _, _, duration, expirationTime = UnitBuff(t, spellName, filter)
-	if expirationTime then
-		return duration - (expirationTime - GetTime());
-	else
-		return 0;
-	end
-end;
-unit.buffremaining = function(target, spell, filter)
-	local expires = select(7, unit.buff(target, spell, filter))
-	if expires ~= nil then
-		return expires - GetTime() - ni.vars.combat.currentcastend
-	else
-		return 0
-	end
-end;
-unit.buffduration = function(target, spell, filter)
-	local name = select(1, unit.buff(target, spell, filter))
-	local duration = select(6, unit.buff(target, spell, filter))
-	if name then
-		return duration == 0 and 9999 or duration
-	end
-	return 0
-end;
---- DEBUFFS ---
-unit.debuff = function(t, id, filter)
-	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
-	if filter == nil then
-		return UnitDebuff(t, spellName);
-	else
-		if strfind(strupper(filter), "EXACT") then
-			local caster = strfind(strupper(filter), "PLAYER");
-			for i = 1, 40 do
-				local _, _, _, _, _, _, _, debuffCaster, _, _, debuffSpellID = UnitDebuff(t, i);
-				if debuffSpellID ~= nil
-				and debuffSpellID == id
-				and (not caster or debuffCaster == "player") then
-					return UnitDebuff(t, i);
-				end
-			end
-		else
-			return UnitDebuff(t, spellName, nil, filter);
-		end
-	end
-end;
-unit.debuffs = function(t, spellIDs, filter)
-	local ands = ni.utils.findand(spellIDs)
-	local results = false
-	if ands ~= nil or (ands == nil and strlen(spellIDs) > 0) then
-		local tmp
-		if ands then
-			tmp = ni.utils.splitstringbydelimiter(spellIDs, "&&")
-			for i = 0, #tmp do
-				if tmp[i] ~= nil then
-					local id = tonumber(tmp[i])
-					if id ~= nil then
-						if not unit.debuff(t, id, filter) then
-							results = false
-							break
-						else
-							results = true
-						end
-					else
-						if not unit.debuff(t, tmp[i], filter) then
-							results = false
-							break
-						else
-							results = true
-						end
-					end
-				end
-			end
-		else
-			tmp = ni.utils.splitstringbydelimiter(spellIDs, "||")
-			for i = 0, #tmp do
-				if tmp[i] ~= nil then
-					local id = tonumber(tmp[i])
-					if id ~= nil then
-						if unit.debuff(t, id, filter) then
-							results = true
-							break
-						end
-					else
-						if unit.debuff(t, tmp[i], filter) then
-							results = true
-							break
+						if unit.buff(target, tmp[i], filter) then
+							results = true;
+							break;
 						end
 					end
 				end
@@ -532,80 +381,234 @@ unit.debuffs = function(t, spellIDs, filter)
 	end
 	return results;
 end;
-unit.debufftype = function(t, str)
-	if not unit.exists(t) then
-		return false;
-	end
-	local st = ni.utils.splitstringtolower(str)
-	local has = false
-	local i = 1
-	local debuff = UnitDebuff(t, i)
-	while debuff do
-		local debufftype = select(5, UnitDebuff(t, i));	
-		if debufftype ~= nil then
-			local dTlwr = strlower(debufftype)
-			if tContains(st, dTlwr) then
-				has = true
-				break
-			end
-		end
-		i = i + 1
-		debuff = UnitDebuff(t, i)	
-	end
-	return has;
-end;
-unit.debufftypetimer = function(t, str)
-	if not unit.exists(t) then
+unit.bufftype = function(target, str)
+	if not unit.exists(target) then
 		return false;
 	end
 	local st = ni.utils.splitstringtolower(str);
+	local has = false;
 	local i = 1;
-	local debuff = UnitDebuff(t, i);
-	while debuff do
-		local debufftype = select(5, UnitDebuff(t, i));
-		if debufftype ~= nil then
-			local dTlwr = strlower(debufftype)
+	local buff = UnitBuff(target, i);
+	while buff do
+		local bufftype = select(5, UnitBuff(target, i))
+		if bufftype ~= nil then
+			if bufftype == "" then
+				bufftype = "Enrage"
+			end
+			local dTlwr = strlower(bufftype)
 			if tContains(st, dTlwr) then
-				local duration, expires = select(6, UnitDebuff(t, i)), select(7, UnitDebuff(t, i));
-				if expires then
-					return (expires - GetTime()), duration;
-				end
-				break
+				has = true;
+				break;
 			end
 		end
 		i = i + 1
-		debuff = UnitDebuff(t, i)
+		buff = UnitBuff(target, i)
+	end
+	return has;
+end;
+unit.bufftypetimer = function(target, str)
+	if not unit.exists(target) then
+		return false;
+	end
+	local st = ni.utils.splitstringtolower(str);
+	local has = false;
+	local i = 1;
+	local buff = UnitBuff(target, i);
+	while buff do
+		local bufftype = select(5, UnitBuff(target, i))
+		if bufftype ~= nil then
+			if bufftype == "" then
+				bufftype = "Enrage"
+			end
+			local dTlwr = strlower(bufftype)
+			if tContains(st, dTlwr) then
+				has = true
+				local remaining = select(7, UnitBuff(target, i))
+				if remaining == 0 then
+					return "infinite";
+				else
+					return remaining;
+				end
+			end
+		end
+		i = i + 1
+		buff = UnitBuff(target, i)
 	end
 	return false;
 end;
-unit.debuffstacks = function (target, spell, filter)
-	local stacks = select(4, unit.debuff(target, spell, filter))
-	return stacks and stacks or 0
+unit.buffstacks = function (target, spellID, filter)
+	local stacks = select(4, unit.buff(target, spellID, filter))
+	return stacks and stacks or 0;
 end;
-unit.debufftimer = function(t, id, filter)
-	local spellName = type(id) == "number" and GetSpellInfo(id) or id;
-	local _, _, _, _, _, duration, expirationTime = UnitDebuff(t, spellName, filter)
+unit.bufftimer = function(target, spellID, filter)
+	local duration = select(6, unit.buff(target, spellID, filter));
+	local expires = select(7, unit.buff(target, spellID, filter));
 	if expirationTime then
 		return duration - (expirationTime - GetTime());
 	else
 		return 0;
 	end
 end;
-unit.debuffremaining = function(target, spell, filter)
-	local expires = select(7, unit.debuff(target, spell, filter))
+unit.buffremaining = function(target, spellID, filter)
+	local expires = select(7, unit.buff(target, spellID, filter));
 	if expires ~= nil then
 		return expires - GetTime() - ni.vars.combat.currentcastend;
 	else
 		return 0;
 	end
 end;
-unit.debuffduration = function(target, spell, filter)
-	local name = select(1, unit.debuff(target, spell, filter))
-	local duration = select(6, unit.debuff(target, spell, filter))
+unit.buffduration = function(target, spellID, filter)
+	local name = select(1, unit.buff(target, spellID, filter))
+	local duration = select(6, unit.buff(target, spellID, filter))
 	if name then
-		return duration == 0 and 9999 or duration
+		return duration == 0 and 9999 or duration;
 	end
-	return 0
+	return 0;
+end;
+--- DEBUFFS ---
+unit.debuff = function(target, spellID, filter)
+	local spellName = type(spellID) == "number" and GetSpellInfo(spellID) or spellID;
+	if filter == nil then
+		return UnitDebuff(target, spellName);
+	else
+		if strfind(strupper(filter), "EXACT") then
+			local caster = strfind(strupper(filter), "PLAYER");
+			for i = 1, 40 do
+				local _, _, _, _, _, _, _, debuffCaster, _, _, debuffSpellID = UnitDebuff(target, i);
+				if debuffSpellID ~= nil
+				and debuffSpellID == spellID
+				and (not caster or debuffCaster == "player") then
+					return UnitDebuff(target, i);
+				end
+			end
+		else
+			return UnitDebuff(target, spellName, nil, filter);
+		end
+	end
+end;
+unit.debuffs = function(target, spellIDs, filter)
+	local ands = ni.utils.findand(spellIDs)
+	local results = false
+	if ands ~= nil or (ands == nil and strlen(spellIDs) > 0) then
+		local tmp
+		if ands then
+			tmp = ni.utils.splitstringbydelimiter(spellIDs, "&&")
+			for i = 0, #tmp do
+				if tmp[i] ~= nil then
+					local id = tonumber(tmp[i])
+					if id ~= nil then
+						if not unit.debuff(target, id, filter) then
+							results = false;
+							break;
+						else
+							results = true;
+						end
+					else
+						if not unit.debuff(target, tmp[i], filter) then
+							results = false;
+							break
+						else
+							results = true;
+						end
+					end
+				end
+			end
+		else
+			tmp = ni.utils.splitstringbydelimiter(spellIDs, "||")
+			for i = 0, #tmp do
+				if tmp[i] ~= nil then
+					local id = tonumber(tmp[i])
+					if id ~= nil then
+						if unit.debuff(target, id, filter) then
+							results = true;
+							break;
+						end
+					else
+						if unit.debuff(target, tmp[i], filter) then
+							results = true;
+							break;
+						end
+					end
+				end
+			end
+		end
+	end
+	return results;
+end;
+unit.debufftype = function(target, str)
+	if not unit.exists(target) then
+		return false;
+	end
+	local st = ni.utils.splitstringtolower(str)
+	local has = false
+	local i = 1
+	local debuff = UnitDebuff(target, i)
+	while debuff do
+		local debufftype = select(5, UnitDebuff(target, i));	
+		if debufftype ~= nil then
+			local dTlwr = strlower(debufftype)
+			if tContains(st, dTlwr) then
+				has = true;
+				break;
+			end
+		end
+		i = i + 1
+		debuff = UnitDebuff(target, i)	
+	end
+	return has;
+end;
+unit.debufftypetimer = function(target, str)
+	if not unit.exists(target) then
+		return false;
+	end
+	local st = ni.utils.splitstringtolower(str);
+	local i = 1;
+	local debuff = UnitDebuff(target, i);
+	while debuff do
+		local debufftype = select(5, UnitDebuff(target, i));
+		if debufftype ~= nil then
+			local dTlwr = strlower(debufftype)
+			if tContains(st, dTlwr) then
+				local duration, expires = select(6, UnitDebuff(target, i)), select(7, UnitDebuff(target, i));
+				if expires then
+					return (expires - GetTime()), duration;
+				end
+				break;
+			end
+		end
+		i = i + 1
+		debuff = UnitDebuff(target, i)
+	end
+	return false;
+end;
+unit.debuffstacks = function (target, spellID, filter)
+	local stacks = select(4, unit.debuff(target, spellID, filter));
+	return stacks and stacks or 0;
+end;
+unit.debufftimer = function(target, spellID, filter)
+	local duration = select(6, unit.debuff(target, spellID, filter));
+	local expires = select(7, unit.debuff(target, spellID, filter));
+	if expires then
+		return duration - (expires - GetTime());
+	else
+		return 0;
+	end
+end;
+unit.debuffremaining = function(target, spellID, filter)
+	local expires = select(7, unit.debuff(target, spellID, filter));
+	if expires ~= nil then
+		return expires - GetTime() - ni.vars.combat.currentcastend;
+	else
+		return 0;
+	end
+end;
+unit.debuffduration = function(target, spellID, filter)
+	local name = select(1, unit.debuff(target, spellID, filter));
+	local duration = select(6, unit.debuff(target, spellID, filter));
+	if name then
+		return duration == 0 and 9999 or duration;
+	end
+	return 0;
 end;
 unit.isfacing = function(t1, t2, degrees)
 	return (t1 ~= nil and t2 ~= nil) and ni.functions.isfacing(t1, t2, degrees) or false
@@ -613,40 +616,40 @@ end;
 unit.notbehindtarget = function(seconds)
 	local seconds = seconds or 2
 	if BehindTime + seconds > GetTime() then
-		return true
+		return true;
 	else
-		return false
+		return false;
 	end
 end;
 unit.isbehind = function(t1, t2, seconds)
 	if unit.notbehindtarget(seconds) then
 		return false;
 	end
-	return (t1 ~= nil and t2 ~= nil) and ni.functions.isbehind(t1, t2) or false
+	return (t1 ~= nil and t2 ~= nil) and ni.functions.isbehind(t1, t2) or false;
 end;
 unit.distance = function(...)
     if #{...} >= 2 then
-        return ni.functions.getdistance(...) or 9999
+        return ni.functions.getdistance(...) or 9999;
     end
-    return 9999
+    return 9999;
 end;
 unit.distancesqr = function(t1, t2)
 	local x1, y1, z1 = unit.location(t1)
 	local x2, y2, z2 = unit.location(t2)
-	return math_pow(x1 - x2, 2) + math_pow(y1 - y2, 2) + math_pow(z1 - z2, 2)
+	return math_pow(x1 - x2, 2) + math_pow(y1 - y2, 2) + math_pow(z1 - z2, 2);
 end;
 unit.meleerange = function(t1, t2)
 	local cr1 = unit.combatreach(t1)
 	local cr2 = unit.combatreach(t2)
-	return math_max(5.0, cr1 + cr2 + (4 / 3))
+	return math_max(5.0, cr1 + cr2 + (4 / 3));
 end;
 unit.inmelee = function(t1, t2)
 	local meleerange = unit.meleerange(t1, t2)
 	local distancesqr = unit.distancesqr(t1, t2)
 	if distancesqr then
-		return distancesqr < meleerange * meleerange
+		return distancesqr < meleerange * meleerange;
 	end
-	return false
+	return false;
 end;
 unit.enemiesinrange = function(t, n)
 	local enemiestable = {}
@@ -654,16 +657,17 @@ unit.enemiesinrange = function(t, n)
 	if t then
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) and unit.readablecreaturetype(k) ~= "Critter" and unit.readablecreaturetype(k) ~= "NotSpecified" then
+				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) 
+				and unit.readablecreaturetype(k) ~= "Critter" and unit.readablecreaturetype(k) ~= "NotSpecified" then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
-						tinsert(enemiestable, {guid = k, name = v.name, distance = distance})
+						tinsert(enemiestable, {guid = k, name = v.name, distance = distance});
 					end
 				end
 			end
 		end
 	end
-	return enemiestable
+	return enemiestable;
 end;
 unit.enemiesinrangewithbufftype = function(t, n, str)
 	local enemiestablebufftype = {}
@@ -677,13 +681,13 @@ unit.enemiesinrangewithbufftype = function(t, n, str)
 				and unit.readablecreaturetype(k) ~= "NotSpecified" then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
-						tinsert(enemiestablebufftype, {guid = k, name = v.name, distance = distance})
+						tinsert(enemiestablebufftype, {guid = k, name = v.name, distance = distance});
 					end
 				end
 			end
 		end
 	end
-	return enemiestablebufftype
+	return enemiestablebufftype;
 end;
 unit.friendsinrange = function(t, n)
 	local friendstable = {}
@@ -694,13 +698,13 @@ unit.friendsinrange = function(t, n)
 				if k ~= t and v:canassist() and not UnitIsDeadOrGhost(k) then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
-						tinsert(friendstable, {guid = k, name = v.name, distance = distance})
+						tinsert(friendstable, {guid = k, name = v.name, distance = distance});
 					end
 				end
 			end
 		end
 	end
-	return friendstable
+	return friendstable;
 end;
 unit.unitstargeting = function(t, friendlies)
 	t = true and UnitGUID(t) or t
@@ -714,7 +718,7 @@ unit.unitstargeting = function(t, friendlies)
 					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) <= 4 and not UnitIsDeadOrGhost(k) then
 						local target = v:target()
 						if target ~= nil and target == t then
-							tinsert(targetingtable, {name = v.name, guid = k})
+							tinsert(targetingtable, {name = v.name, guid = k});
 						end
 					end
 				end
@@ -725,14 +729,14 @@ unit.unitstargeting = function(t, friendlies)
 					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) > 4 then
 						local target = v:target()
 						if target ~= nil and target == t then
-							tinsert(targetingtable, {name = v.name, guid = k})
+							tinsert(targetingtable, {name = v.name, guid = k});
 						end
 					end
 				end
 			end
 		end
 	end
-	return targetingtable
+	return targetingtable;
 end;
 unit.iscasting = function(t)
 	return UnitCastingInfo(t) and true or false;
@@ -757,82 +761,82 @@ unit.incombatwithme = function(t)
     end
 end;
 unit.flags = function(t)
-	return ni.functions.unitflags(t)
+	return ni.functions.unitflags(t);
 end;
 unit.dynamicflags = function(t)
-	return ni.functions.unitdynamicflags(t)
+	return ni.functions.unitdynamicflags(t);
 end;
 unit.istappedbyallthreatlist = function(t)
-	return (unit.exists(t) and select(2, unit.dynamicflags(t))) or false
+	return (unit.exists(t) and select(2, unit.dynamicflags(t))) or false;
 end;
 unit.islootable = function(t)
-	return (unit.exists(t) and select(3, unit.dynamicflags(t))) or false
+	return (unit.exists(t) and select(3, unit.dynamicflags(t))) or false;
 end;
 unit.istaggedbyme = function(t)
-	return (unit.exists(t) and select(7, unit.dynamicflags(t))) or false
+	return (unit.exists(t) and select(7, unit.dynamicflags(t))) or false;
 end;
 unit.istaggedbyother = function(t)
-	return (unit.exists(t) and select(8, unit.dynamicflags(t))) or false
+	return (unit.exists(t) and select(8, unit.dynamicflags(t))) or false;
 end;
 unit.canperformaction = function(t)
-	return (unit.exists(t) and select(1, unit.flags(t))) or false
+	return (unit.exists(t) and select(1, unit.flags(t))) or false;
 end;
 unit.isconfused = function(t)
-	return (unit.exists(t) and select(23, unit.flags(t))) or false
+	return (unit.exists(t) and select(23, unit.flags(t))) or false;
 end;
 unit.notbleed = function(t)
-	return (unit.exists(t) and select(16, unit.flags(t))) or false
+	return (unit.exists(t) and select(16, unit.flags(t))) or false;
 end
 unit.isdisarmed = function(t)
-	return (unit.exists(t) and select(22, unit.flags(t))) or false
+	return (unit.exists(t) and select(22, unit.flags(t))) or false;
 end;
 unit.isfleeing = function(t)
-	return (unit.exists(t) and select(24, unit.flags(t))) or false
+	return (unit.exists(t) and select(24, unit.flags(t))) or false;
 end;
 unit.islooting = function(t)
-	return (unit.exists(t) and select(11, unit.flags(t))) or false
+	return (unit.exists(t) and select(11, unit.flags(t))) or false;
 end;
 unit.ismounted = function(t)
-	return (unit.exists(t) and select(28, unit.flags(t))) or false
+	return (unit.exists(t) and select(28, unit.flags(t))) or false;
 end;
 unit.isnotattackable = function(t)
-	return (unit.exists(t) and select(2, unit.flags(t))) or false
+	return (unit.exists(t) and select(2, unit.flags(t))) or false;
 end;
 unit.isnotselectable = function(t)
-	return (unit.exists(t) and select(26, unit.flags(t))) or false
+	return (unit.exists(t) and select(26, unit.flags(t))) or false;
 end;
 unit.ispacified = function(t)
-	return (unit.exists(t) and select(18, unit.flags(t))) or false
+	return (unit.exists(t) and select(18, unit.flags(t))) or false;
 end;
 unit.ispetinombat = function(t)
-	return (unit.exists(t) and select(12, unit.flags(t))) or false
+	return (unit.exists(t) and select(12, unit.flags(t))) or false;
 end;
 unit.isplayercontrolled = function(t)
-	return (unit.exists(t) and select(4, unit.flags(t))) or false
+	return (unit.exists(t) and select(4, unit.flags(t))) or false;
 end;
 unit.ispossessed = function(t)
-	return (unit.exists(t) and select(25, unit.flags(t))) or false
+	return (unit.exists(t) and select(25, unit.flags(t))) or false;
 end;
 unit.ispreparation = function(t)
-	return (unit.exists(t) and select(6, unit.flags(t))) or false
+	return (unit.exists(t) and select(6, unit.flags(t))) or false;
 end;
 unit.ispvpflagged = function(t)
-	return (unit.exists(t) and select(13, unit.flags(t))) or false
+	return (unit.exists(t) and select(13, unit.flags(t))) or false;
 end;
 unit.issilenced = function(t)
-	return (unit.exists(t) and select(14, unit.flags(t))) or false
+	return (unit.exists(t) and select(14, unit.flags(t))) or false;
 end;
 unit.isskinnable = function(t)
-	return (unit.exists(t) and select(27, unit.flags(t))) or false
+	return (unit.exists(t) and select(27, unit.flags(t))) or false;
 end;
 unit.isstunned = function(t)
-	return (unit.exists(t) and select(19, unit.flags(t))) or false
+	return (unit.exists(t) and select(19, unit.flags(t))) or false;
 end;
 unit.isimmune = function(t)
-	return (unit.exists(t) and select(32, unit.flags(t))) or false
+	return (unit.exists(t) and select(32, unit.flags(t))) or false;
 end;
 unit.isplayer = function(t)
-	return select(5, unit.info(t)) == 4
+	return select(5, unit.info(t)) == 4;
 end;
 unit.transport = function(t)
 	return ni.functions.transport(t);

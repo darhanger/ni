@@ -9,12 +9,13 @@ local GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents = 
 local members = {};
 local memberssetup = { cache = { _cache = {} } };
 local roster = memberssetup.cache
+local aux_roster = {};
 local _cache = roster._cache
 local tankTalents, BuildTalents, inspectFrame, DoInspect
 local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
-local playerInCombat = UnitAffectingCombat("player");
 local wotlk = ni.vars.build == 30300;
+local playerInCombat
 setmetatable(members, {
 	__call = function(_, ...)
 		local groupType, nRaidMembers, nPartyMembers, subgroup
@@ -38,6 +39,7 @@ setmetatable(members, {
 					local o = memberssetup:create(unit, guid, subgroup)
 					if o then
 						members[#members + 1] = o;
+						aux_roster[guid] = nil;
 					end
 				else
 					members[#members + 1] = memberssetup:create("player", pGuid, subgroup)
@@ -48,7 +50,7 @@ setmetatable(members, {
 			members[#members + 1] = memberssetup:create("player", pGuid, 1)
 		end
 	end,
-	__index = { name = "members", author = "MoRBiDuS", version = "1.1.5a" };
+	__index = { name = "members", author = "MoRBiDuS", version = "1.1.8a" };
 });
 
 local dontCache = {	["updatemember"] = true, ["updatemembers"] = true, ["reset"] = true, ["addcustom"] = true, ["removecustom"] = true };
@@ -74,6 +76,7 @@ function memberssetup.Do(f, c)
     end
 end;
 setmetatable(memberssetup, { __call = function(_, ...) return Do(...) end });
+
 if wotlk then
 	tankTalents = {
 		BladeBarrier			= GetSpellInfo(49182),
@@ -82,14 +85,16 @@ if wotlk then
 		SurvivalOfTheFittest	= GetSpellInfo(33853),
 		ProtectorOfThePack		= GetSpellInfo(57873)
 	};
+
 	BuildTalents = function(unit)
 		if not unit then return end
 		local notMe = unit ~= "player"
 		local NumTalentTabs = GetNumTalentTabs(notMe)
 		if NumTalentTabs > 0 then
 			local group = GetActiveTalentGroup(notMe)
-			roster[unit].talents = {}
-			local talents = roster[unit].talents
+			local guid = UnitGUID(unit)
+			roster[guid].talents = {}
+			local talents = roster[guid].talents
 			local maxPointsSpent = 0
 			for tab = 1, NumTalentTabs do
 				local SpecName = GetTalentTabInfo(tab, notMe)
@@ -105,88 +110,89 @@ if wotlk then
 						maxRank		= maxRank
 					};
 				end
-				roster[unit]["t"..tab] = pointsSpent
+				roster[guid]["t"..tab] = pointsSpent
 				if pointsSpent > maxPointsSpent then
-					maxPointsSpent = pointsSpent
-					roster[unit].specName = SpecName
+					maxPointsSpent = pointsSpent;
+					roster[guid].specName = SpecName;
 				end
 			end
 		end
 	end;
 
 	hooksecurefunc("NotifyInspect", function(unit)
-		if not UnitIsUnit("mouseover", unit) then
+		if UnitExists(unit) and  not UnitIsUnit("mouseover", unit) then
 			roster.inspectUnit = unit
 			roster.inspectTainted = true
-			ni.delayfor(INSPECT_TIMEOUT, function()
-				if roster[unit] and roster.inspectTainted then
+			ni.C_Timer.After(INSPECT_TIMEOUT, function()
+				local guid = UnitGUID(roster.inspectUnit)
+				if roster[guid] and roster.inspectTainted then
 					roster.inspectTainted = false
-					roster[unit].lastInspTime = 5 * roster[unit].inspAttempts + GetTime()
-					if roster[unit].inspAttempts < 3 then
-						roster[unit].inspAttempts = roster[unit].inspAttempts + 1
+					roster[guid].lastInspTime = 5 * roster[guid].inspAttempts + GetTime()
+					if roster[guid].inspAttempts < 3 then
+						roster[guid].inspAttempts = roster[guid].inspAttempts + 1
 					end
 				end
 			end)
 		end
 	end);
-		
-	inspectFrame = CreateFrame("frame");
+	inspectFrame = CreateFrame("frame")
 	DoInspect = function(unit)
 		if CanInspect(unit) then
-			NotifyInspect(unit)
-			inspectFrame:RegisterEvent("INSPECT_TALENT_READY")
+			NotifyInspect(unit);
+			inspectFrame:RegisterEvent("INSPECT_TALENT_READY");
 		end
 	end;
 	inspectFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
 	inspectFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
-
+	
 	inspectFrame:SetScript("OnEvent", function(self, event, ...)
 		if event == "INSPECT_TALENT_READY" then
 			self:UnregisterEvent("INSPECT_TALENT_READY")
 			if roster.inspectTainted then
 				BuildTalents(roster.inspectUnit)
-				roster[roster.inspectUnit].lastInspTime = GetTime()
-				roster[roster.inspectUnit].inspAttempts = 0
+				local guid = UnitGUID(roster.inspectUnit)
+				roster[guid].lastInspTime = GetTime()
+				roster[guid].inspAttempts = 0
 				roster.inspectTainted = false
 			end
 		elseif event == "PLAYER_REGEN_ENABLED" then
-			playerInCombat = false
+			playerInCombat = false;
 		elseif event == "PLAYER_REGEN_DISABLED" then
-			playerInCombat = true
+			playerInCombat = true;
 		end
 	end);
-end;	
+end;
 
 function memberssetup:create(unit, guid, subgroup)
-	if roster[unit] then return end;
-	local o = {};
-	setmetatable(o, memberssetup);
-	
+	if roster[guid] then return end
+	local o = {}
+	setmetatable(o, memberssetup)
 	function o:istank()
 		if wotlk then
-			return o:role() == "TANK";
+			return o.role == "TANK";
 		else
-			return o:role() == "TANK"
+			return o.role == "TANK"
 			and ((o.class == "WARRIOR" and o:aura(71))
 			or (o.class == "DRUID" and o:auras("9634||5487"))
 			or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
 			or (o.class == "DEATHKNIGHT" and o:aura(48263))
 			or (o:aura(57339) or o:aura(57340)))
-			or false;		
+			or false;	
 		end
 	end;
+
 	if wotlk then	
 		function o:ishealer()
-			return o:role() == "HEALER";
+			return o.role == "HEALER";
 		end;
 		function o:isdps()
-			return o:role() == "MELEE" or o:role() == "CASTER";
+			return o.role == "MELEE" or o.role == "CASTER";
 		end;
 		function o:iscaster()
-			return o:role() == "CASTER";
+			return o.role == "CASTER";
 		end;
 		function o:ismelee()
-			return o:role() == "MELEE";
+			return o.role == "MELEE";
 		end;
 	end;
 	function o:location()
@@ -199,29 +205,29 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:combat()
 		return UnitAffectingCombat(o.unit) == 1;
 	end
-	function o:aura(aura)
+	function o:aura(auras)
 		return ni.unit.aura(o.unit, aura);
 	end;	
 	function o:auras(auras)
 		return ni.unit.auras(o.unit, auras);
 	end;	
-	function o:buffs(buffs, filter)
-		return ni.unit.buffs(o.unit, buffs, filter);
+	function o:buffs(str, filter)
+		return ni.unit.buffs(o.unit, str, filter);
 	end;
-	function o:debuffs(debuffs, filter)
-		return ni.unit.debuffs(o.unit, debuffs, filter);
+	function o:debuffs(str, filter)
+		return ni.unit.debuffs(o.unit, str, filter) or false;
 	end;
 	function o:debufftype(str)
-		return ni.unit.debufftype(o.unit, str);
+		return ni.unit.debufftype(o.unit, str) or false;
 	end;
 	function o:bufftype(str)
-		return ni.unit.bufftype(o.unit, str);
+		return ni.unit.bufftype(o.unit, str) or false;
 	end;
 	function o:buff(buff, filter)
-		return ni.unit.buff(o.unit, buff, filter) or false;
+		return ni.unit.buff(o.unit, buff, filter) ~= nil;
 	end;
 	function o:debuff(debuff, filter)
-		return ni.unit.debuff(o.unit, debuff, filter) or false;
+		return ni.unit.debuff(o.unit, debuff, filter) ~= nil;
 	end;
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
@@ -232,14 +238,13 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:hpmax()
 		return UnitHealthMax(o.unit);
 	end;
-	--------------------------------------
 	function o:hp()
 		local hp = o:hpraw()/o:hpmax() * 100;
 		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
 			return 100;
-		end		
+		end;
 		for _,id in ipairs(ni.tables.cantheal) do
-			if o:debuff(id) then return 100	end
+			if o:debuff(id) then return 100 end
 		end;
 		for _,id in ipairs(ni.tables.notneedheal) do
 			if o:buff(id) then return 100 end
@@ -265,23 +270,23 @@ function memberssetup:create(unit, guid, subgroup)
 		and IsSpellInRange(GetSpellInfo(spellid), o.unit) == 1
 		and (not facing or o:facing())
 		and (not los or o:los()))
-		or false;
+		or false
 	end;
 	function o:threat()
 		return ni.unit.threat(o.unit) or false;
 	end;
-	function o:role()
+	function o:getRole()
 		if not wotlk then
 			return UnitGroupRolesAssigned(o.unit) or "NONE";
-		elseif not roster[o.unit].talents then
-			return "NONE"
 		else
-			if roster[o.unit].role then
-				return roster[o.unit].role
-			elseif not CheckInteractDistance(o.unit, 1) then
-				return roster[o.unit].lastRole
+			if not roster[o.guid] then
+				return "NONE"
+			elseif not roster[o.guid].talents
+			  or not CheckInteractDistance(o.unit, 1) then
+				return roster[o.guid].lastRole or "NONE"
 			end
 		end
+		
 		local class, role, t = o.class, "none", tankTalents
 		if class == "ROGUE" or class == "HUNTER" then
 			role = "MELEE"
@@ -293,7 +298,7 @@ function memberssetup:create(unit, guid, subgroup)
 			score = score + (o:talent(t.Anticipation) > 0 and 1 or 0)
 			role = score >= 2 and "TANK" or "MELEE"	-- if has 2 of the 3 tanking talents then is a tank
 		else
-			local t1, t2, t3 = roster[o.unit].t1, roster[o.unit].t2, roster[o.unit].t3
+			local t1, t2, t3 = roster[o.guid].t1, roster[o.guid].t2, roster[o.guid].t3
 			if class == "PRIEST" then
 				role = (t1 + t2) > t3 and "HEALER" or "CASTER"
 			elseif class == "WARRIOR" then
@@ -313,16 +318,13 @@ function memberssetup:create(unit, guid, subgroup)
 				end
 			end
 		end
-		roster[o.unit].role = role
+		roster[o.guid].role = role
 		return role
 	end;
 	if wotlk then
-		function o:spec()
-			return roster[o.unit] and roster[o.unit].specName or "None"
-		end;
 		function o:talent(talent) -- Returns the rank of the unit's talent
-			if roster[o.unit] and roster[o.unit].talents then
-				local talents = roster[o.unit].talents
+			if roster[o.guid] and roster[o.guid].talents then
+				local talents = roster[o.guid].talents
 				for tab,tbl in pairs(talents) do
 					if type(tbl) == "table" then
 						for k,v in pairs(tbl) do
@@ -333,34 +335,44 @@ function memberssetup:create(unit, guid, subgroup)
 					end
 				end
 			end
-			return 0;
+			return 0
 		end;
-	end;
+	end
 
 	function o:updatemember()
 		o.name = o.name or UnitName(o.unit);
 		o.class = o.class or select(2, UnitClass(o.unit));
+		o.spec	= wotlk and roster[o.guid] and roster[o.guid].specName or (aux_roster[o.guid] and aux_roster[o.guid].spec) or "None"
 		
-		roster[o.unit].name		= o.name
-		roster[o.unit].class	= o.class
-		roster[o.unit].guid		= o.guid
-		roster[o.unit].subgroup	= o.subgroup
-		
-		if wotlk and not playerInCombat then
+		if wotlk then
+			local role = o:getRole()
+			o.role = role ~= "NONE" and role or (aux_roster[o.guid] and aux_roster[o.guid].role)
+		end
+
+		roster[o.guid].name		= o.name
+		roster[o.guid].class	= o.class
+		roster[o.guid].guid		= o.guid
+		roster[o.guid].subgroup	= o.subgroup
+		roster[o.guid].spec		= o.spec
+		roster[o.guid].role		= o.role
+
+		playerInCombat = playerInCombat == nil and UnitAffectingCombat("player") or playerInCombat
+		if wotlk and not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
 			local now = GetTime()
-			if now-roster[o.unit].lastInspTime > INSPECT_DELAY then
-				if roster[o.unit].role then
-					roster[o.unit].lastRole = roster[o.unit].role
+			roster[o.guid].spec = roster[o.guid].specName or "None"
+			if now-roster[o.guid].lastInspTime > INSPECT_DELAY then
+				if roster[o.guid].role then
+					roster[o.guid].lastRole = roster[o.guid].role
 				end
-				roster[o.unit].role = nil
 				if o.unit == "player" then
 					BuildTalents("player")
-					roster[o.unit].lastInspTime = now
+					roster[o.guid].lastInspTime = now
 				else
 					DoInspect(o.unit)
-				end
+				end		
 			end
 		end
+		
 	end;
 
 	-- Attributes
@@ -370,16 +382,18 @@ function memberssetup:create(unit, guid, subgroup)
 	o.name			= UnitName(unit)
 	o.class			= select(2, UnitClass(unit))
 	o.target		= unit .. "target"
+	o.spec			= "None"
+	o.role			= "NONE"
 
-	roster[unit] = {}
-	roster[unit].name			= o.name
-	roster[unit].class			= o.class
-	roster[unit].guid			= o.guid
-	roster[unit].subgroup		= o.subgroup
-	roster[unit].role			= "NONE"
-	roster[unit].lastRole		= "NONE"
-	roster[unit].lastInspTime	= 0
-	roster[unit].inspAttempts	= 0
+	roster[o.guid] = {}
+	roster[o.guid].name			= o.name
+	roster[o.guid].class		= o.class
+	roster[o.guid].guid			= o.guid
+	roster[o.guid].subgroup		= o.subgroup
+	roster[o.guid].role			= "NONE"
+	roster[o.guid].lastRole		= "NONE"
+	roster[o.guid].lastInspTime	= 0
+	roster[o.guid].inspAttempts	= 0
 	addCache(o)
 	return o;
 end;
@@ -392,9 +406,12 @@ memberssetup.set = function()
 		end
 	end;
 	function members.reset()
-		wipe(members)
-		wipe(roster)
-		memberssetup.set()
+		ni.C_Timer.After(0, function()
+			wipe(members)
+			aux_roster = ni.utils.deepcopytable(roster)
+			wipe(roster)
+			memberssetup.set()
+		end)
 	end;
 	function members.sort()
 		if #members > 1 then
@@ -431,50 +448,6 @@ memberssetup.set = function()
 		end
 		return n > 0 and average/n or 0;
 	end;
-	function members.tsubgroup()
-		local temp = {};
-		for _,o in ipairs(members) do
-			if not tContains(temp, o.subgroup) then
-				tinsert(temp, o.subgroup)
-			end
-		end
-		return temp;
-	end;	
-    function members.subgroupbelow(percent, radius, owngroup)
-        local total, temp, temp2, aux = 0, {}, {};
-        if owngroup then
-            aux = members.inrange("player", 0)[1]
-        end
-        owngroup = aux and aux.subgroup
-        for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
-            for _,o in ipairs(members) do
-                if o.subgroup == group and o:range()
-				and o:hp() < percent and o:los() then
-                    total = 1
-                    for _,o2 in ipairs(members) do
-                        if o.guid ~= o2.guid
-						and o2.subgroup == group
-						and o2:hp() < percent
-						and ni.unit.distance(o.unit, o2.unit) <= radius
-						and ni.unit.los(o.unit, o2.unit) then
-                            total = total + 1
-                        end
-                    end
-                end
-                temp[#temp + 1] = { unit = o.unit, hp = o:hp(), near = total };
-            end
-            table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end );
-            if temp[1] then
-                temp2[#temp2 + 1] = {unit = temp[1].unit, hp = temp[1].hp, near = temp[1].near };
-            end
-        end
-        table.sort( temp2, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end );
-        if temp2[1] then
-            return temp2[1].near, temp2[1];
-        else
-            return 0;
-        end
-    end;
 	function members.inrange(unit, distance)
 		local tmp = {};
 		if type(unit) ~= "string" then return tmp end
@@ -591,6 +564,50 @@ memberssetup.set = function()
 		end
 		return tmp;
 	end;
+	function members.tsubgroup()
+		local temp = {};
+		for _,o in ipairs(members) do
+			if not tContains(temp, o.subgroup) then
+				tinsert(temp, o.subgroup)
+			end
+		end
+		return temp;
+	end	
+	function members.subgroupbelow(percent, radius, owngroup)
+		local total, temp, temp2, aux = 0, {}, {}
+		if owngroup then
+			aux = members.inrange("player", 0)[1]
+			owngroup = aux and aux.subgroup
+		end
+		for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
+			for _,o in ipairs(members) do
+				if o.subgroup == group and o:range()
+				  and o:hp() < percent and o:los() then
+					total = 1
+					for _,o2 in ipairs(members) do
+						if o.guid ~= o2.guid
+						  and o2.subgroup == group
+						  and o2:hp() < percent
+						  and ni.unit.distance(o.unit, o2.unit) <= radius
+						  and ni.unit.los(o.unit, o2.unit) then
+							total = total + 1
+						end
+					end
+				end
+				tmp[#tmp + 1] = { unit = o.unit, hp = o:hp(), near = total }
+			end
+			table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end )
+			if temp[1] then
+				temp2[#temp2 + 1] = {unit = temp[1].unit, hp = temp[1].hp, near = temp[1].near }
+			end
+		end
+		table.sort( temp2, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end )
+		if temp2[1] then
+			return temp2[1].near, temp2[1]
+		else
+			return 0
+		end
+	end;	
 	function members.addcustom(unit, guid)
 		if type(unit) == "string" then
 			local groupMember = memberssetup:create(unit, guid or UnitGUID(unit));
@@ -604,7 +621,7 @@ memberssetup.set = function()
 		if type(unit) == "string" then
 			for i, o in ipairs(members) do
 				if o.unit == unit then
-					roster[o.unit] = nil;
+					roster[o.guid] = nil;
 					tremove(members, i)
 					members:updatemembers()
 				end

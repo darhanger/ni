@@ -488,10 +488,14 @@ Example:
 
 ```lua
 for i = 1, #ni.members do
-	if ni.members[i]:role() == "TANK" then
+	if ni.members[i].role == "TANK" then
 		-- Do something specific for tanks
-	elseif ni.members[i]:role() == "HEALER"
+	elseif ni.members[i].role == "HEALER"
 		-- Do something specific for healer
+	elseif ni.members[i].role == "CASTER"
+		-- Do something specific for caster
+	elseif ni.members[i].role == "MELEE"
+		-- Do something specific for melee		
 	end
 end
 ```
