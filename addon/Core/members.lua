@@ -50,7 +50,7 @@ setmetatable(members, {
 			members[#members + 1] = memberssetup:create("player", pGuid, 1)
 		end
 	end,
-	__index = { name = "members", author = "MoRBiDuS", version = "1.1.8a" };
+	__index = { name = "members", author = "MoRBiDuS", version = "1.1.9a" };
 });
 
 local dontCache = {	["updatemember"] = true, ["updatemembers"] = true, ["reset"] = true, ["addcustom"] = true, ["removecustom"] = true };
@@ -65,7 +65,7 @@ function memberssetup.Do(f, c)
     return function(...)
 		local a, res = tos(f);
 		for n = 2, select('#', ...) do
-			a = a.."»"..tos(select(n,...))
+			a = a.."Â»"..tos(select(n,...))
 		end
 		res = c[a]
         if not res then
@@ -318,6 +318,19 @@ function memberssetup:create(unit, guid, subgroup)
 				end
 			end
 		end
+
+		local tank, healer, damager = UnitGroupRolesAssigned(roster[o.guid].unit)
+		local GroupRole = tank and "TANK" or healer and "HEALER" or damager and "DAMAGER" or "NONE"
+		if GroupRole ~= "NONE" then
+			if GroupRole == "DAMAGER" then
+				if not (role == "CASTER" or role == "MELEE") then
+					role = GroupRole
+				end
+			elseif GroupRole ~= role then
+				role = GroupRole
+			end
+		end
+		
 		roster[o.guid].role = role
 		return role
 	end;
