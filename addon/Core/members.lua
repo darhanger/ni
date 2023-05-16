@@ -15,6 +15,7 @@ local tankTalents, BuildTalents, inspectFrame, DoInspect
 local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
 local wotlk = ni.vars.build == 30300;
+local inspect = { unit = "", tainted = false };
 local playerInCombat
 setmetatable(members, {
 	__call = function(_, ...)
@@ -119,22 +120,25 @@ if wotlk then
 		end
 	end;
 
-	hooksecurefunc("NotifyInspect", function(unit)
-		if UnitExists(unit) and  not UnitIsUnit("mouseover", unit) then
-			roster.inspectUnit = unit
-			roster.inspectTainted = true
-			ni.C_Timer.After(INSPECT_TIMEOUT, function()
-				local guid = UnitGUID(roster.inspectUnit)
-				if roster[guid] and roster.inspectTainted then
-					roster.inspectTainted = false
-					roster[guid].lastInspTime = 5 * roster[guid].inspAttempts + GetTime()
-					if roster[guid].inspAttempts < 3 then
-						roster[guid].inspAttempts = roster[guid].inspAttempts + 1
-					end
-				end
-			end)
-		end
-	end);
+    hooksecurefunc("NotifyInspect", function(unit)
+        if UnitExists(unit) and  not UnitIsUnit("mouseover", unit) then
+            inspect.unit = unit
+            inspect.tainted = true
+            ni.C_Timer.After(INSPECT_TIMEOUT, function()
+                if inspect.tainted then
+                    inspect.tainted = false
+                    local guid = UnitGUID(inspect.unit)
+                    local Obj = roster[guid] or aux_roster[guid]
+                    if Obj then
+                        Obj.lastInspTime = 5 * Obj.inspAttempts + GetTime()
+                        if Obj.inspAttempts < 3 then
+                            Obj.inspAttempts = Obj.inspAttempts + 1
+                        end
+                    end
+                end
+            end)
+        end
+    end);
 	inspectFrame = CreateFrame("frame")
 	DoInspect = function(unit)
 		if CanInspect(unit) then
@@ -145,22 +149,22 @@ if wotlk then
 	inspectFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
 	inspectFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
 	
-	inspectFrame:SetScript("OnEvent", function(self, event, ...)
-		if event == "INSPECT_TALENT_READY" then
-			self:UnregisterEvent("INSPECT_TALENT_READY")
-			if roster.inspectTainted then
-				BuildTalents(roster.inspectUnit)
-				local guid = UnitGUID(roster.inspectUnit)
-				roster[guid].lastInspTime = GetTime()
-				roster[guid].inspAttempts = 0
-				roster.inspectTainted = false
-			end
-		elseif event == "PLAYER_REGEN_ENABLED" then
-			playerInCombat = false;
-		elseif event == "PLAYER_REGEN_DISABLED" then
-			playerInCombat = true;
-		end
-	end);
+    inspectFrame:SetScript("OnEvent", function(self, event, ...)
+        if event == "INSPECT_TALENT_READY" then
+            self:UnregisterEvent("INSPECT_TALENT_READY")
+            if inspect.tainted then
+                BuildTalents(inspect.unit)
+                local guid = UnitGUID(inspect.unit)
+                roster[guid].lastInspTime = GetTime()
+                roster[guid].inspAttempts = 0
+                inspect.tainted = false
+            end
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            playerInCombat = false;
+        elseif event == "PLAYER_REGEN_DISABLED" then
+            playerInCombat = true;
+        end
+    end);
 end;
 
 function memberssetup:create(unit, guid, subgroup)
@@ -586,41 +590,42 @@ memberssetup.set = function()
 		end
 		return temp;
 	end	
-	function members.subgroupbelow(percent, radius, owngroup)
-		local total, temp, temp2, aux = 0, {}, {}
-		if owngroup then
-			aux = members.inrange("player", 0)[1]
-			owngroup = aux and aux.subgroup
-		end
-		for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
-			for _,o in ipairs(members) do
-				if o.subgroup == group and o:range()
-				  and o:hp() < percent and o:los() then
-					total = 1
-					for _,o2 in ipairs(members) do
-						if o.guid ~= o2.guid
-						  and o2.subgroup == group
-						  and o2:hp() < percent
-						  and ni.unit.distance(o.unit, o2.unit) <= radius
-						  and ni.unit.los(o.unit, o2.unit) then
-							total = total + 1
-						end
-					end
-				end
-				tmp[#tmp + 1] = { unit = o.unit, hp = o:hp(), near = total }
-			end
-			table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end )
-			if temp[1] then
-				temp2[#temp2 + 1] = {unit = temp[1].unit, hp = temp[1].hp, near = temp[1].near }
-			end
-		end
-		table.sort( temp2, function(a,b) return (a.near > b.near) or (a.near == b.near and a.hp < b.hp) end )
-		if temp2[1] then
-			return temp2[1].near, temp2[1]
-		else
-			return 0
-		end
-	end;	
+    function members.subgroupbelow(percent, radius, owngroup)
+        local total, temp, temp2, aux = 0, {}, {}
+        if owngroup then
+            aux = members.inrange("player", 0)[1]
+            owngroup = aux and aux.subgroup
+        end
+        for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
+            for _,o in ipairs(members) do
+                if o.subgroup == group and o:range()
+                  and o:hp() < percent and o:los() then
+                    total = 1
+                    for _,o2 in ipairs(members) do
+                        if o.guid ~= o2.guid
+                          and o2.subgroup == group
+                          and o2:hp() < percent
+                          and ni.unit.distance(o.unit, o2.unit) <= radius
+                          and ni.unit.los(o.unit, o2.unit) then
+                            total = total + 1
+                        end
+                    end
+                end
+                o.near = total
+                temp[#temp + 1] = o
+            end
+            table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a:hp() < b:hp()) end )
+            if temp[1] then
+                temp2[#temp2 + 1] = temp[1]
+            end
+        end
+        table.sort( temp2, function(a,b) return (a.near > b.near) or (a.near == b.near and a:hp() < b:hp()) end )
+        if temp2[1] then
+            return temp2[1].near, temp2[1]
+        else
+            return 0
+        end
+    end;
 	function members.addcustom(unit, guid)
 		if type(unit) == "string" then
 			local groupMember = memberssetup:create(unit, guid or UnitGUID(unit));
