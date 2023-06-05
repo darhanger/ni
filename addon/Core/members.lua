@@ -17,30 +17,30 @@ local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
 local wotlk = ni.vars.build == 30300;
 local inspect = { unit = "", tainted = false };
 local playerInCombat
+local pGuid
 setmetatable(members, {
-	__call = function(_, ...)
-		local groupType, nRaidMembers, nPartyMembers, subgroup
-		if wotlk then
-			nRaidMembers = GetNumRaidMembers()
-			nPartyMembers = GetNumPartyMembers()
-			groupType = nRaidMembers > 0 and "raid" or "party"
-		else
-			nRaidMembers = GetNumGroupMembers()
-			nPartyMembers = nRaidMembers - 1
-			groupType = IsInRaid() and "raid" or "party"
-		end
-		local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
-		local pGuid = UnitGUID("player");
-		for i = 1, groupsize do
-			local unit = groupType .. i
-			local guid = UnitGUID(unit)
+    __call = function(_, ...)
+        local groupType, nRaidMembers, nPartyMembers, subgroup
+        if wotlk then
+            nRaidMembers = GetNumRaidMembers()
+            nPartyMembers = GetNumPartyMembers()
+            groupType = nRaidMembers > 0 and "raid" or "party"
+        else
+            nRaidMembers = GetNumGroupMembers()
+            nPartyMembers = nRaidMembers - 1
+            groupType = IsInRaid() and "raid" or "party"
+        end
+        local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
+        pGuid = UnitGUID("player");
+        for i = 1, groupsize do
+            local unit = groupType .. i
+            local guid = UnitGUID(unit)
 			if guid then
 				subgroup = groupType == "raid" and select(3, GetRaidRosterInfo(i)) or 1
 				if guid ~= pGuid then
 					local o = memberssetup:create(unit, guid, subgroup)
 					if o then
 						members[#members + 1] = o;
-						aux_roster[guid] = nil;
 					end
 				else
 					members[#members + 1] = memberssetup:create("player", pGuid, subgroup)
@@ -51,7 +51,7 @@ setmetatable(members, {
 			members[#members + 1] = memberssetup:create("player", pGuid, 1)
 		end
 	end,
-	__index = { name = "members", author = "MoRBiDuS", version = "1.1.9a" };
+	__index = { name = "members", author = "MoRBiDuS", version = "1.2.0" };
 });
 
 local dontCache = {	["updatemember"] = true, ["updatemembers"] = true, ["reset"] = true, ["addcustom"] = true, ["removecustom"] = true };
@@ -171,21 +171,20 @@ function memberssetup:create(unit, guid, subgroup)
 	if roster[guid] then return end
 	local o = {}
 	setmetatable(o, memberssetup)
+	
 	function o:istank()
 		if wotlk then
 			return o.role == "TANK";
 		else
-			return o.role == "TANK"
-			and ((o.class == "WARRIOR" and o:aura(71))
+			return (o.class == "WARRIOR" and o:aura(71))
 			or (o.class == "DRUID" and o:auras("9634||5487"))
 			or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
 			or (o.class == "DEATHKNIGHT" and o:aura(48263))
-			or (o:aura(57339) or o:aura(57340)))
-			or false;	
+			or (o:aura(57339) or o:aura(57340))
+			or o.role == "TANK" or false;	
 		end
 	end;
-
-	if wotlk then	
+	if wotlk then
 		function o:ishealer()
 			return o.role == "HEALER";
 		end;
@@ -198,7 +197,7 @@ function memberssetup:create(unit, guid, subgroup)
 		function o:ismelee()
 			return o.role == "MELEE";
 		end;
-	end;
+	end
 	function o:location()
 		local x, y, z, r = ni.functions.objectinfo(o.guid);
 		if x then
@@ -209,7 +208,7 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:combat()
 		return UnitAffectingCombat(o.unit) == 1;
 	end
-	function o:aura(auras)
+	function o:aura(aura)
 		return ni.unit.aura(o.unit, aura);
 	end;	
 	function o:auras(auras)
@@ -242,11 +241,12 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:hpmax()
 		return UnitHealthMax(o.unit);
 	end;
+	--------------------------------------
 	function o:hp()
 		local hp = o:hpraw()/o:hpmax() * 100;
 		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
 			return 100;
-		end;
+		end
 		for _,id in ipairs(ni.tables.cantheal) do
 			if o:debuff(id) then return 100 end
 		end;
@@ -257,10 +257,11 @@ function memberssetup:create(unit, guid, subgroup)
 		hp = o:dispel() and (hp - 2) or hp;
 		return hp;
 	end;
-	function o:range()
+    function o:range()
+		local reqDist = roster[pGuid] and roster[pGuid].class == "PALADIN" and roster[pGuid].role == "HEALER" and 60 or 40        
 		local dist = ni.player.distance(o.unit) or 999;
-		return dist < 40 or false;
-	end;
+        return dist < reqDist or false;
+    end;
 	function o:los()
 		return ni.player.los(o.unit) == true;
 	end;
@@ -322,7 +323,7 @@ function memberssetup:create(unit, guid, subgroup)
 				end
 			end
 		end
-
+		
 		local tank, healer, damager = UnitGroupRolesAssigned(roster[o.guid].unit)
 		local GroupRole = tank and "TANK" or healer and "HEALER" or damager and "DAMAGER" or "NONE"
 		if GroupRole ~= "NONE" then
@@ -333,7 +334,7 @@ function memberssetup:create(unit, guid, subgroup)
 			elseif GroupRole ~= role then
 				role = GroupRole
 			end
-		end
+		end		
 		
 		roster[o.guid].role = role
 		return role
@@ -625,7 +626,7 @@ memberssetup.set = function()
         else
             return 0
         end
-    end;
+    end;	
 	function members.addcustom(unit, guid)
 		if type(unit) == "string" then
 			local groupMember = memberssetup:create(unit, guid or UnitGUID(unit));
