@@ -1,3 +1,7 @@
+local Sirus = GetItemInfo(100455) ~= nil or false;
+
+if Sirus then
+
 local t4 = 0
 if ni.player.hasitemequipped(28963) then
     t4 = t4 + 1
@@ -674,4 +678,18 @@ local abilities = {
     end,
     --------------------------
 };
-ni.bootstrap.profile("demon_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+	ni.bootstrap.profile("demon_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+else
+	local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not Sirus then
+				ni.frames.floatingtext:message("Only for SIRUS.SU")
+			end
+        end,
+    };
+    ni.bootstrap.profile("demon_by_makaren", queue, abilities);
+end;

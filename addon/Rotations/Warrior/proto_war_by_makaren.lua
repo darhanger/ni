@@ -1,3 +1,7 @@
+local Sirus = GetItemInfo(100455) ~= nil or false;
+
+if Sirus then
+
 local enables = {
     ["krik"] = false,
     ["target"] = true,
@@ -453,4 +457,18 @@ local abilities = {
         end
     end,
 };
-ni.bootstrap.profile("proto_war_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+	ni.bootstrap.profile("proto_war_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+else
+	local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not Sirus then
+				ni.frames.floatingtext:message("Only for SIRUS.SU")
+			end
+        end,
+    };
+    ni.bootstrap.profile("proto_war_by_makaren", queue, abilities);
+end;

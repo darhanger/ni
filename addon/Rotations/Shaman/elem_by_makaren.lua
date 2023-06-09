@@ -1,3 +1,5 @@
+local Sirus = GetItemInfo(100455) ~= nil or false;
+if Sirus then
 local t4 = 0
 if ni.player.hasitemequipped(29033) then
     t4 = t4 + 1
@@ -1709,5 +1711,19 @@ else
         end,
         --------------------------
     };
-    ni.bootstrap.profile("elem_by_makaren", queue, abilities, OnLoad, OnUnLoad);
-end
+		ni.bootstrap.profile("elem_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+	end
+else
+	local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not Sirus then
+				ni.frames.floatingtext:message("Only for SIRUS.SU")
+			end
+        end,
+    };
+    ni.bootstrap.profile("elem_by_makaren", queue, abilities);
+end;
