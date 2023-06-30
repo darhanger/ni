@@ -1,9 +1,11 @@
 ![logo](_media/ni.png)
 
-> Profile Framework for **World of Warcraft** and its older expansions
+> Profile Framework for World of Warcraft and older expansions
 
-- Support for 3.3.5, 4.3.4, 5.4.8 only
+- Support for 3.3.5a, 4.3.4, 5.4.8 only
 
-[Get Started](#advantages)
+[Get Started](#ni-v2-legacy)
 
 ![](_media/bg.png)
+
+![color](#76599f)
