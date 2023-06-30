@@ -1,10 +1,10 @@
-- Getting started
+- <img src="_media/start.png" alt="Start Icon" style="vertical-align: middle;"> **Getting started**
 
   - [Quick start](getting-started/quickstart.md)
   - [How to contribute](getting-started/how-to-contribute.md)
   - [FAQ](getting-started/faq.md)
 
-- Api
+- <img src="_media/api.png" alt="API Icon" style="vertical-align: middle;"> **Api**
 
   - [Debug](api/debug.md)
   - [Generic](api/generic.md)
@@ -19,7 +19,9 @@
   - [Unit](api/unit.md)
   - [Vars](api/vars.md)
 
-- Usefull
+- <img src="_media/useful.png" alt="Usefull Icon" style="vertical-align: middle;"> **Usefull**
 
-  - [Discord](https://discord.com/invite/xBFKJc6QRr)
-  - [YouTube](https://youtube.com/playlist?list=PLvjnPqMPbgyoq7rM8bHr3rdcRTVZ5cXuy)
+  - <a href="https://darhanger.github.io/rotations/">
+	<img src="_media/darhanger.png" alt="Server Icon">PvE Profiles</a>
+  - <a href="https://discord.gg/xBFKJc6QRr">
+	<img src="_media/server.png" alt="Server Icon">Project Server</a>

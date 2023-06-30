@@ -3,15 +3,16 @@
 
 <head>
 	<meta charset="UTF-8" />
-	<title>ni</title>
+	<title>ni (v2) Legacy</title>
+	<meta name="google-site-verification" content="6OvSZnxDwtpu2GD1Pdij1661AUSxEp9qkS5oytILICk" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="keywords" content="rotation,wow,combat-rotation,wotlk,DarhangeR,3-3-5a,pqr,warmane,сircle,blackdps,byster"/>	
 	<meta name="description" content="Profile Framework for World of Warcraft and its older expansions." />
-	<meta property="og:title" content="https://darhanger.github.io/ni/_media/logo.png" width="85"/>
+	<meta property="og:title" content="ni (v2) Legacy"/>
 	<meta property="og:description" content="Profile Framework for World of Warcraft and its older expansions." />
 	<meta property="og:image" content="https://darhanger.github.io/ni/_media/logo.png" />
 	<meta property="og:url" content="https://darhanger.github.io/ni/" />
-	<meta name="viewport"
-		content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
 	<link rel="icon" href="https://darhanger.github.io/ni/_media/favicon.ico" type="image/gif" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
 </head>
@@ -21,16 +22,22 @@
 	<script>
 		window.$docsify = {
 			name: "ni (nHub)",
+			logo: 'logo.png height="52px"',
 			repo: "https://github.com/darhanger/ni",
+			coverpage: true,
+			auto2top: true,
+			executeScript: true,
 			loadSidebar: true,
-			ga: "UA-XXXXX-Y",
 			maxLevel: 4,
 			subMaxLevel: 3,
-			scroll2top: true,
+			gtag: [
+			  'G-C40H56NC3Y',
+			  'UA-275906865-1',
+			],			
 			search: {
 				maxAge: 86400000,
 				paths: "auto",
-				placeholder: "Search",
+				placeholder: "Search api",
 				noData: "No Results",
 				depth: 6,
 				hideOtherSidebarContent: false,
@@ -41,11 +48,14 @@
 			},
 		};
 	</script>
+	
+	<script src="//unpkg.com/docsify/lib/plugins/emoji.min.js"></script>	
 	<script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+	<script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gtag.min.js"></script>
 	<script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
 	<script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-lua.min.js"></script>
 	<script src="//cdn.jsdelivr.net/npm/docsify-copy-code"></script>
-	<!-- <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/ga.min.js"></script> -->
+
 </body>
 
 </html>
