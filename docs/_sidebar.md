@@ -1,4 +1,4 @@
-- <img src="_media/start.png" alt="Start Icon" style="vertical-align: middle;"> **Getting started**
+- <img src="_media/start.png" alt="Start Icon" style="vertical-align: middle;"> **Getting Started**
 
   - [Quick start](getting-started/quickstart.md)
   - [How to contribute](getting-started/how-to-contribute.md)
@@ -22,6 +22,8 @@
 - <img src="_media/useful.png" alt="Usefull Icon" style="vertical-align: middle;"> **Usefull**
 
   - <a href="https://darhanger.github.io/rotations/">
-	<img src="_media/darhanger.png" alt="Server Icon">PvE Profiles</a>
+	<img src="_media/darhanger.png" alt="PvE Icon">PvE Profiles</a>
+  - <a href="https://discord.gg/4FC8rwy">
+	<img src="_media/pvp.png" alt="PvP Icon">PvP Profiles</a>
   - <a href="https://discord.gg/xBFKJc6QRr">
 	<img src="_media/server.png" alt="Server Icon">Project Server</a>

@@ -4,7 +4,7 @@
 
 - Support for 3.3.5a, 4.3.4, 5.4.8 only
 
-[Get Started](#ni-v2-legacy)
+[Getting Started](#ni-v2-legacy)
 
 ![](_media/bg.png)
 
