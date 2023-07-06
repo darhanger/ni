@@ -516,7 +516,7 @@ local abilities = {
 			local target = enemies[i].guid
 				-- if ni.spell.valid(spells.ShadowWordDeath.id, target, false, true, false)
 				if ni.player.los(target)	
-				and UnitClass(target) == "ROGUE"or"DRUID"
+				and UnitClass(target) == "ROGUE" or UnitClass(target) == "DRUID"
 				and not ni.unit.debuff (target, 	spells.ShadowWordPain.id, p)
 				then 
 						ni.spell.cast(spells.ShadowWordPain.id, target)
