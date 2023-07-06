@@ -406,7 +406,7 @@ local queue = {
 			"PowerWordFortitude",
 			"PrayerofSpirit",
 			"PrayerofShadowProtection",
-			-- "AntiInterupt",
+			"AntiInterupt",
 			"Desesperate Prayer",
 			"Shieldlow",
 			"POMlow",
@@ -496,20 +496,7 @@ local abilities = {
 			ni.spell.cast(spells.PrayerofShadowProtection.id)
 		end
 	end,
-	-- ["KS"] = function ()
-	-- 	if ni.spell.cd(spells.ShadowWordDeath.id) == 0 then
-	-- 		for i = 1, #cache.targets do
-	-- 			local finaos = cache.targets[i].guid
-	-- 			if ni.spell.valid(spells.ShadowWordDeath, finaos, false, true, false)
-	-- 			and ni.unit.hp (finaos) <= 99	
-	-- 			then 
-	-- 					ni.spell.cast(spells.ShadowWordDeath, finaos)
-	-- 					ni.player.target(finaos)
-	-- 					ni.player.useinventoryitem(10)
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end,
+
 	["antiinvi"] = function ()
 			local enemies = ni.unit.enemiesinrange("player", 30)
 			for i = 1, #enemies do
@@ -554,31 +541,32 @@ local abilities = {
 		end
 	end,
 
-	-- ["AntiInterupt"] = function()
-		-- local interruptID = {1766, 		--Kick 
-    -- 19647, 	--Spell Lock
-    -- 2139,	--Counterspell 
-    -- 47476,		--Strangulate
-    -- 57994, 	--Wind Shear 
-    -- 6552, 		--Pummel 
-    -- 72, 		--Shield Bash 
-    -- 31935,		--Avenger's Shield
-    -- 34490, 	--Silencing Shot
-    -- 47528, 	--Mind Freeze 
-    -- 53550}
+	["AntiInterupt"] = function()
+		local interruptID = {
+	1766, 		--Kick 
+    19647, 	--Spell Lock
+    2139,	--Counterspell 
+    47476,		--Strangulate
+    57994, 	--Wind Shear 
+    6552, 		--Pummel 
+    72, 		--Shield Bash 
+    31935,		--Avenger's Shield
+    34490, 	--Silencing Shot
+    47528, 	--Mind Freeze 
+    53550}
     
-  --   for i, v in ipairs(interruptID) do
-  --   local enemies = ni.unit.enemiesinrange("player", 36)
-  --   for i = 1, #enemies do
-  --   if ni.spell.cd(48158) == 0
-  --   and (UnitCastingInfo(enemies[i].guid)==GetSpellInfo(v)  or UnitChannelInfo(enemies[i].guid)==GetSpellInfo(v) ) then
-  --   ni.spell.stopcasting()
-  --   ni.spell.stopcasting()
-  --   ni.spell.stopcasting()
-  --   end
-  --   end
-  --   end
-  --   end,
+    for i, v in ipairs(interruptID) do
+    local enemies = ni.unit.enemiesinrange("player", 36)
+    for i = 1, #enemies do
+    if ni.spell.cd(48158) == 0
+    and (UnitCastingInfo(enemies[i].guid)==GetSpellInfo(v)  or UnitChannelInfo(enemies[i].guid)==GetSpellInfo(v) ) then
+    ni.spell.stopcasting()
+    ni.spell.stopcasting()
+    ni.spell.stopcasting()
+    end
+    end
+    end
+    end,
 	["Shieldlow"] = function ()
     for i = 1, #ni.members.inrange ("player", 40) do
         if  ni.members[i]:hp() <=40 
@@ -699,9 +687,9 @@ end,
 	local buffdispe = {642, 45438} -- Divine Shield, Ice Block
 	local targets = ni.unit.enemiesinrange("player", 30)
 	for i = 1, #targets do
-		for _, buffId in ipairs(buffdispe) do
-			if ni.unit.buff(targets[i].guid, buffId) and 
-			not cache.moving then
+		for _, buffId in pairs(buffdispe) do
+			if not cache.moving
+			and ni.unit.buff(targets[i].guid, buffId) then
 				print("dispel")
 				ni.spell.castat(spells.MassDispel.id, targets[i].unit)
 				return true
@@ -741,16 +729,14 @@ end,
 	end
 end,
 ["Shackle Gargoyle"] = function ()
-local enemies = ni.unit.enemiesinrange("player", 35)
-for i = 1, #enemies do
-  local target = enemies[i].guid
-  local name = enemies[i].name
-	if name [i] == "Ebon Gargoyle"
-	and not ni.unit.debuff(target, spells.ShackleUndead.id)
-	then 
-		ni.spell.cast (spells.ShackleUndead.id, target[i])
+	local enemies = ni.unit.enemiesinrange("player", 35)
+	for i = 1, #enemies do
+		local target = enemies[i].guid
+		local name = enemies[i].name
+		if name == "Ebon Gargoyle" and not ni.unit.debuff(target, spells.ShackleUndead.id) then
+			ni.spell.cast(spells.ShackleUndead.id, target)
+		end
 	end
-end
 end,
 ["DefensiveDispelpriority"] = function ()
 local controlt = {
@@ -792,7 +778,7 @@ local controlt = {
 	}
 	local friends = ni.unit.friendsinrange("player", 30)
 	for i = 1, #friends do
-		for _, debuffId in ipairs(controlt) do
+		for _, debuffId in pairs(controlt) do
 			if ni.unit.debuff(friends[i].guid, debuffId) then
 				ni.spell.cast(spells.dispelmagic.id, friends[i].guid)
 			end
@@ -819,7 +805,7 @@ end,
 	end
 end,
 ["Penance"] = function ()
-	if not ni.player.ismoving()  then
+	if not cache.moving then
 	for i = 1,  #ni.members  do
 			if   ni.members [i]:hp() <= 70 and
 			ValidUsable(spells.Penance.id, ni.members[i].unit) and
@@ -844,7 +830,7 @@ end
 end,
 
 ["FlashHeal"] = function()
-	if not ni.player.ismoving() then
+	if not cache.moving then
 	for i = 1, #ni.members do
 			if
 					ni.members[i]:hp () <= 70 and
