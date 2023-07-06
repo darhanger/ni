@@ -434,11 +434,11 @@ local queue = {
 			"RenewMe",
 			"Penancelowpriority",
 			"DefensiveDispel",
-			-- "Ofensive Dispell",
+			"OfensiveDispell",
 			-- "Rebuff",
 			-- "CureDisease",
 			-- "Ofensive Dispel2",
-			-- "DOTS",
+			"DOTS",
 	}
 local abilities = {
 	["Drink"] = function ()
@@ -785,6 +785,27 @@ local controlt = {
 		end
 	end
 end,
+["OffensiveDispel"] = function ()
+	local buffoffensive = {
+		26991, -- Great Gift of the Wild
+		21849, -- Gift of the Wild
+		17116, -- Nature's Swiftness
+		69369, -- Predatory Swiftness
+	}
+	local enemies = ni.unit.enemiesinrange("player", 30)
+	for _, enemy in pairs(enemies) do
+		if ni.spell.available(spells.dispelmagic.id, enemy.unit) then 
+			local enemyBuffs = ni.unit.buffs(enemy.guid)
+			for buffId, _ in pairs(enemyBuffs) do
+				if tContains(buffoffensive, buffId) then
+					ni.spell.cast(spells.dispelmagic.id, enemy.unit)
+					break
+				end
+			end
+		end
+	end
+end,
+
 ["Burn mana"] = function ()
 	if ni.unit.hasheal("target") 
 	and ni.unit.powermax("mana") > 17000
@@ -872,4 +893,5 @@ else
 end;
 --TODO: 
 -- Buffer against dispe
+-- Crear defensive dispel
 -- valid ahora es :valid
