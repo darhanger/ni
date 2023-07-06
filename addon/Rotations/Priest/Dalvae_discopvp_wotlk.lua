@@ -516,7 +516,8 @@ local abilities = {
 			for i = 1, #enemies do
 			local target = enemies[i].guid
 				-- if ni.spell.valid(spells.ShadowWordDeath.id, target, false, true, false)
-				if ni.player.los(target)	
+				if ni.player.los(target)
+				and ni.unit.isplayer(target)
 				and ni.unit.hp(target) <= 17	
 				then 
 						ni.spell.cast(spells.ShadowWordDeath.id, target)
@@ -895,3 +896,4 @@ end;
 -- Buffer against dispe
 -- Crear defensive dispel
 -- valid ahora es :valid
+-- inrange below en vez de inrange
