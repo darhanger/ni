@@ -808,7 +808,7 @@ end,
 
 ["Burn mana"] = function ()
 	if ni.unit.hasheal("target") 
-	and ni.unit.powermax("mana") > 17000
+	and ni.unit.powermax(t, "mana") > 17000
 	and ni.unit.power("mana") > 3
 	then
 		ni.spell.cast(spells.ManaBurn.id, t)
