@@ -796,7 +796,7 @@ local controlt = {
 	for i = 1, #friends do
 		for _, debuffId in ipairs(controlt) do
 			if ni.unit.debuff(friends[i].guid, debuffId) then
-				ni.spell.cast(spells.dispelmagic, friends[i].guid)
+				ni.spell.cast(spells.dispelmagic.id, friends[i].guid)
 			end
 		end
 	end
