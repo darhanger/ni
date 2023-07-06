@@ -370,12 +370,12 @@ end;
 
 local t, p = "target", "player"
 local cache = {
-			enemies = nil,
-			friends = nil,
-			moving = nil,
-			curchannel = nil,
-			iscasting = nil,
-		}
+			-- enemies = false,
+			-- friends = false,
+			moving = false,
+			curchannel = false,
+			iscasting = false,
+		};
 local function LosCast(spell, tar)
 			if ni.player.los(tar) and IsSpellInRange(spell, tar) == 1 then
 				ni.spell.cast(spell, tar)
@@ -453,15 +453,15 @@ local abilities = {
 	end,
 	
 	["Cache"] = function ()
-    cache.targets = ni.unit.enemiesinrange(p, 30)
-    cache.friends = ni.unit.friendsinrange(p, 40)
-    cache.moving = ni.player.ismoving()
-		cache.iscasting = ni.player.iscasting()
-		cache.curchannel = ni.unit.ischanneling("player")
+    -- cache.targets = ni.unit.enemiesinrange(p, 30) or false
+    -- cache.friends = ni.unit.friendsinrange(p, 40) or false
+    cache.moving = ni.player.ismoving() or false;
+	cache.iscasting = ni.player.iscasting() or false;
+	cache.curchannel = ni.unit.ischanneling("player") or false;
     end,
 
 		
-  ["InnerFire"] = function()
+["InnerFire"] = function()
 			if not ni.player.buff(spells.InnerFire.id)
 					and ni.player.hp() then
 				ni.spell.cast(spells.InnerFire.name)
@@ -635,7 +635,8 @@ end,
 		or UnitIsDeadOrGhost("player")
 		or not UnitAffectingCombat("player")
 		or ni.unit.buff("player", "Drink") 
-						or ni.unit.ischanneling("player")then
+		or cache.curchannel
+		then
 				return true;
 		end
 		end,
@@ -646,7 +647,7 @@ end,
 			then
 					local renewActive = false
 					for i = 1, #ni.members.inrange ("player", 40) do
-							if ni.unit.buff(ni.members[i].unit, 48113, "player") then
+					if ni.unit.buff(ni.members[i].unit, 48113, "player") then
 									renewActive = true
 									break
 							end
@@ -663,6 +664,16 @@ end,
 							end
 					end
 			end
+	end,
+	["Mending2"] = function ()
+		local allyOne = ni.members[1];
+		local friends = ni.members.inrangewithoutbuffbelow(allyOne.unit, 30, spells.PrayerofMending.id, 70);
+		if #friends >=2
+		and allyOne:hp() <=70
+		and allyOne:valid(spells.PrayerofMending.id,false, true) then
+			ni.spell.cast(spells.PrayerofMending.id, allyOne.unit)
+		end
+
 	end,
 	["PsychicScream"] = function ()
 		local value, enabled = GetSetting("PsychicScream")
@@ -694,7 +705,7 @@ end,
 	-- and ni.spell.valid(spells.HolyFire, cache.targets[i].guid, false, true, true)
 	then
 	print ("dispel")
-	ni.spell.castat(32375, targets[i].guid)
+	ni.spell.castat(32375, targets[i].unit)
 	return true
 	end
 	end 
@@ -781,11 +792,11 @@ local controlt = {
 	64044,		-- Psychic Horror
 	122,		-- Frost Nova
 	}
-	local friends = ni.unit.friendsinrange(p, 40)
+	local friends = ni.unit.friendsinrange("player", 30)
 	for i = 1, #friends do
-	for i, v in ipairs(controlt) do
-		if ni.unit.debuff(#friends[i], controlt(v))
-			then ni.spell.cast (spells.dispelmagic, #friends[i])
+		for _, debuffId in ipairs(controlt) do
+			if ni.unit.debuff(friends[i].guid, debuffId) then
+				ni.spell.cast(spells.dispelmagic, friends[i].guid)
 			end
 		end
 	end
@@ -793,7 +804,7 @@ end,
 
 ["Burn mana"] = function ()
 	if ni.unit.hasheal("target") 
-	-- and ni.unit.powermax("mana")> 17000
+	and ni.unit.powermax("mana") > 17000
 	and ni.unit.power("mana") > 3
 	then
 		ni.spell.cast(spells.ManaBurn.id, t)
@@ -851,7 +862,7 @@ end,
 ["RenewMe"] = function ()
 	if ni.player.power("mana") > 45 
 	and ni.player.hp()<= 80
-	and not ni.unit.buff (p, spells.Renew.id, p)
+	and not ni.player.buff (spells.Renew.id, p)
 	then
 			ni.spell.cast(spells.Renew.id, p)
 	end
@@ -878,3 +889,4 @@ else
 end;
 --TODO: 
 -- Buffer against dispe
+-- valid ahora es :valid
