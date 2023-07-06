@@ -161,7 +161,7 @@ frames.floatingtext = CreateFrame("Frame", floattext)
 frames.floatingtext.ranW, frames.floatingtext.ranH = random(410, 435), random(32, 40);
 frames.floatingtext:SetSize(frames.floatingtext.ranW, frames.floatingtext.ranH)
 frames.floatingtext:SetAlpha(0)
-frames.floatingtext:SetPoint("CENTER", 0, 80)
+frames.notification:SetPoint("TOP", ChatFrame1, 0, -10)
 frames.floatingtext.text = frames.floatingtext:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
 frames.floatingtext.text:SetAllPoints()
 frames.floatingtext.texture = frames.floatingtext:CreateTexture()
