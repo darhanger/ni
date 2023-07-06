@@ -776,16 +776,15 @@ local controlt = {
 	64044,		-- Psychic Horror
 	122,		-- Frost Nova
 	}
-	local friends = ni.unit.friendsinrange("player", 30)
+	local friends = ni.unit.friendsinrange("player", 36)
 	for i = 1, #friends do
-		for _, debuffId in pairs(controlt) do
-			if ni.unit.debuff(friends[i].guid, debuffId) then
+		for _, v in pairs(controlt) do
+			if ni.unit.debuff(friends[i].guid, v) then
 				ni.spell.cast(spells.dispelmagic.id, friends[i].guid)
 			end
 		end
 	end
 end,
-
 ["Burn mana"] = function ()
 	if ni.unit.hasheal("target") 
 	and ni.unit.powermax("mana") > 17000
