@@ -698,17 +698,15 @@ end,
 ["MassDispel"] = function()
 	local buffdispe = {642, 45438} -- Divine Shield, Ice Block
 	local targets = ni.unit.enemiesinrange("player", 30)
-	for d = 1, #buffdispe do
 	for i = 1, #targets do
-	if ni.unit.buff(targets[i].guid, buffdispe[d]) 
-	and not ni.player.ismoving() 
-	-- and ni.spell.valid(spells.HolyFire, cache.targets[i].guid, false, true, true)
-	then
-	print ("dispel")
-	ni.spell.castat(32375, targets[i].unit)
-	return true
-	end
-	end 
+		for _, buffId in ipairs(buffdispe) do
+			if ni.unit.buff(targets[i].guid, buffId) and 
+			not cache.moving then
+				print("dispel")
+				ni.spell.castat(spells.MassDispel.id, targets[i].unit)
+				return true
+			end
+		end
 	end
 end,
 ["Antipoly"] = function()
