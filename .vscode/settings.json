@@ -2161,6 +2161,23 @@
 		"RaidWarningFrame",
 		"ChatTypeInfo",
 		"DEFAULT_CHAT_FRAME",
-		"GetShapeshiftFormID"
+		"GetShapeshiftFormID",
+		"UIDropDownMenu_Initialize",
+		"UIDropDownMenu_SetWidth",
+		"UIDropDownMenu_SetButtonWidth",
+		"UIDropDownMenu_JustifyText",
+		"UIDropDownMenu_SetSelectedID",
+		"UIDropDownMenu_SetText",
+		"WorldFrame",
+		"ItemRefTooltip",
+		"ItemRefShoppingTooltip1",
+		"ItemRefShoppingTooltip2",
+		"ShoppingTooltip1",
+		"ShoppingTooltip2",
+		"message",
+		"UIDropDownMenu_AddButton",
+		"UIDropDownMenu_CreateInfo",
+		"SPELL_FAILED_NOT_BEHIND",
+		"BOOKTYPE_SPELL"
 	]
 }

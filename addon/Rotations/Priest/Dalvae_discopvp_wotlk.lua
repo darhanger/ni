@@ -8,6 +8,8 @@ local spells = {
 	InnerFire = {id = 588, name = GetSpellInfo(588), icon = select(3, GetSpellInfo(588))},
 	PowerWordShield = {id = 48066, name = GetSpellInfo(48066), icon = select(3, GetSpellInfo(48066))},
 	PowerWordFortitude = {id = 48162, name = GetSpellInfo(48162), icon = select(3, GetSpellInfo(48162))},
+	PowerInfusion = {id = 10060, name = GetSpellInfo(10060), icon = select(3, GetSpellInfo(10060))},
+
 	dispelmagic = {id = 988, name = GetSpellInfo(988), icon = select(3, GetSpellInfo(988))},
 	ShackleUndead = {id = 9484, name = GetSpellInfo(9484), icon = select(3, GetSpellInfo(9484))},
 	MassDispel = {id = 32375, name = GetSpellInfo(32375), icon = select(3, GetSpellInfo(32375))},
@@ -401,6 +403,7 @@ local function ValidUsable(id, tar)
 
 
 local queue = {
+		  "Universal pause",
 			"Drink",
 			"InnerFire",
 			"PowerWordFortitude",
@@ -412,6 +415,7 @@ local queue = {
 			"POMlow",
 			"Penancelow",
 			"Shieldme",
+			"Power infusion",
 			"KS",
 			"Antiinvi",
 			"Showinvis",
@@ -441,6 +445,16 @@ local queue = {
 			"DOTS",
 	}
 local abilities = {
+	["Universal Pause"] = function ()
+		if IsMounted()	
+		or UnitIsDeadOrGhost("player")
+		or ni.unit.buff("player", "Drink") 
+		or cache.curchannel
+		then
+				return true;
+		end
+		end,
+
 	["Drink"] = function ()
 		if ni.player.hasitem (43236)
 		and ni.player.power("mana") < 95
@@ -593,15 +607,14 @@ end,
 		end
 	end,
 	["POMlow"] = function ()
-		if ni.spell.cd (spells.PrayerofMending.id) then
-			for i = 1, #ni.members.inrange ("player", 40) do
-					if  ni.members[i]:hp() <=40 
-					and
-							ValidUsable(spells.PrayerofMending.id, ni.members[i].unit) and
-							LosCast(spells.PrayerofMending.name, ni.members[i].unit)
-					then
-							return true
-					end
+		if ni.spell.cd(spells.PrayerofMending.id) then
+			for i = 1, #ni.members.inrange("player", 40) do
+				if ni.members[i]:hp() <= 40 and ni.player.los(ni.members[i].unit) and
+					ni.spell.valid(spells.PrayerofMending.name, ni.members[i].unit) and
+					ni.player.loscast(spells.PrayerofMending.name, ni.members[i].unit)
+				then
+					return true
+				end
 			end
 		end
 	end,
@@ -617,7 +630,15 @@ end,
 				end
 			end
 	end,
-	
+-- DPS Burst Secction
+["Power infusion"] = function ()
+	if ni.vars.combat.cd
+	and  ni.spell.cd(spells.PowerInfusion.id)== 0 
+	then
+		ni.spell.cast(spells.PowerInfusion.name)
+		return true
+end
+end,
 
 	["Pause"] = function ()
 		if IsMounted()	
@@ -788,6 +809,7 @@ local controlt = {
 end,
 ["OffensiveDispel"] = function ()
 	local buffoffensive = {
+		-- Druid
 		26991, -- Great Gift of the Wild
 		21849, -- Gift of the Wild
 		17116, -- Nature's Swiftness
@@ -808,11 +830,13 @@ end,
 end,
 
 ["Burn mana"] = function ()
-	if ni.unit.hasheal("target") 
-	and ni.unit.powermax(t, "mana") > 17000
-	and ni.unit.power(t, "mana") > 3
+	local target = "target"  -- Reemplaza "target" con el nombre o la variable del objetivo real
+
+	if ni.unit.hasheal(target)
+		and ni.unit.powermax(target, "mana") > 17000
+		and ni.unit.power(target, "mana") > 3
 	then
-		ni.spell.cast(spells.ManaBurn.id, t)
+		ni.spell.cast(spells.ManaBurn.id, target)
 	end
 end,
 ["Shield"] = function ()
@@ -897,3 +921,8 @@ end;
 -- Crear defensive dispel
 -- valid ahora es :valid
 -- inrange below en vez de inrange
+-- Power infusion + mana Burn
+-- Shadowfiend + Power infusion +  Holy fire, dots ¿que seria lo más logico? dots primero?
+-- Power infusion defensivamente o ofensivamente?	
+
+-- Como hacer un script de power infusion, siendo que no hay ninguna variable que me permita medirlo.-- Se hace manual no mas. 
