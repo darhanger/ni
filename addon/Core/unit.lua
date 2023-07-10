@@ -390,7 +390,7 @@ unit.bufftype = function(target, str)
 	local i = 1;
 	local buff = UnitBuff(target, i);
 	while buff do
-		local bufftype = select(5, UnitBuff(target, i))
+		local _, _, _, _, bufftype = UnitBuff(target, i);
 		if bufftype ~= nil then
 			if bufftype == "" then
 				bufftype = "Enrage"
@@ -407,50 +407,43 @@ unit.bufftype = function(target, str)
 	return has;
 end;
 unit.bufftypetimer = function(target, str)
-	if not unit.exists(target) then
-		return false;
-	end
-	local st = ni.utils.splitstringtolower(str);
-	local has = false;
-	local i = 1;
-	local buff = UnitBuff(target, i);
-	while buff do
-		local bufftype = select(5, UnitBuff(target, i))
-		if bufftype ~= nil then
-			if bufftype == "" then
-				bufftype = "Enrage"
-			end
-			local dTlwr = strlower(bufftype)
-			if tContains(st, dTlwr) then
-				has = true
-				local remaining = select(7, UnitBuff(target, i))
-				if remaining == 0 then
-					return "infinite";
-				else
-					return remaining;
-				end
-			end
-		end
-		i = i + 1
-		buff = UnitBuff(target, i)
-	end
-	return false;
+    if not unit.exists(target) then
+        return false;
+    end
+    local st = ni.utils.splitstringtolower(str);
+    local i = 1;
+    local debuff = UnitBuff(target, i);
+    while debuff do
+        local _, _, _, _, debufftype = UnitBuff(target, i);
+        if debufftype ~= nil then
+            local dTlwr = strlower(debufftype)
+            if tContains(st, dTlwr) then
+                local _, _, _, _, _, _, expires = UnitBuff(target, i);
+                if expires then
+                    return (expires - GetTime());
+                end
+                break;
+            end
+        end
+        i = i + 1
+        debuff = UnitBuff(target, i)
+    end
+    return false;
 end;
-unit.buffstacks = function (target, spellID, filter)
-	local stacks = select(4, unit.buff(target, spellID, filter))
+unit.buffstacks = function(target, spellID, filter)
+	local _, _, _, stacks = unit.buff(target, spellID, filter);
 	return stacks and stacks or 0;
 end;
 unit.bufftimer = function(target, spellID, filter)
-	local duration = select(6, unit.buff(target, spellID, filter));
-	local expires = select(7, unit.buff(target, spellID, filter));
-	if expirationTime then
-		return duration - (expirationTime - GetTime());
+	local _, _, _, _, _, duration, expires = unit.buff(target, spellID, filter);
+	if expires then
+		return duration - (expires - GetTime());
 	else
 		return 0;
 	end
 end;
 unit.buffremaining = function(target, spellID, filter)
-	local expires = select(7, unit.buff(target, spellID, filter));
+	local _, _, _, _, _, _, expires = unit.buff(target, spellID, filter);
 	if expires ~= nil then
 		return expires - GetTime() - ni.vars.combat.currentcastend;
 	else
@@ -458,8 +451,7 @@ unit.buffremaining = function(target, spellID, filter)
 	end
 end;
 unit.buffduration = function(target, spellID, filter)
-	local name = select(1, unit.buff(target, spellID, filter))
-	local duration = select(6, unit.buff(target, spellID, filter))
+	local name, _, _, _, _, duration = unit.buff(target, spellID, filter);
 	if name then
 		return duration == 0 and 9999 or duration;
 	end
@@ -544,7 +536,7 @@ unit.debufftype = function(target, str)
 	local i = 1
 	local debuff = UnitDebuff(target, i)
 	while debuff do
-		local debufftype = select(5, UnitDebuff(target, i));	
+		local _, _, _, _, debufftype = UnitDebuff(target, i);
 		if debufftype ~= nil then
 			local dTlwr = strlower(debufftype)
 			if tContains(st, dTlwr) then
@@ -558,36 +550,35 @@ unit.debufftype = function(target, str)
 	return has;
 end;
 unit.debufftypetimer = function(target, str)
-	if not unit.exists(target) then
-		return false;
-	end
-	local st = ni.utils.splitstringtolower(str);
-	local i = 1;
-	local debuff = UnitDebuff(target, i);
-	while debuff do
-		local debufftype = select(5, UnitDebuff(target, i));
-		if debufftype ~= nil then
-			local dTlwr = strlower(debufftype)
-			if tContains(st, dTlwr) then
-				local duration, expires = select(6, UnitDebuff(target, i)), select(7, UnitDebuff(target, i));
-				if expires then
-					return (expires - GetTime()), duration;
-				end
-				break;
-			end
-		end
-		i = i + 1
-		debuff = UnitDebuff(target, i)
-	end
-	return false;
+    if not unit.exists(target) then
+        return false;
+    end
+    local st = ni.utils.splitstringtolower(str);
+    local i = 1;
+    local debuff = UnitDebuff(target, i);
+    while debuff do
+        local _, _, _, _, debufftype = UnitDebuff(target, i);
+        if debufftype ~= nil then
+            local dTlwr = strlower(debufftype)
+            if tContains(st, dTlwr) then
+                local _, _, _, _, _, _, expires = UnitDebuff(target, i);
+                if expires then
+                    return (expires - GetTime());
+                end
+                break;
+            end
+        end
+        i = i + 1
+        debuff = UnitDebuff(target, i)
+    end
+    return false;
 end;
-unit.debuffstacks = function (target, spellID, filter)
-	local stacks = select(4, unit.debuff(target, spellID, filter));
+unit.debuffstacks = function(target, spellID, filter)
+	local _, _, _, stacks = unit.debuff(target, spellID, filter);
 	return stacks and stacks or 0;
 end;
 unit.debufftimer = function(target, spellID, filter)
-	local duration = select(6, unit.debuff(target, spellID, filter));
-	local expires = select(7, unit.debuff(target, spellID, filter));
+	local _, _, _, _, _, duration, expires = unit.debuff(target, spellID, filter);
 	if expires then
 		return duration - (expires - GetTime());
 	else
@@ -595,7 +586,7 @@ unit.debufftimer = function(target, spellID, filter)
 	end
 end;
 unit.debuffremaining = function(target, spellID, filter)
-	local expires = select(7, unit.debuff(target, spellID, filter));
+	local _, _, _, _, _, _, expires = unit.debuff(target, spellID, filter);
 	if expires ~= nil then
 		return expires - GetTime() - ni.vars.combat.currentcastend;
 	else
@@ -603,12 +594,20 @@ unit.debuffremaining = function(target, spellID, filter)
 	end
 end;
 unit.debuffduration = function(target, spellID, filter)
-	local name = select(1, unit.debuff(target, spellID, filter));
-	local duration = select(6, unit.debuff(target, spellID, filter));
+	local name, _, _, _, _, duration = unit.debuff(target, spellID, filter);
 	if name then
 		return duration == 0 and 9999 or duration;
 	end
 	return 0;
+end;
+unit.spellstealable = function(t)
+    for i = 1, 40 do
+        local _, _, _, _, _, _, _, _, stealable = UnitBuff(t, i)
+        if stealable then
+            return true;
+        end
+    end
+    return false;
 end;
 unit.isfacing = function(t1, t2, degrees)
 	return (t1 ~= nil and t2 ~= nil) and ni.functions.isfacing(t1, t2, degrees) or false
