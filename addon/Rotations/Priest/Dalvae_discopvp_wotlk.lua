@@ -609,9 +609,10 @@ end,
 	["POMlow"] = function ()
 		if ni.spell.cd(spells.PrayerofMending.id) then
 			for i = 1, #ni.members.inrange("player", 40) do
-				if ni.members[i]:hp() <= 40 and ni.player.los(ni.members[i].unit) and
-					ni.spell.valid(spells.PrayerofMending.name, ni.members[i].unit) and
-					ni.player.loscast(spells.PrayerofMending.name, ni.members[i].unit)
+				if ni.members[i]:hp() <= 40 and ni.player.los(ni.members[i].unit)
+				and
+					ValidUsable(spells.PrayerofMending.name, ni.members[i].unit) and
+					LosCast(spells.PrayerofMending.name, ni.members[i].unit)
 				then
 					return true
 				end
@@ -833,8 +834,8 @@ end,
 	local target = "target"  -- Reemplaza "target" con el nombre o la variable del objetivo real
 
 	if ni.unit.hasheal(target)
-		and ni.unit.powermax(target, "mana") > 17000
-		and ni.unit.power(target, "mana") > 3
+	and UnitManaMax (target)> 17000
+	and ni.unit.power(target, "mana") > 3
 	then
 		ni.spell.cast(spells.ManaBurn.id, target)
 	end
