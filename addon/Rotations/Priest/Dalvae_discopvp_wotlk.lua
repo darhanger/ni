@@ -611,9 +611,10 @@ end,
 			for i = 1, #ni.members.inrange("player", 40) do
 				if ni.members[i]:hp() <= 40 and ni.player.los(ni.members[i].unit)
 				and
-					ValidUsable(spells.PrayerofMending.id, ni.members[i].unit) and
-					LosCast(spells.PrayerofMending.id, ni.members[i].unit)
+					ValidUsable(spells.PrayerofMending.id, ni.members[i].unit) 
+					and ni.spell.valid(ni.members[i].unit, 48113, false, true, true)
 				then
+					ni.spell.cast(48113, ni.members[i].unit)
 					return true
 				end
 			end
