@@ -511,12 +511,13 @@ local abilities = {
 		end
 	end,
 
-	["antiinvi"] = function ()
+	["Antiinvi"] = function ()
 		local enemies = ni.unit.enemiesinrange("player", 30)
 		for i = 1, #enemies do
-			local target = enemies[i].guid  -- Obtener el GUID del enemigo
-			-- if ni.spell.valid(spells.ShadowWordDeath.id, target, false, true, false)
-			if ni.player.los(target) and (UnitClass(enemies[i].name) == "ROGUE" or UnitClass(enemies[i].name) == "DRUID")
+			local target = enemies[i].guid
+			if ni.player.los(target) 
+				and (select(2, UnitClass(enemies[i].guid))== "DRUID" or
+				select(2, UnitClass(enemies[i].guid))== "ROGUE")
 				and not ni.unit.debuff(target, spells.ShadowWordPain.id, "player")
 			then 
 				ni.spell.cast(spells.ShadowWordPain.id, target)
@@ -834,7 +835,7 @@ end,
 	local target = "target"  -- Reemplaza "target" con el nombre o la variable del objetivo real
 
 	if ni.unit.hasheal(target)
-	and UnitManaMax (target)> 17000
+	and UnitManaMax (target)> 18000
 	and ni.unit.power(target, "mana") > 3
 	then
 		ni.spell.cast(spells.ManaBurn.id, target)
