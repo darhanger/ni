@@ -30,6 +30,8 @@ local spells = {
 	PrayerofMending = {id = 48113, name = GetSpellInfo(48113), icon = select(3, GetSpellInfo(48113))},
 	DivineHymn = {id = 64843, name = GetSpellInfo(64843), icon = select(3, GetSpellInfo(64843))},
 	Nova = {id = 48007, name = GetSpellInfo(48007), icon = select(3, GetSpellInfo(48007))},
+	HolyFire = {id = 48135, name = GetSpellInfo(48135), icon = select(3, GetSpellInfo(48135))},
+	Smite = {id = 48123, name = GetSpellInfo(48123), icon = select(3, GetSpellInfo(48123))},
 
 	--Shadow Magic icon = select(2, GetSpellTabInfo(4))
 	DevouringPlague = {id = 48300, name = GetSpellInfo(48300), icon = select(3, GetSpellInfo(48300))},
@@ -394,6 +396,23 @@ local function LosCastStand(spell, tar)
 			end
 			return false
 		end
+-- local function LosCastStand(spell, tar)
+-- 	if ni.player.los(tar) and IsSpellInRange(spell, tar) == 1 then
+-- 			ni.player.stopmoving()  -- Detiene el movimiento del jugador
+-- 			ni.player.lookat(tar)  -- Hace que el jugador mire al objetivo
+-- 			ni.spell.cast(spell, tar)  -- Comienza a lanzar el hechizo
+-- 			-- Espera hasta que el jugador haya terminado de castear el hechizo
+-- 			while ni.player.iscasting() do
+-- 					-- Espera un corto período de tiempo antes de verificar nuevamente
+-- 					-- para evitar bloquear innecesariamente el hilo de ejecución.
+-- 					ni.sleep(0.1)
+-- 			end
+-- 			return true
+-- 	end
+-- 	return false
+-- end
+
+	
 local function ValidUsable(id, tar)
 			if IsSpellKnown(id) and ni.spell.available(id) and ni.spell.valid(tar, id, false, true, true) then
 				return true
@@ -413,9 +432,11 @@ local queue = {
 			"Desesperate Prayer",
 			"Shieldlow",
 			"POMlow",
+			"Lookatcasting",
 			"Penancelow",
 			"Shieldme",
 			"Power infusion",
+			"Shadowfiend",
 			"KS",
 			"Antiinvi",
 			"Showinvis",
@@ -432,17 +453,19 @@ local queue = {
 
 			"Shield",
 			"Penance",
-			"Shadowfiend",
 			-- "Binding Heal",
 			"FlashHeal",
 			"RenewMe",
 			"Penancelowpriority",
 			"DefensiveDispel",
-			"OfensiveDispell",
+			"OfensiveDispel",
 			-- "Rebuff",
 			-- "CureDisease",
 			-- "Ofensive Dispel2",
-			"DOTS",
+			-- "DOTS",
+			"HolyFire",
+			"MindBlast",
+			"Smite",
 	}
 local abilities = {
 	["Universal Pause"] = function ()
@@ -473,6 +496,12 @@ local abilities = {
 	cache.iscasting = ni.player.iscasting() or false;
 	cache.curchannel = ni.unit.ischanneling("player") or false;
     end,
+		["Lookatcasting"] = function ()
+			if ni.player.iscasting() or ni.unit.ischanneling("player") then
+					ni.player.stopmoving()
+					ni.player.lookat("target")
+			end
+	end,
 
 		
 ["InnerFire"] = function()
@@ -512,6 +541,7 @@ local abilities = {
 	end,
 
 	["Antiinvi"] = function ()
+		if ni.player.hp()> 50 then
 		local enemies = ni.unit.enemiesinrange("player", 30)
 		for i = 1, #enemies do
 			local target = enemies[i].guid
@@ -524,6 +554,7 @@ local abilities = {
 				
 			end
 		end
+	end
 	end,
 	["KS"] = function ()
 		if ni.spell.cd(spells.ShadowWordDeath.id) == 0 then
@@ -810,23 +841,31 @@ local controlt = {
 		end
 	end
 end,
-["OffensiveDispel"] = function ()
+["OfensiveDispel"] = function ()
 	local buffoffensive = {
 		-- Druid
-		26991, -- Great Gift of the Wild
-		21849, -- Gift of the Wild
+		48470, -- Great Gift of the Wild
+		48469, -- Mark  of the Wild
 		17116, -- Nature's Swiftness
 		69369, -- Predatory Swiftness
+		-- Paladin
+		20217, -- Blessing of Kings
+    19740, -- Blessing of Might
+    25895, -- Greater Blessing of Kings
+    25782, -- Greater Blessing of Might
+		642,   -- Divine Shield
+    1042,  -- Blessing of Protection
+		54428, -- Divine Plea
+-- Hay que generar una lista de bufos prioritaos
 	}
+
 	local enemies = ni.unit.enemiesinrange("player", 30)
-	for _, enemy in pairs(enemies) do
-		if ni.spell.available(spells.dispelmagic.id, enemy.unit) then 
-			local enemyBuffs = ni.unit.buffs(enemy.guid)
-			for buffId, _ in pairs(enemyBuffs) do
-				if tContains(buffoffensive, buffId) then
-					ni.spell.cast(spells.dispelmagic.id, enemy.unit)
-					break
-				end
+	for i = 1, #enemies do
+		local target = enemies[i].guid
+		for j = 1, #buffoffensive do
+			if ni.unit.buff(target, buffoffensive[j]) then
+				ni.spell.cast(spells.dispelmagic.id, target)
+				break  -- Romper el bucle interno para no disipar el mismo buff varias veces
 			end
 		end
 	end
@@ -899,11 +938,49 @@ end,
 			ni.spell.cast(spells.Renew.id, p)
 	end
 end,
+["DOTS"] = function ()
+	if ni.unit.los("target") then
+		if not ni.unit.debuff("target", spells.ShadowWordPain.id, "player") then
+			ni.spell.cast(spells.ShadowWordDeath.id, "target")
+		else
+			if not ni.unit.debuff("target", spells.DevouringPlague.id, "player") then
+				ni.spell.cast(spells.DevouringPlague.id, "target")
+			end
+		end
+	end
+end,
+["ShadowFiend"] = function ()
+	if ni.vars.combat.cd
+	and  ni.spell.cd(spells.Shadowfiend.id)== 0 
+	and ni.unit.los("target")
+	then
+		ni.spell.cast(spells.Shadowfiend.name, "target")
+		return true
+end
+end,
+["HolyFire"] = function ()
+	if ni.spell.cd(spells.HolyFire.id) == 0
+	 and ni.unit.los("target") then
+		ni.spell.cast(spells.HolyFire.name, "target")
+	 end
+	end,
+["MindBlast"] = function ()
+	if ni.spell.cd(spells.MindBlast.id)== 0 
+	and ni.unit.los("target")
+	and LosCastStand (spells.MindBlast.name, "target")
+	then 
+		return true
+end
+end,
+["Smite"] = function ()
+	if ni.spell.cd(spells.Smite.id)== 0 
+	and ni.unit.los("target")
+	and LosCastStand (spells.Smite.name, "target")
+	then 
+		return true
+end
+end,
 }
-
-
-
-
 ni.bootstrap.profile("Dalvae_discopvp_wotlk", queue, abilities, OnLoad, OnUnload);
 else
     local queue = {
