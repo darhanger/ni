@@ -521,6 +521,7 @@ local abilities = {
 				and not ni.unit.debuff(target, spells.ShadowWordPain.id, "player")
 			then 
 				ni.spell.cast(spells.ShadowWordPain.id, target)
+				
 			end
 		end
 	end,
@@ -536,7 +537,7 @@ local abilities = {
 				then 
 						ni.spell.cast(spells.ShadowWordDeath.id, target)
 						ni.player.target(target)
-						ni.player.useinventoryitem(10)
+						ni.player.runtext("/use 10")
 				end
 			end
 		end
