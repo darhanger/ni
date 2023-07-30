@@ -500,6 +500,7 @@ local abilities = {
 			if ni.player.iscasting() or ni.unit.ischanneling("player") then
 					ni.player.stopmoving()
 					ni.player.lookat("target")
+					return false
 			end
 	end,
 
@@ -965,12 +966,12 @@ end,
 	 end
 	end,
 ["MindBlast"] = function ()
-	if ni.spell.cd(spells.MindBlast.id)== 0 
-	and ni.unit.los("target")
-	and LosCastStand (spells.MindBlast.name, "target")
-	then 
-		return true
-end
+	if ni.vars.combat.cd  
+	and not ni.player.ismoving()  and
+	LosCast(spells.MindBlast.name, t)
+			then
+return true
+			end
 end,
 ["Smite"] = function ()
 	if ni.spell.cd(spells.Smite.id)== 0 
