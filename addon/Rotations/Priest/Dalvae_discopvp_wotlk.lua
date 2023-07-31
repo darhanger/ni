@@ -422,6 +422,7 @@ if wotlk then
 
 
 	local queue = {
+		"Cache",
 		"Universal pause",
 		"Drink",
 		"InnerFire",
@@ -436,7 +437,7 @@ if wotlk then
 		"Penancelow",
 		"Shieldme",
 		"Power infusion",
-		"Shadowfiend",
+		"ShadowFiend",
 		"KS",
 		"Antiinvi",
 		"Showinvis",
@@ -448,24 +449,22 @@ if wotlk then
 		"Antipoly",
 		"Shackle Gargoyle",
 		"DefensiveDispelpriority",
-		"Burn mana",
-
-
 		"Shield",
 		"Penance",
 		-- "Binding Heal",
 		"FlashHeal",
 		"RenewMe",
+		"Burn mana",
 		"Penancelowpriority",
 		"DefensiveDispel",
 		"OfensiveDispel",
 		-- "Rebuff",
 		-- "CureDisease",
 		-- "Ofensive Dispel2",
-		-- "DOTS",
+		"DOTS",
 		"HolyFire",
-		"MindBlast",
 		"Smite",
+		"MindBlast",
 	}
 	local abilities = {
 		["Universal Pause"] = function()
@@ -627,7 +626,7 @@ if wotlk then
 			end
 		end,
 		["Penancelow"] = function()
-			if ni.spell.cd(spells.Penance.id) then
+			if ni.spell.cd(spells.Penance.id) == 0 then
 				for i = 1, #ni.members.inrange("player", 40) do
 					if ni.members[i]:hp() <= 40
 							and
@@ -640,7 +639,7 @@ if wotlk then
 			end
 		end,
 		["POMlow"] = function()
-			if ni.spell.cd(spells.PrayerofMending.id) then
+			if ni.spell.cd(spells.PrayerofMending.id) == 0 then
 				for i = 1, #ni.members.inrange("player", 40) do
 					if ni.members[i]:hp() <= 40 and ni.player.los(ni.members[i].unit)
 							and
@@ -747,7 +746,7 @@ if wotlk then
 				for _, buffId in pairs(buffdispe) do
 					if not cache.moving
 							and ni.unit.buff(targets[i].guid, buffId) then
-						print("dispel")
+						print("massdispel")
 						ni.spell.castat(spells.MassDispel.id, targets[i].unit)
 						return true
 					end
@@ -836,7 +835,8 @@ if wotlk then
 			local friends = ni.unit.friendsinrange("player", 36)
 			for i = 1, #friends do
 				for _, v in pairs(controlt) do
-					if ni.unit.debuff(friends[i].guid, v) then
+					if ni.player.los(friends[i].guid)
+							and ni.unit.debuff(friends[i].guid, v) then
 						ni.spell.cast(spells.dispelmagic.id, friends[i].guid)
 					end
 				end
@@ -849,6 +849,8 @@ if wotlk then
 				48469, -- Mark  of the Wild
 				17116, -- Nature's Swiftness
 				69369, -- Predatory Swiftness
+				8936, -- Regrowth
+				774, -- Rejuvenation
 				-- Paladin
 				20217, -- Blessing of Kings
 				19740, -- Blessing of Might
@@ -864,7 +866,8 @@ if wotlk then
 			for i = 1, #enemies do
 				local target = enemies[i].guid
 				for j = 1, #buffoffensive do
-					if ni.unit.buff(target, buffoffensive[j]) then
+					if ni.unit.buff(target, buffoffensive[j])
+							and ni.player.los(target) then
 						ni.spell.cast(spells.dispelmagic.id, target)
 						break -- Romper el bucle interno para no disipar el mismo buff varias veces
 					end
@@ -940,7 +943,7 @@ if wotlk then
 			end
 		end,
 		["DOTS"] = function()
-			if ni.unit.los("target") then
+			if ni.player.los(t) then
 				if not ni.unit.debuff("target", spells.ShadowWordPain.id, "player") then
 					ni.spell.cast(spells.ShadowWordDeath.id, "target")
 				else
@@ -953,29 +956,30 @@ if wotlk then
 		["ShadowFiend"] = function()
 			if ni.vars.combat.cd
 					and ni.spell.cd(spells.Shadowfiend.id) == 0
-					and ni.unit.los("target")
+					and ni.player.los("target")
 			then
-				ni.spell.cast(spells.Shadowfiend.name, "target")
+				ni.spell.cast(spells.Shadowfiend.id, "target")
 				return true
 			end
 		end,
 		["HolyFire"] = function()
 			if ni.spell.cd(spells.HolyFire.id) == 0
-					and ni.unit.los("target") then
-				ni.spell.cast(spells.HolyFire.name, "target")
+					and not ni.player.ismoving()
+					and LosCastStand(spells.HolyFire.name, t)
+			then
+				return true
 			end
 		end,
 		["MindBlast"] = function()
-			if ni.vars.combat.cd
-					and not ni.player.ismoving() and
-					LosCast(spells.MindBlast.name, t)
+			if ni.spell.cd(spells.MindBlast.id) == 0
+					and not ni.player.ismoving()
+					and LosCastStand(spells.MindBlast.name, t)
 			then
 				return true
 			end
 		end,
 		["Smite"] = function()
-			if ni.spell.cd(spells.Smite.id) == 0
-					and ni.unit.los("target")
+			if not ni.player.ismoving()
 					and LosCastStand(spells.Smite.name, "target")
 			then
 				return true
