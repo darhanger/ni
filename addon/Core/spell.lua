@@ -44,35 +44,32 @@ end;
 spell.isqueued = function()
 	if ni.vars.combat.spellqueueenabled then
 		local name, _, _, _, startTimeMS, endTimeMS = UnitCastingInfo("player")
-
 		if name then
 			local casttime = (endTimeMS - startTimeMS) / 1000
 			local finish = endTimeMS / 1000 - GetTime()
 			local spellqueuewindow = casttime - (casttime - ni.vars.combat.spellqueuems)
 			if spellqueuewindow <= finish then
 				ni.vars.combat.currentcastend = finish
-				return true
+				return true;
 			else
 				ni.vars.combat.queued = false
 				ni.vars.combat.currentcastend = finish
-				return false
+				return false;
 			end
 		else
 			ni.vars.combat.queued = false
 			ni.vars.combat.currentcastend = 0
-			return false
+			return false;
 		end
-
 		if ni.vars.combat.queued and name then
-			return true
+			return true;
 		end
 	else
-		if UnitCastingInfo("player") or ni.vars.combat.casting then
-			return true
+		if ni.vars.combat.casting or UnitCastingInfo("player") or UnitChannelInfo("player") then
+			return true;
 		end
 	end
-
-	return false
+	return false;
 end;
 spell.lastcast = function(spellid, sec)
 	if tonumber(spellid) == nil then

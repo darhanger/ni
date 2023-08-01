@@ -173,16 +173,12 @@ function memberssetup:create(unit, guid, subgroup)
 	setmetatable(o, memberssetup)
 	
 	function o:istank()
-		if wotlk then
-			return o.role == "TANK";
-		else
-			return (o.class == "WARRIOR" and o:aura(71))
-			or (o.class == "DRUID" and o:auras("9634||5487"))
-			or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
-			or (o.class == "DEATHKNIGHT" and o:aura(48263))
-			or (o:aura(57339) or o:aura(57340))
-			or o.role == "TANK" or false;	
-		end
+		return (o.class == "WARRIOR" and o:aura(71))
+		or (o.class == "DRUID" and o:auras("9634||5487"))
+		or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
+		or (o.class == "DEATHKNIGHT" and o:aura(48263))
+		or (o:aura(57339) or o:aura(57340))
+		or o.role == "TANK" or false;	
 	end;
 	if wotlk then
 		function o:ishealer()
@@ -197,7 +193,7 @@ function memberssetup:create(unit, guid, subgroup)
 		function o:ismelee()
 			return o.role == "MELEE";
 		end;
-	end
+	end;
 	function o:location()
 		local x, y, z, r = ni.functions.objectinfo(o.guid);
 		if x then
@@ -213,25 +209,31 @@ function memberssetup:create(unit, guid, subgroup)
 	end;	
 	function o:auras(auras)
 		return ni.unit.auras(o.unit, auras);
-	end;	
-	function o:buffs(str, filter)
-		return ni.unit.buffs(o.unit, str, filter);
-	end;
-	function o:debuffs(str, filter)
-		return ni.unit.debuffs(o.unit, str, filter) or false;
-	end;
-	function o:debufftype(str)
-		return ni.unit.debufftype(o.unit, str) or false;
-	end;
-	function o:bufftype(str)
-		return ni.unit.bufftype(o.unit, str) or false;
 	end;
 	function o:buff(buff, filter)
 		return ni.unit.buff(o.unit, buff, filter) ~= nil;
 	end;
 	function o:debuff(debuff, filter)
 		return ni.unit.debuff(o.unit, debuff, filter) ~= nil;
+	end;	
+	function o:buffs(str, filter)
+		return ni.unit.buffs(o.unit, str, filter) or false;
 	end;
+	function o:debuffs(str, filter)
+		return ni.unit.debuffs(o.unit, str, filter) or false;
+	end;
+	function o:bufftype(str)
+		return ni.unit.bufftype(o.unit, str) or false;
+	end;	
+	function o:debufftype(str)
+		return ni.unit.debufftype(o.unit, str) or false;
+	end;
+	function o:buffstacks(buff, filter)
+		return ni.unit.buffstacks(o.unit, buff, filter) or 0;
+	end;	
+	function o:debuffstacks(debuff, filter)
+		return ni.unit.debuffstacks(o.unit, debuff, filter) or 0;
+	end;	
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
 	end;
@@ -470,9 +472,11 @@ memberssetup.set = function()
 		local tmp = {};
 		if type(unit) ~= "string" then return tmp end
 		for _,o in ipairs(members) do
-			local unitdistance = ni.unit.distance(o.unit, unit) or 999
-			if unitdistance <= distance then
-				tmp[#tmp + 1] = o;
+			if not UnitIsUnit(o.unit, unit) then
+				local unitdistance = ni.unit.distance(o.unit, unit) or 999;
+				if unitdistance <= distance then
+					tmp[#tmp + 1] = o;
+				end
 			end
 		end
 		return tmp;

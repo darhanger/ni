@@ -22,6 +22,9 @@ local BehindTime = 0;
 local los = ni.functions.los;
 local unit = {};
 
+unit.incombat = function(t)
+	return UnitAffectingCombat(t) or false;
+end;
 unit.exists = function(t)
     return UnitExists(t) or (ni.functions.objectexists(t) or false);
 end;
@@ -179,7 +182,7 @@ unit.hp = function(t)
 	for _, spellId in ipairs(ni.tables.notneedheal) do
 		if unit.buff(t, spellId) then return 100 end
 	end
-	return 100 * UnitHealth(t) / UnitHealthMax(t)
+	return 100 * UnitHealth(t) / UnitHealthMax(t);
 end;	
 unit.hpraw = function(t)
     return UnitHealth(t);
@@ -277,13 +280,14 @@ unit.channelpercent = function(t)
 	end
 	return 0;
 end;
-local function buildAurasTable(t)
+local function buildAurasTable(t)	
     wipe(unitauras);
     unitauras = ni.functions.auras(t) or { };
     return unitauras;
 end;
 unit.aura = function(t, s)
     if tonumber(s) == nil then
+        -- unit.auras(t);
         buildAurasTable(t);
         for k, v in pairs(unitauras) do
             if v.name == s then
@@ -745,7 +749,8 @@ unit.ischanneling = function(t)
 end;
 unit.target = function(t)
     if unit.exists(t) then
-        return select(6, unit.info(t));
+	local _, _, _, _, _, unitTarget = unit.info(t);
+        return unitTarget;
     end
 end;
 unit.incombatwithme = function(t)

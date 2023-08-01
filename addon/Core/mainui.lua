@@ -582,7 +582,7 @@ function bitwise.clearbit(x, p)
 	return bitwise.hasbit(x, p) and x - p or x;
 end;
 --Resource tracking menu
-CreateText(resourcesettings, Localization.Resource, 0, -8, 0.2, 0.7, 1, 1);
+CreateText(resourcesettings, Localization.Resource, 0, -8, 0.2, 0.7, 1, 1, "CENTER");
 local currentresources = ni.vars.currentresources or 0;
 ni.functions.setresourcetracking(currentresources);
 local boxes = {
@@ -693,7 +693,7 @@ CreateDropDownText(resourcesettings, Localization.OpenFromVehicle, 130, -228, "L
 boxes.resource_openfromvehicle = CreateCheckBox(resourcesettings, 15, -226, bitwise.hasbit(currentresources, 0x100000), checkbox_clicked, 0x100000);
 
 --Creature tracking menu
-CreateText(creaturesettings, Localization.CreatureTrackingToggles, 0, -8, 0.2, 0.7, 1, 1);
+CreateText(creaturesettings, Localization.CreatureTrackingToggles, 0, -8, 0.2, 0.7, 1, 1, "CENTER");
 local cboxes = {
 	none,
 	beasts,
@@ -853,7 +853,7 @@ end);
 globaledit:SetText(ni.vars.global or "");
 globaledit:Show();
 
-CreateText(mainsettings, Localization.Dev, 0, -385, 0.8, 0.1, 0.1, 1);
+CreateText(mainsettings, Localization.Dev, 0, -385, 0.8, 0.1, 0.1, 1, "CENTER");
 
 local relran = ni.utils.generaterandomname();
 local reloadbutton = CreateFrame("BUTTON", relran, mainsettings, "UIPanelButtonTemplate");
@@ -877,7 +877,7 @@ consolebutton:SetScript("OnClick", function()
 	message("\n\nUNAVAILABLE")
 end);
 
-CreateText(mainsettings, Localization.Contact, 0, -475, 0.8, 0.1, 0.1, 1);
+CreateText(mainsettings, Localization.Contact, 0, -475, 0.8, 0.1, 0.1, 1, "CENTER");
 
 local dimran = ni.utils.generaterandomname();
 local dimbutton = CreateFrame("BUTTON", dimran, mainsettings, "UIPanelButtonTemplate");
@@ -1013,7 +1013,7 @@ function MiniMapLDB:OnDragStop()
     ni.vars.ui.iconPos = self.db.minimapPos
 end;
 function MiniMapLDB:OnTooltipShow()
-    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.58")
+    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.60")
     self:AddLine(" ")
     self:AddLine(Localization.LeftClick)
 	self:AddLine(Localization.RightClick)

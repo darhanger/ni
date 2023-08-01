@@ -97,9 +97,10 @@ local frames = {};
 
 local notfram = ni.utils.generaterandomname();
 frames.notification = CreateFrame("frame", notfram, UIParent);
-frames.notification:SetSize(ChatFrame1:GetWidth(), 30)
+frames.notification.ranH2, frames.notification.ranH = random(91, 95), random(31, 38);
+frames.notification:SetSize(ChatFrame1:GetWidth(), frames.notification.ranH)
 frames.notification:Hide()
-frames.notification:SetPoint("TOP", ChatFrame1, 0, 90)
+frames.notification:SetPoint("TOP", ChatFrame1, 0, frames.notification.ranH2)
 frames.notification.text = frames.notification:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
 frames.notification.text:SetAllPoints()
 frames.notification.texture = frames.notification:CreateTexture()
@@ -113,9 +114,10 @@ function frames.notification:message(message)
 end
 local spellqhol = ni.utils.generaterandomname();
 frames.spellqueueholder = CreateFrame("Frame", spellqhol)
+frames.spellqueueholder.ranW, frames.spellqueueholder.ranH = random(276, 285), random(31, 38);
 frames.spellqueueholder:ClearAllPoints()
-frames.spellqueueholder:SetHeight(30)
-frames.spellqueueholder:SetWidth(275)
+frames.spellqueueholder:SetHeight(frames.spellqueueholder.ranH)
+frames.spellqueueholder:SetWidth(frames.spellqueueholder.ranW)
 frames.spellqueueholder:SetMovable(true)
 frames.spellqueueholder:EnableMouse(true)
 frames.spellqueueholder:RegisterForDrag("LeftButton")
@@ -128,9 +130,10 @@ frames.spellqueueholder:Hide()
 
 local spellq = ni.utils.generaterandomname();
 frames.spellqueue = CreateFrame("Frame", spellq, frames.spellqueueholder)
+frames.spellqueue.ranW, frames.spellqueue.ranH = random(201, 215), random(21, 26);
 frames.spellqueue:ClearAllPoints()
-frames.spellqueue:SetHeight(20)
-frames.spellqueue:SetWidth(200)
+frames.spellqueue:SetHeight(frames.spellqueue.ranH)
+frames.spellqueue:SetWidth(frames.spellqueue.ranW)
 frames.spellqueue:Show()
 frames.spellqueue.text = frames.spellqueue:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 frames.spellqueue.text:SetAllPoints()
@@ -155,7 +158,8 @@ end;
 
 local floattext = ni.utils.generaterandomname();
 frames.floatingtext = CreateFrame("Frame", floattext)
-frames.floatingtext:SetSize(400, 30)
+frames.floatingtext.ranW, frames.floatingtext.ranH = random(410, 435), random(32, 40);
+frames.floatingtext:SetSize(frames.floatingtext.ranW, frames.floatingtext.ranH)
 frames.floatingtext:SetAlpha(0)
 frames.floatingtext:SetPoint("CENTER", 0, 80)
 frames.floatingtext.text = frames.floatingtext:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
