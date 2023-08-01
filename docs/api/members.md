@@ -232,7 +232,7 @@ Returns true or false if the member accessed has the debuff type passed.
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:debufftype("Disease") then
-		--This member has a debuff type that is Disease on them
+		-- This member has a debuff type that is Disease on them
 	end
 end
 ```
@@ -255,7 +255,7 @@ Returns true or false if the member accessed has the debuff type passed.
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:bufftype("Magic") then
-		--This member has a buff type that is Magic on them
+		-- This member has a buff type that is Magic on them
 	end
 end
 ```
@@ -280,7 +280,7 @@ Returns the same results from UnitBuff if they have the buff present.
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:buff("Power Word: Shield", "PLAYER") then
-		--This member has Power Word: Shield on them cast by the player
+		-- This member has Power Word: Shield on them cast by the player
 	end
 end
 ```
@@ -305,7 +305,41 @@ Returns the same results from UnitDebuff if they have the debuff present.
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:debuff("Weakend Soul") then
-		--This member has Weakend Soul on them
+		-- This member has Weakend Soul on them
+	end
+end
+```
+
+Note: If the `filter` argument is not specified, this function will return the first matching debuff it finds, regardless of its type.
+
+## buffstacks
+
+Arguments:
+
+- **buff** `name|id`
+- **filter** `EXACT|PLAYER` _optional_
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:buffstacks("Earth Shield") < 3 then
+		-- This member has Earth Shield less then 3 stacks
+	end
+end
+```
+
+Note: If the `filter` argument is not specified, this function will return the first matching debuff it finds, regardless of its type.
+
+## debuffstacks
+
+Arguments:
+
+- **buff** `name|id`
+- **filter** `EXACT|PLAYER` _optional_
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:debuffstacks("Chilled to the Bone") > 5 then
+		-- This member has Chilled to the Bone debuff mor then 5 stacks
 	end
 end
 ```
@@ -325,7 +359,7 @@ This is the variable that returns true or false of the member accessed if you ca
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:dispel() then
-		--This member has a debuff that can be dispelled by you
+		-- This member has a debuff that can be dispelled by you
 	end
 end
 ```
@@ -378,7 +412,7 @@ This is the variable that returns the health percentage of the member accessed.
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:hp() < 20 then
-		--This member is below 20% health
+		-- This member is below 20% health
 	end
 end
 ```
@@ -470,7 +504,26 @@ This is the variable that returns the threat (number between -1 and 3) of the me
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:threat() == -1 then
-		--This member is not on any mobs threat list (99% chance just out of combat)
+		-- This member is not on any mobs threat list (99% chance just out of combat)
+	end
+end
+```
+
+## subgroup
+
+Type:
+
+- **variable**
+
+Returns: `number`
+
+This is the variable that returns subgroup number of raid party.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:subgroup == 1
+	or ni.members[i]:subgroup == 2 then
+		-- Do something only for members with 1 and 2 subgroup from raid (10 ppl)
 	end
 end
 ```
@@ -500,6 +553,24 @@ for i = 1, #ni.members do
 end
 ```
 
+## spec
+
+Returns the class specialization of the unit in the group.
+
+Returns:
+
+- Returns None if the unit has no tallent builds.
+
+Example:
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i].spec == "Fire" then
+		-- Do something specific for mages with Fire build	
+	end
+end
+```
+
 ## below
 
 Arguments:
@@ -512,19 +583,26 @@ Returns the number of members below the percentage passed as the argument.
 
 ```lua
 local count = ni.members.below(90); --Count would then be the number of members below 90
+if #count >= 3 then
+	-- Do something
+end
 ```
 
 ## average
 
 Arguments:
 
+- **unit** `guid|token`
+- **distance** `number`
+
 Returns: `number`
 
-Returns the average health of all the members in your group.
+Calculates the average health percentage of members within a specified distance of a unit.
 
 ```lua
-if ni.members.average() < 20 then
-	--Cast some raid wide health
+local avarage = ni.members.average("player", 20);
+if avarage <= 40
+	-- Avarage HP of all members in distance with player low then 40%
 end
 ```
 
@@ -533,15 +611,16 @@ end
 Arguments:
 
 - **count** `number`
+- **unit** `guid|token`
+- **distance** `number`
 
 Returns: `number`
 
-Returns the average health of the lowest members, averaged by the argument passed.
+The average health percentage of the specified number of members within the specified distance of the unit.
 
 ```lua
-if ni.members.averageof(4) < 20 then
-	--4 of the group members average the hp below 20%
-end
+local averageHealth = ni.members.averageof(5, "focus", 30) 
+-- Calculates the average health of the 5 nearest members to the focus within 30 yards.
 ```
 
 ## subgroupbelow
