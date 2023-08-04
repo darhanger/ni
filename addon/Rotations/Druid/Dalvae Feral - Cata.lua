@@ -132,7 +132,7 @@ if cata then
 	end
 
 	local items = {
-		settingsfile = "feral-cata.json",
+		settingsfile = "feral-cata.xml",
 		callback = GUICallback,
 		{ type = "title",    text = "|cff00ccffFeral-Cata" },
 		{ type = "separator" },
