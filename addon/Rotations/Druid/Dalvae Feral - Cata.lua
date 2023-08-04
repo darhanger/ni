@@ -390,6 +390,7 @@ if cata then
 	local t, p = "target", "player"
 
 	local queue = {
+		-- "test",
 		"GOW",
 		-- "AutoLook",
 		-- "AutoLoot",
@@ -449,15 +450,11 @@ if cata then
 
 
 	local abilities = {
-		["test"] = function()
-			if ni.player.buff(spells.CatForm.id)
-					and not ni.unit.isbehind(p, t)
-					and ni.unit.inmelee(p, t)
-			then
-				ni.frames.floatingtext:message("\124cffff0000Shred!")
-				return false
-			end
-		end,
+		-- ["test"] = function()
+		-- 	if select(5, GetTalentInfo(2, 19)) == 2 then
+		-- 		print("caca")
+		-- 	end
+		-- end,
 
 		["Potion"] = function()
 			if ni.player.hasitem(57191)
@@ -574,8 +571,7 @@ if cata then
 		end,
 
 		["CatForm"] = function()
-			local _, enabled = GetSetting("getSetting_CatForm")
-			if enabled then
+			if enables["CatForm"] then
 				if not ni.player.buffs(spells.CatForm.id) and ni.spell.available(spells.CatForm.id) then
 					if not ni.player.buff(spells.BearForm.id) then
 						ni.spell.cast(spells.CatForm.id)
@@ -586,8 +582,7 @@ if cata then
 			end
 		end,
 		["CycloneFocus"] = function()
-			local _, enabled = GetSetting("getSetting_CycloneFocus")
-			if enabled then
+			if enables["CycloneFocus"] then
 				if ni.player.buff(69369)
 						and ni.unit.exists("focus")
 						and not ni.unit.debuff("focus", spells.Cyclone.name)
@@ -601,8 +596,7 @@ if cata then
 		end,
 
 		["INVI"] = function()
-			local _, enabled = GetSetting("getSetting_Invi")
-			if enabled then
+			if enables["Invi"] then
 				if ni.spell.available(spells.ProwlCat.id)
 						and ni.player.buff(spells.CatForm.id)
 						and not UnitAffectingCombat(p)
@@ -613,8 +607,7 @@ if cata then
 			end
 		end,
 		["Ravage"] = function()
-			local _, enabled = GetSetting("getSetting_Ravage")
-			if enabled then
+			if enables["Ravage"] then
 				if ni.player.buff(spells.ProwlCat.id)
 						and ni.player.buff(spells.CatForm.id)
 						and ni.spell.available(spells.RavageCat.id)
@@ -685,8 +678,7 @@ if cata then
 			end
 		end,
 		["SkullBashBear"] = function()
-			local _, enabled = GetSetting("getSetting_InterruptBear")
-			if enabled then
+			if enables["InterruptBear"] then
 				if ni.spell.cd(spells.SkullBashBear.id) == 0
 						and ni.player.buff(spells.BearForm.id)
 				then
@@ -713,8 +705,7 @@ if cata then
 
 
 		["MangleDebuff"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and ni.unit.debuffremaining(t, spells.MangleCat.name) < 2.5
 						and not ni.unit.debuff(t, spells.MangleBear.name)
@@ -750,8 +741,7 @@ if cata then
 		end,
 
 		["Rake"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and not ni.unit.debuff(t, spells.RakeCat.id, p)
 						and UnitExists(t)
@@ -762,8 +752,7 @@ if cata then
 			end
 		end,
 		["Shred"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and ni.unit.inmelee(p, t)
 						and IsUsableSpell(spells.ShredCat.name)
@@ -811,8 +800,7 @@ if cata then
 			end
 		end,
 		["SavageRoar"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and ni.player.buffremaining(spells.SavageRoarCat.name) < 3
 						and GetComboPoints("player", "target") > 1 then
@@ -822,8 +810,7 @@ if cata then
 		end,
 
 		["Ingrediente Secreto"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id) then
 					local sr_remains = ni.player.buffremaining(spells.SavageRoarCat.name)
 					local rip_remains = ni.unit.debuffremaining(t, spells.RipCat.id, p)
@@ -840,8 +827,7 @@ if cata then
 			end
 		end,
 		["Tigers"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and ni.unit.inmelee("player", "target")
 						and ni.spell.cd(spells.TigersFuryCat.id) == 0
@@ -860,8 +846,7 @@ if cata then
 			end
 		end,
 		["Rip"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["FullAutomated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and ni.unit.inmelee(p, t)
 						and (ni.spell.cd(spells.TigersFuryCat.id) >= 3
@@ -904,7 +889,9 @@ if cata then
 			end
 		end,
 		["FB25"] = function()
+			local Bloodonwater = select(5, GetTalentInfo(2, 19))
 			if ni.player.buff(spells.CatForm.id)
+					and Bloodonwater == 2
 					and ni.unit.inmelee(p, t)
 					and ni.unit.debuff(t, spells.RipCat.id, p)
 					and ni.unit.hp(t) < 25
@@ -914,7 +901,9 @@ if cata then
 			end
 		end,
 		["FB25R"] = function()
+			local Bloodonwater = select(5, GetTalentInfo(2, 19)) == 2
 			if ni.player.buff(spells.CatForm.id)
+					and Bloodonwater == 2
 					and ni.unit.inmelee(p, t)
 					and ni.unit.hp(t) < 25
 					and ni.unit.debuff(t, spells.RipCat.id, p)
@@ -926,24 +915,22 @@ if cata then
 			end
 		end,
 		["FrenziedRegenerationBear"] = function()
-			local value, enabled = GetSetting("getSetting_FrenziedRegen")
-			if enabled
+			if enables["FrenziedRegen"]
 					and ni.spell.cd(spells.FrenziedRegenerationBear.name) == 0
 					and ni.player.buff(spells.BearForm.id)
-					and ni.player.hp() < value
+					and ni.player.hp() < values["FrenziedRegen"]
 			then
 				ni.spell.cast(spells.FrenziedRegenerationBear.name)
 			end
 		end,
 		["Taunt"] = function()
-			local _, enabled = GetSetting("getSetting_Taunt")
-			if enabled then
+			if enables["Taunt"] then
 				if ni.spell.cd(spells.GrowlBear.name) == 0
 						and ni.player.buff(spells.BearForm.id)
 						and UnitExists(t)
 						and UnitAffectingCombat("player")
 						and ni.unit.exists("target")
-						and not UnitIsUnit("player", "targettarget")
+						and not UnitIsUnit("player", "targetta")
 				then
 					ni.spell.cast(spells.GrowlBear.name, "target")
 				end
@@ -964,33 +951,30 @@ if cata then
 		end,
 
 		["Thrash"] = function()
-			local value, enabled = GetSetting("getSetting_BearAoe")
 			local enemies = ni.unit.enemiesinrange("player", 8)
-			if enabled
+			if enables["BearAoe"]
 					and ni.vars.combat.aoe
-					and #enemies >= value
+					and #enemies >= values["BearAoe"]
 					and ni.player.buff(spells.BearForm.id)
 					and ni.spell.available(spells.ThrashBear.name) then
 				ni.spell.cast(spells.ThrashBear.name)
 			end
 		end,
 		["SwipeBear"] = function()
-			local value, enabled = GetSetting("getSetting_BearAoe")
 			local enemies = ni.unit.enemiesinrange("player", 7)
-			if enabled
+			if enables["BearAoe"]
 					and ni.vars.combat.aoe
-					and #enemies >= value
+					and #enemies >= values["BearAoe"]
 					and ni.player.buff(spells.BearForm.id)
 					and ni.spell.available(spells.SwipeBear.name) then
 				ni.spell.cast(spells.SwipeBear.id)
 			end
 		end,
 		["SwipeCat"] = function()
-			local value, enabled = GetSetting("getSetting_CatAoe")
 			local enemies = ni.unit.enemiesinrange("player", 7)
-			if enabled
+			if enables["CatAoe"]
 					and ni.vars.combat.aoe
-					and #enemies >= value
+					and #enemies >= values["CatAoe"]
 					and ni.player.buff(spells.CatForm.id)
 			then
 				ni.player.runtext("/starattack")
@@ -1061,7 +1045,9 @@ if cata then
 			end
 		end,
 		["Pulverize"] = function()
+			local Pulverizetalent = select(5, GetTalentInfo(2, 21))
 			if ni.player.buff(spells.BearForm.id)
+					and Pulverizetalent == 1
 					and ni.unit.debuffstacks(t, spells.LacerateBear.id, p) > 2
 					and ni.player.buffremaining(80951) < 3
 					and ni.spell.available(spells.Pulverize.id)
