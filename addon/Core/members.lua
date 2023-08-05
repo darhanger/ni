@@ -32,9 +32,9 @@ setmetatable(members, {
 			nPartyMembers = GetNumPartyMembers()
 			groupType = nRaidMembers > 0 and "raid" or "party"
 		else
-			nRaidMembers = GetNumGroupMembers()
-			nPartyMembers = nRaidMembers - 1
-			groupType = IsInRaid() and "raid" or "party"
+			nRaidMembers = GetNumRaidMembers()
+			nPartyMembers = GetNumPartyMembers()
+			groupType = nRaidMembers > 0 and "raid" or "party"
 		end
 		local groupsize = groupType == "raid" and nRaidMembers or nPartyMembers
 		pGuid = UnitGUID("player");
