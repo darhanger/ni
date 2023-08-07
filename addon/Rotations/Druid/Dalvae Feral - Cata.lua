@@ -107,7 +107,8 @@ if cata then
 		["BearAoe"] = true,
 		["FrenziedRegen"] = true,
 		["Taunt"] = false,
-		["InterruptBear"] = true
+		["InterruptBear"] = true,
+		["InterruptPVP"] = true,
 	}
 	local values = {
 		["CatAoe"] = 3,
@@ -220,6 +221,13 @@ if cata then
 			text = "\124T" .. select(3, GetSpellInfo(spells.RavageCat.id)) .. ":26:26\124t Ravage opener",
 			tooltip = "It will will use ravage for opening if not Pounce",
 			enabled = enables["Ravage"],
+			key = "Ravage"
+		},
+		{
+			type = "entry",
+			text = "\124T" .. select(3, GetSpellInfo(spells.BashBear.id)) .. ":26:26\124t Interrupt for pvp",
+			tooltip = "It will will use everything to interrupt players",
+			enabled = enables["InterruptPVP"],
 			key = "Ravage"
 		},
 		{
@@ -405,6 +413,7 @@ if cata then
 		"Start Attack",
 		"AutoAttack",
 		"CycloneFocus",
+		"InterruptPVP",
 		-- "Jump",
 		"Primal Madness",
 		"CatForm",
@@ -425,11 +434,11 @@ if cata then
 		"Ingrediente Secreto",
 		"Rake",
 		"Shred",
-		"SkullBash",
+		-- "SkullBash",
 		"FB",
 		--bear
-		"InterruptBear",
-		"SkullBashBear",
+		-- "InterruptBear",
+		-- "SkullBashBear",
 		"FrenziedRegenerationBear",
 		"Taunt",
 		"Thrash",
@@ -443,9 +452,9 @@ if cata then
 		"LacerateBear3",
 		"LacerateBearFiller",
 		--leveling
-		"Moonfire",
-		"Wrath",
-		"AutoAttack"
+		-- "Moonfire",
+		-- "Wrath",
+		-- "AutoAttack"
 	}
 
 
@@ -663,8 +672,7 @@ if cata then
 						local target = enemies[i].guid
 						local name = enemies[i].name
 						local distance = enemies[i].distance
-						if ni.unit.creaturetype(target) ~= 11
-								and not ni.unit.ispetinombat
+						if ni.unit.isplayer(target)
 								and distance >= 8
 								and ni.spell.shouldinterrupt(target)
 								and (ni.unit.castingpercent(target) >= 80
@@ -679,6 +687,115 @@ if cata then
 				end
 			end
 		end,
+
+		["InterruptPVP"] = function()
+			if enables["InterruptPVP"] then
+				if ni.player.buff(spells.CatForm.id)
+						and not ni.player.buff(spells.ProwlCat.id)
+				then
+					if ni.player.cd(spells.SkullBashCat.name) == 0 -- SKullbash from cat
+					then
+						local enemies = ni.unit.enemiesinrange("player", 13)
+						for i = 1, #enemies do
+							local target = enemies[i].guid
+							local name = enemies[i].name
+							if ni.unit.isplayer(target)
+									and ni.unit.iscasting(target)
+									and (ni.unit.castingpercent(target) >= 60
+										or ni.unit.ischanneling(target))
+									and ni.player.los(target)
+									and ni.player.power("energy") > 5
+							then
+								ni.player.lookat(target)
+								ni.spell.cast(80965, target)
+								print("SkullBash PVPINTERRUPT " .. name)
+							end
+						end
+					else
+						if GetComboPoints(p, t) >= 1
+								and ni.unit.isplayer(t)
+								and ni.unit.iscasting(t)
+								and (ni.unit.castingpercent(t) >= 70
+									or ni.unit.ischanneling(t))
+						then
+							ni.player.lookat(t)
+							ni.spell.cast(spells.MaimCat.id, t)
+							print("MAIM PVPINTERRUPT " .. t)
+						end
+					end
+				else
+					if ni.player.buff(spells.BearForm.id)
+					then
+						if ni.spell.cd(spells.SkullBashBear.id) == 0
+						then
+							local enemies = ni.unit.enemiesinrange("player", 13)
+							for i = 1, #enemies do
+								local target = enemies[i].guid
+								local name = enemies[i].name
+								local distance = enemies[i].distance
+								if ni.unit.isplayer(target)
+										and ni.unit.iscasting
+										and (ni.unit.castingpercent(target) >= 60
+											or ni.unit.ischanneling(target))
+										and ni.player.los(target)
+										and ni.spell.valid(target, spells.SkullBashBear.id, false, true)
+								then
+									ni.player.lookat(target)
+									ni.spell.cast(spells.SkullBashBear.id, target)
+									print("SkullBash PVPINTERRUPT " .. name)
+								end
+							end
+						elseif ni.spell.cd(16979) == 0
+						then
+							local enemies = ni.unit.enemiesinrange("player", 25)
+							for i = 1, #enemies do
+								local target = enemies[i].guid
+								local name = enemies[i].name
+								local distance = enemies[i].distance
+								if ni.unit.isplayer(target)
+										and distance >= 8
+										and ni.unit.iscasting
+										and (ni.unit.castingpercent(target) >= 30
+											or ni.unit.ischanneling(target))
+										and ni.player.los(target)
+										and ni.spell.valid(target, 16979, false, true)
+								then
+									ni.player.lookat(target)
+									ni.spell.cast(16979, target)
+									print("Charge PVPINTERRUPT " .. name)
+								end
+							end
+						else
+							if ni.spell.cd(spells.BashBear.id) == 0
+							then
+								local enemies = ni.unit.enemiesinrange("player", 3)
+								for i = 1, #enemies do
+									local target = enemies[i].guid
+									local name = enemies[i].name
+									if ni.unit.isplayer(target)
+											and ni.unit.iscasting
+											and (ni.unit.castingpercent(target) >= 30
+												or ni.unit.ischanneling(target))
+											and ni.player.power("rage") >= 10
+											and ni.player.inmelee(target)
+									then
+										ni.player.lookat(target)
+										ni.spell.cast(spells.BashBear.id, target)
+										print("Bashed PVPINTERRUPT " .. name)
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end,
+
+
+
+
+
+
 		["SkullBashBear"] = function()
 			if enables["InterruptBear"] then
 				if ni.spell.cd(spells.SkullBashBear.id) == 0
@@ -691,7 +808,6 @@ if cata then
 						local distance = enemies[i].distance
 
 						if ni.unit.creaturetype(target) ~= 11
-								and not ni.unit.ispetinombat
 								and distance < 11
 								and ni.spell.shouldinterrupt(target)
 								and (ni.unit.castingpercent(target) >= 80
