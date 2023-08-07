@@ -611,6 +611,7 @@ if cata then
 				if ni.player.buff(spells.ProwlCat.id)
 						and ni.player.buff(spells.CatForm.id)
 						and ni.spell.available(spells.RavageCat.id)
+						and UnitIsEnemy(p, t)
 						and ni.unit.isbehind(p, t)
 				then
 					ni.spell.cast(spells.RavageCat.name)
@@ -618,6 +619,7 @@ if cata then
 				end
 			else
 				if ni.player.buff(spells.ProwlCat.id)
+						and UnitIsEnemy(p, t)
 						and ni.unit.inmelee(p, t)
 				then
 					ni.spell.cast(spells.PounceCat.name)
