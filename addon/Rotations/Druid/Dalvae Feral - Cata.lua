@@ -1211,12 +1211,10 @@ end
 --   -- Do something with the units targeting the player
 -- end
 
---Autoatack , auto target mas safe sumado al fairy fire
--- Shred clear casting
--- Arreglar la gui
--- Pasarlo al nuevo addon.
 
--- 5512 healtstone
+-- Optimizar los loops
+
+--Autoatack , auto target mas safe sumado al fairy fire
+-- Arreglar la gui
 -- Arreglar Healing potion
 -- Arreglar comparten reduccion de atack
--- nottotem en interrupt
