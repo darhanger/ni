@@ -619,7 +619,7 @@ if cata then
 				if ni.player.buff(spells.ProwlCat.id)
 						and ni.player.buff(spells.CatForm.id)
 						and ni.spell.available(spells.RavageCat.id)
-						and ni.spell.valid(spells.RavageCat.id, t, true, true)
+						and ni.spell.valid(t, spells.RavageCat.id, true, true)
 
 						and ni.unit.isbehind(p, t)
 				then
@@ -628,7 +628,7 @@ if cata then
 				end
 			else
 				if ni.player.buff(spells.ProwlCat.id)
-						and ni.spell.valid(spells.PounceCat.name, t, true, true)
+						and ni.spell.valid(t, spells.PounceCat.id, true, true)
 				then
 					ni.spell.cast(spells.PounceCat.name)
 					print("Pounce")
@@ -692,7 +692,7 @@ if cata then
 				if ni.player.buff(spells.CatForm.id)
 						and not ni.player.buff(spells.ProwlCat.id)
 				then
-					if ni.player.cd(spells.SkullBashCat.id) == 0 -- SKullbash from cat
+					if ni.spell.cd(spells.SkullBashCat.id) == 0 -- SKullbash from cat
 					then
 						local enemies = ni.unit.enemiesinrange("player", 13)
 						for i = 1, #enemies do
