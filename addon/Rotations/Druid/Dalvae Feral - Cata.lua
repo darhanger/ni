@@ -585,7 +585,6 @@ if cata then
 					if not ni.player.buff(spells.BearForm.id) then
 						ni.spell.cast(spells.CatForm.id)
 					elseif ni.player.buffs(spells.BearForm.id) then
-						-- El jugador ya tiene el buff Forma de Oso, no se hace nada
 					end
 				end
 			end
@@ -609,8 +608,8 @@ if cata then
 				if ni.spell.available(spells.ProwlCat.id)
 						and ni.player.buff(spells.CatForm.id)
 						and not UnitAffectingCombat(p)
-						and ni.unit.buff(p, spells.CatForm.id, p)
-						and not ni.unit.buff(p, spells.ProwlCat.id, p) then
+						and not ni.unit.buff(p, spells.ProwlCat.id, p)
+				then
 					ni.spell.cast(spells.ProwlCat.id)
 				end
 			end
@@ -620,7 +619,8 @@ if cata then
 				if ni.player.buff(spells.ProwlCat.id)
 						and ni.player.buff(spells.CatForm.id)
 						and ni.spell.available(spells.RavageCat.id)
-						and UnitIsEnemy(p, t)
+						and ni.spell.valid(spells.RavageCat.id, t, true, true)
+
 						and ni.unit.isbehind(p, t)
 				then
 					ni.spell.cast(spells.RavageCat.name)
@@ -628,8 +628,7 @@ if cata then
 				end
 			else
 				if ni.player.buff(spells.ProwlCat.id)
-						and UnitIsEnemy(p, t)
-						and ni.unit.inmelee(p, t)
+						and ni.spell.valid(spells.PounceCat.name, t, true, true)
 				then
 					ni.spell.cast(spells.PounceCat.name)
 					print("Pounce")
@@ -693,7 +692,7 @@ if cata then
 				if ni.player.buff(spells.CatForm.id)
 						and not ni.player.buff(spells.ProwlCat.id)
 				then
-					if ni.player.cd(spells.SkullBashCat.name) == 0 -- SKullbash from cat
+					if ni.player.cd(spells.SkullBashCat.id) == 0 -- SKullbash from cat
 					then
 						local enemies = ni.unit.enemiesinrange("player", 13)
 						for i = 1, #enemies do
@@ -701,13 +700,13 @@ if cata then
 							local name = enemies[i].name
 							if ni.unit.isplayer(target)
 									and ni.unit.iscasting(target)
-									and (ni.unit.castingpercent(target) >= 60
-										or ni.unit.ischanneling(target))
+									and (ni.unit.ischanneling(target)
+										or ni.unit.castingpercent(target) >= 60)
 									and ni.player.los(target)
-									and ni.player.power("energy") > 5
+									and ni.player.powerraw("energy") > 5
 							then
 								ni.player.lookat(target)
-								ni.spell.cast(80965, target)
+								ni.spell.cast(spells.SkullBashCat.id, target)
 								print("SkullBash PVPINTERRUPT " .. name)
 							end
 						end
@@ -715,8 +714,8 @@ if cata then
 						if GetComboPoints(p, t) >= 1
 								and ni.unit.isplayer(t)
 								and ni.unit.iscasting(t)
-								and (ni.unit.castingpercent(t) >= 70
-									or ni.unit.ischanneling(t))
+								and (ni.unit.ischanneling(t)
+									or ni.unit.castingpercent(t) >= 70)
 						then
 							ni.player.lookat(t)
 							ni.spell.cast(spells.MaimCat.id, t)
@@ -735,8 +734,8 @@ if cata then
 								local distance = enemies[i].distance
 								if ni.unit.isplayer(target)
 										and ni.unit.iscasting
-										and (ni.unit.castingpercent(target) >= 60
-											or ni.unit.ischanneling(target))
+										and (ni.unit.ischanneling(target)
+											or ni.unit.castingpercent(target) >= 60)
 										and ni.player.los(target)
 										and ni.spell.valid(target, spells.SkullBashBear.id, false, true)
 								then
@@ -755,8 +754,8 @@ if cata then
 								if ni.unit.isplayer(target)
 										and distance >= 8
 										and ni.unit.iscasting
-										and (ni.unit.castingpercent(target) >= 30
-											or ni.unit.ischanneling(target))
+										and (ni.unit.ischanneling(target)
+											or ni.unit.castingpercent(target) >= 30)
 										and ni.player.los(target)
 										and ni.spell.valid(target, 16979, false, true)
 								then
@@ -774,8 +773,8 @@ if cata then
 									local name = enemies[i].name
 									if ni.unit.isplayer(target)
 											and ni.unit.iscasting
-											and (ni.unit.castingpercent(target) >= 30
-												or ni.unit.ischanneling(target))
+											and (ni.unit.ischanneling(target)
+												or ni.unit.castingpercent(target) >= 50)
 											and ni.player.power("rage") >= 10
 											and ni.player.inmelee(target)
 									then
@@ -790,11 +789,6 @@ if cata then
 				end
 			end
 		end,
-
-
-
-
-
 
 		["SkullBashBear"] = function()
 			if enables["InterruptBear"] then
@@ -820,7 +814,6 @@ if cata then
 				end
 			end
 		end,
-
 
 		["MangleDebuff"] = function()
 			if enables["FullAutomated"] then
@@ -1057,7 +1050,7 @@ if cata then
 		["Demoralazing"] = function()
 			if ni.player.buff(spells.BearForm.id)
 					and not UnitIsDeadOrGhost(t)
-					and ni.unit.inmelee("player", "target")
+					and ni.unit.inmelee(p, t)
 					and not ni.unit.debuff("target", spells.DemoralizingRoarBear.id)
 					and not ni.unit.debuff("target", 81130) -- Scarlet Feever
 					and not ni.unit.debuff("target", 26017) --vindication
@@ -1209,6 +1202,14 @@ end
 ;
 ---------------------------------------------------------------------------------------------[[
 -- TODO
+-- local units = ni.unit.unitstargeting("player")
+
+-- for i = 1, #units do
+--   local target = units[i].guid
+--   local name = units[i].name
+--   local distance = units[i].distance
+--   -- Do something with the units targeting the player
+-- end
 
 --Autoatack , auto target mas safe sumado al fairy fire
 -- Shred clear casting
