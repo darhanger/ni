@@ -4,8 +4,9 @@ if cata then
 	local queue = {
 		"InnerFire",
 		"Cache",
-		-- "PowerWordFortitude",
-		"Drink",
+		"PowerWordFortitude",
+		"PrayerofShadowProtection",
+		-- "Drink",
 		"Antiinvi",
 		"Showinvis",
 		"DesesperatePrayer",
@@ -15,18 +16,19 @@ if cata then
 		"Archangel",
 		"ShieldLow",
 		"POMlow",
-		"Penance",
+		"PenanceLow",
 		"MassDispel",
 		"Lookatcasting",
 		"PrayerOfMendingMyself",
 		"RenewMe",
 		"ShadowFiend",
-		-- "ShieldMe",
+		"ShieldMe",
 		"Pause Rotation",
 		"PrayerOfMending",
 		"Shackle Gargoyle",
 		"Burst", -- CD Toggller
 		"Shield",
+		"Penance",
 		"FlashHeal",
 		"MovingDispel",
 		"Burn mana",
@@ -68,6 +70,9 @@ if cata then
 		DesesperatePrayer = { id = 19236, name = GetSpellInfo(19236) },
 		ShadowWordPain = { id = 589, name = GetSpellInfo(589) },
 		HolyNova = { id = 15237, name = GetSpellInfo(15237) },
+		ShadowWordDeath = { id = 32379, name = GetSpellInfo(32379) },
+		DevouringPlague = { id = 2944, name = GetSpellInfo(2944) },
+		PrayerofShadowProtection = { id = 27683, name = GetSpellInfo(27683) },
 	}
 
 	local values = {
@@ -101,6 +106,17 @@ if cata then
 			return true
 		end
 		return false
+	end
+	local function OnLoad()
+		ni.combatlog.registerhandler("Tapto Disco", CombatEventCatcher)
+		print("Rotation \124cFF15E615Dalvae Disco pvp")
+		-- ni.GUI.AddFrame("Tapto Disco", items)
+	end
+	;
+	local function OnUnload()
+		ni.combatlog.unregisterhandler("Tapto Disco")
+		print("Rotation \124cFFE61515stopped!")
+		-- ni.GUI.DestroyFrame("Tapto Disco")
 	end
 
 	local t, p = "target", "player"
@@ -138,13 +154,18 @@ if cata then
 		-- Añade más bufos dispeleables de otras clases aquí
 
 	}
-
+	local Cache = {
+		moving = ni.player.ismoving(),
+		members = ni.members.sort(),
+		targets = ni.unit.enemiesinrange(p, 30),
+	}
 	local abilities = {
 		["Cache"] = function()
-			cache.targets = ni.unit.enemiesinrange(p, 30)
-			cache.friends = ni.members.inrange(p, 40)
-			cache.moving = ni.player.ismoving()
+			Cache.targets = ni.unit.enemiesinrange(p, 30)
+			Cache.moving = ni.player.ismoving()
+			Cache.members = ni.members.sort()
 		end,
+
 
 		["Antiinvi"] = function()
 			if ni.player.hp() > 50 then
@@ -154,18 +175,11 @@ if cata then
 					if ni.player.los(target)
 							and (select(2, UnitClass(enemies[i].guid)) == "DRUID" or
 								select(2, UnitClass(enemies[i].guid)) == "ROGUE")
-							and not ni.unit.debuff(target, spells.ShadowWordPain.id, "player")
+							and not ni.unit.debuff(target, spells.DevouringPlague.id, "player")
 					then
-						ni.spell.cast(spells.ShadowWordPain.id, target)
+						ni.spell.cast(spells.DevouringPlague.id, target)
 					end
 				end
-			end
-		end,
-		["Lookatcasting"] = function()
-			if ni.player.iscasting() or ni.unit.ischanneling("player") then
-				ni.player.stopmoving()
-				ni.player.lookat("target")
-				return false
 			end
 		end,
 		["Showinvis"] = function()
@@ -178,6 +192,13 @@ if cata then
 						ni.spell.cast(48078) -- Holy nova
 					end
 				end
+			end
+		end,
+		["Lookatcasting"] = function()
+			if ni.player.iscasting() or ni.unit.ischanneling("player") then
+				ni.player.stopmoving()
+				ni.player.lookat("target")
+				return false
 			end
 		end,
 
@@ -203,6 +224,15 @@ if cata then
 				return true
 			end
 		end,
+		["PrayerofShadowProtection"] = function()
+			if not ni.player.buff(spells.PrayerofShadowProtection.id)
+					and not UnitAffectingCombat("player")
+					and ni.player.power("mana") > 80
+			then
+				ni.spell.cast(spells.PrayerofShadowProtection.id)
+			end
+		end,
+
 		["Burst"] = function()
 			if ni.vars.combat.cd
 					and ni.spell.cd(spells.PowerInfusion.id) == 0 then
@@ -257,6 +287,21 @@ if cata then
 				return true
 			end
 		end,
+		["KS"] = function()
+			if ni.spell.cd(spells.ShadowWordDeath.id) == 0 then
+				local enemies = ni.unit.enemiesinrange("player", 30)
+				for i = 1, #enemies do
+					local target = enemies[i].guid
+					-- if ni.spell.valid(spells.ShadowWordDeath.id, target, false, true, false)
+					if ni.player.los(target)
+							and ni.unit.isplayer(target)
+							and ni.unit.hp(target) <= 17
+					then
+						ni.spell.cast(spells.ShadowWordDeath.id, target)
+					end
+				end
+			end
+		end,
 		["MovingDispel"] = function()
 			if ni.player.ismoving() then
 				for d = 1, #dispelableBuffs do
@@ -269,13 +314,13 @@ if cata then
 		end,
 		["POMlow"] = function()
 			if ni.spell.cd(spells.PrayerOfMending.id) == 0 then
-				for i = 1, #cache.friends do
-					if ni.members[i]:hp() <= 40 and ni.player.los(ni.members[i].unit)
+				for i = 1, #Cache.members do
+					if Cache.members[i].hp() <= 40 and ni.player.los(Cache.members[i].unit)
 							and
-							ValidUsable(spells.PrayerOfMending.id, ni.members[i].unit)
-							and ni.spell.valid(ni.members[i].unit, 48113, false, true, true)
+							ValidUsable(spells.PrayerOfMending.id, Cache.members[i].unit)
+							and ni.spell.valid(Cache.members[i].unit, 33076, false, true, true)
 					then
-						ni.spell.cast(spells.PrayerOfMending.id, ni.members[i].unit)
+						ni.spell.cast(spells.PrayerOfMending.id, Cache.members[i].unit)
 						return true
 					end
 				end
@@ -291,29 +336,17 @@ if cata then
 			end
 		end,
 
-		["KS"] = function()
-			if ni.spell.cd(32379) == 0 then
-				for i = 1, #cache.targets do
-					local target = cache.targets[i].guid
-					if ni.player.los(target)
-							and ni.unit.isplayer(target)
-							and ni.unit.hp(target) <= 17
-					then
-						ni.spell.cast(32379, target)
-					end
-				end
-			end
-		end,
+
 		["MassDispel"] = function()
 			local buffdispe = { 642, 45438 } -- Divine Shield, Ice Block
 			for d = 1, #buffdispe do
-				for i = 1, #cache.targets do
-					if ni.unit.buff(cache.targets[i].guid, buffdispe[d])
+				for i = 1, #Cache.targets do
+					if ni.unit.buff(Cache.targets[i].guid, buffdispe[d])
 							and not ni.player.ismoving()
-					-- and ni.spell.valid(spells.HolyFire, cache.targets[i].guid, false, true, true)
+					-- and ni.spell.valid(spells.HolyFire, Cache.targets[i].guid, false, true, true)
 					then
 						print("dispel")
-						ni.spell.castat(32375, cache.targets[i].guid)
+						ni.spell.castat(32375, Cache.targets[i].guid)
 						return true
 					end
 				end
@@ -328,7 +361,7 @@ if cata then
 		["PenanceOnTank"] = function()
 			for i = 1, #ni.members.inrange("player", 40) do
 				if ni.members[i]:istank() and
-						ni.members.inrange("player", 40)[i]:hp() <= 90 and
+						ni.members.inrange("player", 40)[i].hp() <= 90 and
 						ValidUsable(spells.Penance.id, ni.members[i].unit) and
 						LosCast(spells.Penance.name, ni.members[i].unit)
 				then
@@ -339,7 +372,7 @@ if cata then
 		["ShieldOnTank"] = function()
 			for i = 1, #ni.members.inrange("player", 40) do
 				if ni.members[i]:istank() and
-						ni.members.inrange("player", 40)[i]:hp() <= 100 and
+						ni.members.inrange("player", 40)[i].hp() <= 100 and
 						not ni.unit.debuff(ni.members[i].unit, 6788, t) and
 						ValidUsable(spells.PowerWordShield.id, ni.members[i].unit) and
 						LosCast(spells.PowerWordShield.name, ni.members[i].unit)
@@ -351,9 +384,9 @@ if cata then
 		["Heal"] = function()
 			if not ni.player.ismoving()
 					and not ni.player.ismoving() then
-				for i = 1, #cache.friends do
+				for i = 1, #Cache.members do
 					if
-							cache.friends[i]:hp() <= 80 and
+							Cache.members[i].hp() <= 80 and
 							ValidUsable(spells.Heal.id, ni.members[i].unit) and
 							LosCast(spells.Heal.name, ni.members[i].unit)
 					then
@@ -364,9 +397,9 @@ if cata then
 		end,
 		["FlashHeal"] = function()
 			if not ni.player.ismoving() then
-				for i = 1, #cache.friends do
+				for i = 1, #Cache.members do
 					if
-							cache.friends[i]:hp() <= 70 and
+							Cache.members[i].hp() <= 70 and
 							ValidUsable(spells.FlashHeal.id, ni.members[i].unit) and
 							LosCast(spells.FlashHeal.name, ni.members[i].unit)
 					then
@@ -375,10 +408,24 @@ if cata then
 				end
 			end
 		end,
+		["PenanceLow"] = function()
+			if not ni.player.ismoving()
+					and ni.spell.cd(spells.Penance.id) == 0 then
+				for i = 1, #Cache.members do
+					if Cache.members[i].hp() <= 30 and
+							ValidUsable(spells.Penance.id, ni.members[i].unit) and
+							LosCastStand(spells.Penance.name, ni.members[i].unit)
+					then
+						return true
+					end
+				end
+			end
+		end,
 		["Penance"] = function()
-			if not ni.player.ismoving() then
-				for i = 1, #cache.friends do
-					if cache.friends[i]:hp() <= 30 and
+			if not ni.player.ismoving()
+					and ni.spell.cd(spells.Penance.id) == 0 then
+				for i = 1, #Cache.members do
+					if Cache.members[i].hp() <= 69 and
 							ValidUsable(spells.Penance.id, ni.members[i].unit) and
 							LosCastStand(spells.Penance.name, ni.members[i].unit)
 					then
@@ -388,9 +435,10 @@ if cata then
 			end
 		end,
 		["Penancelowpriority"] = function()
-			if not ni.player.ismoving() then
-				for i = 1, #cache.friends do
-					if cache.friends[i]:hp() <= 80 and
+			if not ni.player.ismoving()
+					and ni.spell.cd(spells.Penance.id) == 0 then
+				for i = 1, #Cache.members do
+					if Cache.members[i].hp() <= 80 and
 							ValidUsable(spells.Penance.id, ni.members[i].unit) and
 							LosCastStand(spells.Penance.name, ni.members[i].unit)
 					then
@@ -400,20 +448,20 @@ if cata then
 			end
 		end,
 		["Shield"] = function()
-			for i = 1, #cache.friends do
-				if cache.friends[i]:hp() <= 99 and not ni.unit.debuff(cache.friends[i].unit, 6788, t) and
-						ValidUsable(spells.PowerWordShield.id, cache.friends[i].unit) and
-						LosCast(spells.PowerWordShield.name, cache.friends[i].unit)
+			for i = 1, #Cache.members do
+				if Cache.members[i].hp() <= 99 and not ni.unit.debuff(Cache.members[i].unit, 6788, t) and
+						ValidUsable(spells.PowerWordShield.id, Cache.members[i].unit) and
+						LosCast(spells.PowerWordShield.name, Cache.members[i].unit)
 				then
 					return true
 				end
 			end
 		end,
 		["ShieldLow"] = function()
-			for i = 1, #cache.friends do
-				if cache.friends[i].hp() <= 40 and not ni.unit.debuff(ni.members[i].unit, 6788, t) and
-						ValidUsable(spells.PowerWordShield.id, ni.members[i].unit) and
-						LosCast(spells.PowerWordShield.n, ni.members[i].unit)
+			for i = 1, #Cache.members do
+				if Cache.members[i].hp() <= 40 and not ni.unit.debuff(Cache.members[i].unit, 6788, t) and
+						ValidUsable(spells.PowerWordShield.id, Cache.members[i].unit) and
+						LosCast(spells.PowerWordShield.name, Cache.members[i].unit)
 				then
 					return true
 				end
@@ -421,8 +469,8 @@ if cata then
 		end,
 		["Renew"] = function()
 			if ni.player.power("mana") > 65 then
-				for i = 1, #cache.friends do
-					if cache.friends[i]:hp() <= 95 and not ni.unit.buff(ni.members[i].unit, 139, p) and
+				for i = 1, #Cache.members do
+					if Cache.members[i].hp() <= 95 and not ni.unit.buff(ni.members[i].unit, 139, p) and
 							ValidUsable(spells.Renew.id, ni.members[i].unit) and
 							LosCast(spells.Renew.name, ni.members[i].unit)
 					then
@@ -454,11 +502,11 @@ if cata then
 
 		["ShieldEveryone"] = function()
 			if ni.vars.combat.aoe then
-				local frendos = ni.members.inrange("player", 40)
-				for i = 1, #frendos do
-					if not ni.unit.debuff(frendos[i].guid, 6788) and
-							ni.player.los(frendos[i].guid) and
-							LosCast(spells.PowerWordShield.name, frendos[i].guid)
+				for i = 1, #Cache.members do
+					local ally = Cache.members[i]
+					if not ni.unit.debuff(ally.guid, 6788, "player") and
+							ValidUsable(spells.PowerWordShield.id, ally.guid) and
+							LosCast(spells.PowerWordShield.name, ally.guid)
 					then
 						return true
 					end
@@ -478,7 +526,7 @@ if cata then
 				-- No sé si funciona, tambien hay que agregarle una condicional para targetar aquel que tenga agro
 				if not renewActive then
 					for i = 1, #ni.members.inrange("player", 40) do
-						if ni.members[i]:hp() < 99
+						if ni.members[i].hp() < 99
 								and not ni.unit.buff(ni.members[i].unit, spells.PrayerOfMending.id, "player")
 								and ni.spell.valid(ni.members[i].unit, spells.PrayerOfMending.id, false, true, true) then
 							ni.spell.cast(spells.PrayerOfMending.id, ni.members[i].unit)
@@ -506,9 +554,9 @@ if cata then
 			end
 		end,
 		["GreaterHeal"] = function()
-			for i = 1, #cache.friends do
+			for i = 1, #Cache.members do
 				if
-						cache.friends[i]:hp() <= 70 and
+						Cache.members[i].hp() <= 70 and
 						ValidUsable(spells.GreaterHeal.id, ni.members[i].unit) and
 						LosCast(spells.GreaterHeal.name, ni.members[i].unit)
 				then
@@ -524,7 +572,19 @@ if cata then
 				ni.spell.cast(87151)
 				return true
 			end
-		end
+		end,
+		["DOTS"] = function()
+			if ni.player.los(t) then
+				if not ni.unit.debuff("target", spells.ShadowWordPain.id, "player") then
+					ni.spell.cast(spells.ShadowWordPain.id, "target")
+				else
+					if not ni.unit.debuff("target", spells.DevouringPlague.id, "player") then
+						ni.spell.cast(spells.DevouringPlague.id, "target")
+					end
+				end
+			end
+		end,
+
 	}
 
 	ni.bootstrap.profile("Dalvae_discopvp_cata", queue, abilities, OnLoad, OnUnload)
