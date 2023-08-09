@@ -73,6 +73,7 @@ if cata then
 		ShadowWordDeath = { id = 32379, name = GetSpellInfo(32379) },
 		DevouringPlague = { id = 2944, name = GetSpellInfo(2944) },
 		PrayerofShadowProtection = { id = 27683, name = GetSpellInfo(27683) },
+		ShadowFiend = { id = 34433, name = GetSpellInfo(34433) },
 	}
 
 	local values = {
@@ -152,6 +153,15 @@ if cata then
 		687, -- Demon Armor
 		-- Añade más bufos dispeleables de Brujo aquí
 		-- Añade más bufos dispeleables de otras clases aquí
+
+	}
+	local priorityccbuffs = {
+		5782, -- fear Warlock
+		118, -- Poly Sheep.
+		853, -- Hammer of justice
+		6770, -- Sap
+		2094, -- Blind
+
 
 	}
 	local Cache = {
@@ -265,24 +275,26 @@ if cata then
 			if ni.vars.combat.cd
 					and not ni.player.ismoving()
 					and ni.spell.cd(spells.HolyFire.id) == 0
-					and
-					LosCast(spells.HolyFire.name, t)
+					and ni.player.los(t)
+					and LosCast(spells.HolyFire.name, t)
 			then
 				return true
 			end
 		end,
 		["AttonementHolySmite"] = function()
 			if ni.vars.combat.cd
-					and not ni.player.ismoving() and
-					LosCast(spells.Smite.name, t)
+					and not ni.player.ismoving()
+					and ni.player.los(t)
+					and LosCast(spells.Smite.name, t)
 			then
 				return true
 			end
 		end,
 		["AttonementMindBlast"] = function()
 			if ni.vars.combat.cd
-					and not ni.player.ismoving() and
-					LosCast(spells.MindBlast.name, t)
+					and not ni.player.ismoving()
+					and ni.player.los(t)
+					and LosCast(spells.MindBlast.name, t)
 			then
 				return true
 			end
@@ -366,6 +378,17 @@ if cata then
 						LosCast(spells.Penance.name, ni.members[i].unit)
 				then
 					return true
+				end
+			end
+		end,
+
+		["DefensiveDispelpriority"] = function()
+			for i = 1, #Cache.members do
+				for _, v in pairs(priorityccbuffs) do
+					if ni.player.los(Cache.members[i].guid)
+							and ni.unit.debuff(Cache.members[i].guid, v) then
+						ni.spell.cast(spells.dispelmagic.id, Cache.members[i].guid)
+					end
 				end
 			end
 		end,
@@ -570,6 +593,15 @@ if cata then
 			then
 				print("entro xd")
 				ni.spell.cast(87151)
+				return true
+			end
+		end,
+		["ShadowFiend"] = function()
+			if ni.vars.combat.cd
+					and ni.spell.cd(spells.ShadowFiend.id) == 0
+					and ni.player.los("target")
+			then
+				ni.spell.cast(spells.ShadowFiend.id, "target")
 				return true
 			end
 		end,
