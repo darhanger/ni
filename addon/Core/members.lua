@@ -378,19 +378,21 @@ function memberssetup:create(unit, guid, subgroup)
 		roster[o.guid].role		= o.role
 
 		playerInCombat = playerInCombat == nil and UnitAffectingCombat("player") or playerInCombat
-		if wotlk and not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
-			local now = GetTime()
-			roster[o.guid].spec = roster[o.guid].specName or "None"
-			if now-roster[o.guid].lastInspTime > INSPECT_DELAY then
-				if roster[o.guid].role then
-					roster[o.guid].lastRole = roster[o.guid].role
+		if wotlk then
+			if not playerInCombat or o.unit == "player" or (roster[o.guid].lastInspTime == 0 and CheckInteractDistance(o.unit, 1) ~= nil) then
+				local now = GetTime()
+				roster[o.guid].spec = roster[o.guid].specName or "None"
+				if now-roster[o.guid].lastInspTime > INSPECT_DELAY then
+					if roster[o.guid].role then
+						roster[o.guid].lastRole = roster[o.guid].role
+					end
+					if o.unit == "player" then
+						BuildTalents("player")
+						roster[o.guid].lastInspTime = now
+					else
+						DoInspect(o.unit)
+					end		
 				end
-				if o.unit == "player" then
-					BuildTalents("player")
-					roster[o.guid].lastInspTime = now
-				else
-					DoInspect(o.unit)
-				end		
 			end
 		end
 		
