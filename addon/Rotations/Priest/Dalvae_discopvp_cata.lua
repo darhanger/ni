@@ -6,7 +6,7 @@ if cata then
 		"Cache",
 		"PowerWordFortitude",
 		"PrayerofShadowProtection",
-		-- "Drink",
+		"Drink",
 		"Antiinvi",
 		"Showinvis",
 		"DesesperatePrayer",
@@ -185,9 +185,9 @@ if cata then
 					if ni.player.los(target)
 							and (select(2, UnitClass(enemies[i].guid)) == "DRUID" or
 								select(2, UnitClass(enemies[i].guid)) == "ROGUE")
-							and not ni.unit.debuff(target, spells.DevouringPlague.id, "player")
+							and not ni.unit.debuff(target, spells.ShadowWordPain.id, "player")
 					then
-						ni.spell.cast(spells.DevouringPlague.id, target)
+						ni.spell.cast(spells.ShadowWordPain.id, target)
 					end
 				end
 			end
