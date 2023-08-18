@@ -297,8 +297,9 @@ This functions ensures that a spell can be casted at specific target. It include
 !> [`ni.spell.valid`](api/spell.md#valid) is not the same as [`ni.spell.available`](api/spell.md#available).
 
 - [`ni.unit.exists`](api/unit.md#exists)
-- [`ni.player.los`](api/player.md)
-- [`ni.player.isfacing`](api/player.md)
+- [`ni.player.los`](api/player.md#los)
+- [`ni.player.isfacing`](api/player.md#isfacing)
+- `IsSpellInRange`
 
 ```lua
 if ni.spell.valid("Fear", "target") then

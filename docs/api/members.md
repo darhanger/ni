@@ -501,6 +501,10 @@ Returns: `boolean`
 
 This functions ensures that a spell can be casted at specific unit. It includes checks such as:
 
+- [`los`](api/members.md#los)
+- [`facing`](api/members.md#facing)
+- `IsSpellInRange`
+
 ```lua
 for i = 1, #ni.members do
 	if ni.members[i]:valid(48441, false, true) then
