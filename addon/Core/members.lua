@@ -238,6 +238,9 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
 	end;
+	function o:cast(spell)
+		return ni.spell.cast(spell, o.unit) or true;
+	end;
 	function o:hpraw()
 		return UnitHealth(o.unit);
 	end;		
