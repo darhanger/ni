@@ -39,7 +39,7 @@ if cata then
 		"AttonementHolySmite", -- CD toggler
 		"PrayerofHealing",
 		"AttonementMindBlast", --CD Toggllwer
-		-- "Renew",
+		"Renew",
 		"Penancelowpriority",
 		"Heal",
 		"DOTS",
@@ -101,6 +101,13 @@ if cata then
 			return true
 		end
 		return false
+	end
+	local function CombatEventCatcher(event, ...)
+		if event == "PLAYER_REGEN_DISABLED" then
+			incombat = true
+		elseif event == "PLAYER_REGEN_ENABLED" then
+			incombat = false
+		end
 	end
 	local function ValidUsable(id, tar)
 		if IsSpellKnown(id) and ni.spell.available(id) and ni.spell.valid(tar, id, false, true, true) then
@@ -172,7 +179,7 @@ if cata then
 	local abilities = {
 		["Cache"] = function()
 			Cache.targets = ni.unit.enemiesinrange(p, 30)
-			Cache.moving = ni.player.ismoving()
+			Cache.moving = ni.playmovinger.ismoving()
 			Cache.members = ni.members.sort()
 		end,
 
@@ -253,7 +260,9 @@ if cata then
 		["PenanceAttornament"] = function()
 			if ni.vars.combat.cd
 					and not cache.moving
-					and ni.spell.cd(spells.Penance.id) == 0 and
+					and ni.spell.cd(spells.Penance.id) == 0
+					and ni.spell.valid(spells.Penance.id, t, false, true, false)
+					and
 					LosCastStand(spells.Penance.name, t)
 			then
 				return true
@@ -330,7 +339,7 @@ if cata then
 					if Cache.members[i].hp() <= 40 and ni.player.los(Cache.members[i].unit)
 							and
 							ValidUsable(spells.PrayerOfMending.id, Cache.members[i].unit)
-							and ni.spell.valid(Cache.members[i].unit, 33076, false, true, true)
+							and ni.spell.valid(33076, Cache.members[i].unit, false, true, true)
 					then
 						ni.spell.cast(spells.PrayerOfMending.id, Cache.members[i].unit)
 						return true
@@ -505,7 +514,7 @@ if cata then
 		["RenewMe"] = function()
 			if ni.player.power("mana") > 45
 					and ni.player.hp() <= 80
-					and not ni.unit.buff(p, 139)
+					and not ni.player.buff(139)
 			then
 				ni.spell.cast(139, p)
 			end
