@@ -455,13 +455,12 @@ memberssetup.set = function()
 		return total;
 	end;
 	function members.average(unit, distance)
-		unit = unit or "player"
-		distance = distance or 40
 		local average = 0;
-		for _,o in ipairs(members.inrange(unit, distance)) do
+		local tbl = members.inrange(unit or "player", distance or 40)
+		for _,o in ipairs(tbl) do
 			average = average + o:hp()
 		end
-		return average / #members;
+		return average / #tbl;
 	end;
 	function members.averageof(count, unit, distance)
 		if not count or count <= 0 then return 0 end
