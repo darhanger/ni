@@ -1,5 +1,6 @@
 local GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable = GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable
 local CurrentMovingTime, CurrentStationaryTime, ResetMovementTime = 0, 0, 0.5;
+local build = ni.vars.build;
 local player = {};
 player.moveto = function(...) --target/x,y,z
 	ni.functions.moveto(...)
@@ -55,14 +56,18 @@ player.interact = function(target)
 	ni.functions.interact(target)
 end;
 player.hasglyph = function(glyphid)
-	for i = 1, 6 do
-		if GetGlyphSocketInfo(i) then
-			if select(3, GetGlyphSocketInfo(i)) == glyphid then
-				return true
-			end
+	for slot = 1, GetNumGlyphSockets() do
+	local enabled, glyph_id
+		if build >= 40300 then
+			enabled, _, _, glyph_id = GetGlyphSocketInfo(slot)
+		else
+			enabled, _, glyph_id = GetGlyphSocketInfo(slot)
+		end
+		if enabled and glyph_id == id then
+			return true;
 		end
 	end
-	return false
+	return false;
 end;
 player.hasitem = function(itemid)
 	return GetItemCount(itemid, false, false) > 0
@@ -111,6 +116,9 @@ player.itemcd = function(item)
 		return start + duration - GetTime()
 	end
 	return 0
+end;
+player.itemready = function(item)
+	return player.hasitem(item) and IsUsableItem(item) and player.itemcd(item) == 0
 end;
 player.petcd = function(spell)
 	local start, duration, enable = GetSpellCooldown(spell)

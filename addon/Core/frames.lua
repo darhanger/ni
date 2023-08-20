@@ -216,6 +216,7 @@ frames.OnEvent = function(self, event, ...)
 		ni.utils.savesetting(UnitName("player")..".json", ni.utils.json.encode(ni.vars));
 	end
 	if event == "PLAYER_REGEN_DISABLED" then
+		ni.vars.combat.counter = ni.vars.combat.counter + 1
 		ni.vars.combat.started = true
 		ni.vars.combat.time = GetTime()
 		ni.vars.combat.ended = 0

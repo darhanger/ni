@@ -37,7 +37,7 @@ Returns: `boolean`
 Checks if a player has equipped a specific glyph.
 
 ```lua
-if ni.player.hasglyph(42455) then
+if ni.player.hasglyphWotlk(42455) then
   -- Player has Glyph of Conflagrate
 end
 ```

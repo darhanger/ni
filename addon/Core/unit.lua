@@ -661,7 +661,7 @@ unit.enemiesinrange = function(t, n)
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
 				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) 
-				and unit.readablecreaturetype(k) ~= "Critter" and unit.readablecreaturetype(k) ~= "NotSpecified" then
+				and unit.readablecreaturetype(k) ~= "Critter" then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
 						tinsert(enemiestable, {guid = k, name = v.name, distance = distance});
@@ -680,8 +680,7 @@ unit.enemiesinrangewithbufftype = function(t, n, str)
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
 				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) 
 				and unit.bufftype(k, str) and unit.readablecreaturetype(k) ~= "Critter" 
-				and unit.readablecreaturetype(k) ~= "Totem" 
-				and unit.readablecreaturetype(k) ~= "NotSpecified" then
+				and unit.readablecreaturetype(k) ~= "Totem" then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
 						tinsert(enemiestablebufftype, {guid = k, name = v.name, distance = distance});
