@@ -100,10 +100,12 @@ if cata then
 		SpellReflection = { id = 23920, name = GetSpellInfo(23920), icon = select(3, GetSpellInfo(23920)) },
 		Intervene = { id = 3411, name = GetSpellInfo(3411), icon = select(3, GetSpellInfo(3411)) }
 	}
-
 	local p, t = "player", "target"
 
-	local enables = {}
+	local enables = {
+		["interrupt"] = true,
+		["battleshout"] = true
+	}
 	local values = {
 		["HeroicStrike"] = 70,
 		["Slam"] = 40
@@ -122,6 +124,7 @@ if cata then
 			menus[key] = value
 		end
 	end
+
 	local items = {
 		settingsfile = "Dalvae_armspve_cata.xml",
 		callback = GUICallback,
@@ -130,19 +133,36 @@ if cata then
 		{ type = "separator" },
 		{
 			type = "entry",
+			text = "\124T" .. spells.Pummel.icon .. ":26:26\124t Interrupt",
+			tooltip = "Use Pummel on target",
+			enable = enables["interrupt"],
+			key = "interrupt"
+		},
+		{
+			type = "entry",
+			text = "\124T" .. spells.BattleShout.icon .. ":26:26\124t Battle Shout",
+			tooltip = "Use Battle Shout or commanding shout",
+			enable = enables["battleshout"],
+			key = "battleshout"
+		},
+		{
+			type = "entry",
 			text = "\124T" .. spells.HeroicStrike.icon .. ":26:26\124t Heroic Strike",
 			tooltip = "Use Heroic Strike when above this rage pct",
 			value = values["HeroicStrike"],
 			key = "HeroicStrike"
 		},
+		{ type = "separator" },
 		{
 			type = "entry",
 			text = "\124T" .. spells.Slam.icon .. ":26:26\124t Slam",
 			tooltip = "Use Slam when above this rage pct",
 			value = values["Slam"],
 			key = "Slam"
-		}
+		},
 	}
+
+
 
 	local incombat = false
 
@@ -155,12 +175,12 @@ if cata then
 	end
 
 	local function OnLoad()
-		ni.combatlog.registerhandler("Arms", CombatEventCatcher)
-		ni.GUI.AddFrame("Arms", items)
+		ni.combatlog.registerhandler("Dalvae_armspve_cata", CombatEventCatcher)
+		ni.GUI.AddFrame("Dalvae_armspve_cata", items)
 	end
 	local function OnUnload()
-		ni.combatlog.unregisterhandler("Arms")
-		ni.GUI.DestroyFrame("Arms")
+		ni.combatlog.unregisterhandler("Dalvae_armspve_cata")
+		ni.GUI.DestroyFrame("Dalvae_armspve_cata")
 	end
 
 	local enemies = {}
@@ -248,8 +268,12 @@ if cata then
 
 		["Pause"] = function()
 			if
-					IsMounted() or UnitIsDeadOrGhost(p) or not UnitExists(t) or UnitIsDeadOrGhost(t) or
-					(UnitExists(t) and not UnitCanAttack(p, t))
+					IsMounted()
+					or UnitIsDeadOrGhost(p)
+					or not UnitExists(t)
+					or UnitIsDeadOrGhost(t) or
+					(UnitExists(t)
+						and not UnitCanAttack(p, t))
 			then
 				return true
 			end
@@ -268,26 +292,32 @@ if cata then
 			end
 		end,
 		["BattleShout"] = function()
-			if ni.spell.available(spells.CommandingShout.id) and not ni.player.buff(spells.CommandingShout.id) then
+			if ni.spell.available(spells.CommandingShout.id)
+					and not ni.player.buff(spells.CommandingShout.id)
+			then
 				ni.spell.cast(spells.CommandingShout.id)
 				return true
 			end
 		end,
 		["AutoAttack"] = function()
-			if not IsCurrentSpell(spells.AutoAttack.id) and cache.inmelee and incombat then
+			if not IsCurrentSpell(spells.AutoAttack.id)
+					and cache.inmelee
+					and incombat then
 				ni.spell.cast(spells.AutoAttack.name)
 			end
 		end,
 		["Strike"] = function()
-			if ValidUsable(spells.Strike.id, t) and FacingLosCastBerserk(spells.Strike.name, t) then
+			if ValidUsable(spells.Strike.id, t)
+					and FacingLosCastBerserk(spells.Strike.name, t)
+			then
 				return true
 			end
 		end,
 		["MortalStrike"] = function()
 			if ValidUsable(spells.MortalStrike.id, t)
 					and ni.spell.available(spells.MortalStrike.id)
-					and (ni.player.buffstacks(84586) < 3
-						or ni.player.buffremaining(84586) < 3)
+					and (ni.player.buffstacks(84586) < 3 --Slaugther something
+						or ni.player.buffremaining(84586) < 4)
 					and FacingLosCastBerserk(spells.MortalStrike.name, t) then
 				return true
 			end
@@ -317,14 +347,16 @@ if cata then
 		end,
 		["Rend"] = function()
 			if ValidUsable(spells.Rend.id, t)
-					and not ni.unit.debuff(t, spells.Rend.id, p) and FacingLosCastBattle(spells.Rend.name, t) then
+					and not ni.unit.debuff(t, spells.Rend.id, p)
+					and FacingLosCastBattle(spells.Rend.name, t)
+			then
 				return true
 			end
 		end,
 		["ColossusSmash"] = function()
 			if ValidUsable(spells.ColossusSmash.id, t)
-					and not ni.unit.debuff(t, 86346, p)
-					and ni.player.buffremaining(86346) < 2
+					and not ni.unit.debuff(t, spells.ColossusSmash.id, p) --C
+					and ni.player.buffremaining(spells.ColossusSmash.id) < 2
 					and FacingLosCastBerserk(spells.ColossusSmash.name, t) then
 				return true
 			end
@@ -334,7 +366,7 @@ if cata then
 			if
 			-- and IsUsableSpell(spells.Overpower.name)
 					ni.player.buff(60503)
-					and ni.unit.debuff(t, 86346, p) --Coloss samsh
+					and ni.unit.debuff(t, spells.ColossusSmash.id, p) --Coloss samsh
 					and FacingLosCastBattle(spells.Overpower.name, t)
 			then
 				return true
@@ -343,34 +375,36 @@ if cata then
 		["Overpower"] = function()
 			if
 			-- and IsUsableSpell(spells.Overpower.name)
-					ni.player.buff(60503)
-					and (ni.spell.cd(86346) > 4
-						or ni.unit.debuff(t, 86346, p))
+					ni.player.buff(60503) --
+					and (ni.spell.cd(spells.ColossusSmash.id) > 4
+						or ni.unit.debuff(t, spells.ColossusSmash.id, p))
 					and FacingLosCastBattle(spells.Overpower.name, t)
 			then
 				return true
 			end
 		end,
 		["Execute"] = function()
-			if IsUsableSpell(spells.Execute.name) and FacingLosCastBerserk(spells.Execute.name, t) then
+			if IsUsableSpell(spells.Execute.name)
+					and FacingLosCastBerserk(spells.Execute.name, t)
+			then
 				return true
 			end
 		end,
 		["HeroicStrike"] = function()
-			if
-					ni.u
-					and ni.spell.cd(spells.HeroicStrike.id) == 0
-					and (ni.spell.cd(86346) > 3
-						or ni.unit.debuff(t, 86346, p))
-					and (ni.player.buff(BattleTrance) or cache.rage >= values["HeroicStrike"])
+			if ni.spell.cd(spells.HeroicStrike.id) == 0
+					and (ni.spell.cd(spells.ColossusSmash.id) > 3
+						or ni.unit.debuff(t, spells.ColossusSmash.id, p))
+
 			then
 				if ni.vars.combat.aoe
+						and cache.rage >= 50
 						and cache.activeenemies > 2
 				then
 					ni.spell.cast(spells.Cleave.id)
 					print("Cleave")
 				else
 					if not IsUsableSpell(spells.Execute.name)
+							and (ni.player.buff(BattleTrance) or cache.rage >= values["HeroicStrike"])
 					then
 						ni.spell.cast(spells.HeroicStrike.id)
 						print("Heroic")
@@ -406,7 +440,8 @@ if cata then
 		["Slam"] = function()
 			if ValidUsable(spells.Slam.id, t)
 					and ((cache.rage >= values["Slam"])
-						or ni.unit.debuff(t, 86346, p)) and FacingLosCastBerserk(spells.Slam.name, t) then
+						or ni.unit.debuff(t, 86346, p))
+					and FacingLosCastBerserk(spells.Slam.name, t) then
 				return true
 			end
 		end,
@@ -426,11 +461,14 @@ if cata then
 			end
 		end,
 		["Pummel"] = function()
-			if
-					ValidUsable(spells.Pummel.name, "target") and ni.spell.shouldinterrupt("target") and
-					FacingLosCast(spells.Pummel.name, "target")
+			if enables["Interrupt"]
 			then
-				return true
+				if ValidUsable(spells.Pummel.name, "target")
+						and ni.spell.shouldinterrupt("target") and
+						FacingLosCast(spells.Pummel.name, "target")
+				then
+					return true
+				end
 			end
 		end,
 		["Sweeping"] = function()
