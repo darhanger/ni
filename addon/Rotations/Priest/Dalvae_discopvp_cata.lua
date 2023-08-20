@@ -78,14 +78,6 @@ if cata then
 
 	local values = {
 	}
-	local cache = {
-		enemies = nil,
-		friends = nil,
-		moving = ni.player.ismoving(),
-		curchannel = nil,
-		iscasting = nil
-	}
-
 	local function LosCast(spell, tar)
 		if ni.player.los(tar) and IsSpellInRange(spell, tar) == 1 then
 			ni.spell.cast(spell, tar)
