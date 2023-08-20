@@ -6,10 +6,12 @@ if cata then
 		"Cache",
 		"PowerWordFortitude",
 		"PrayerofShadowProtection",
+		"VampiricEmbrace",
+
 		"Drink",
 		"Antiinvi",
 		"Showinvis",
-		"DesesperatePrayer",
+		-- "DesesperatePrayer",
 		"KS",
 		-- "ShieldEveryone", --Aoe toggler
 		-- "PainSupression",
@@ -24,13 +26,13 @@ if cata then
 		"ShadowFiend",
 		"ShieldMe",
 		"Pause Rotation",
+		"ShadowForm",
 		-- "PrayerOfMending",
 		"Shackle Gargoyle",
 		-- "Burst", -- CD Toggller
 		-- "Shield",
 		-- "Penance",
 		-- "FlashHeal",
-		"MovingDispel",
 		"Burn mana",
 		-- "AttonementHolyFire", --CD Toggller
 		-- "PenanceAttornament", -- CD Toggller
@@ -38,15 +40,14 @@ if cata then
 		-- "ShieldOnTank",
 		-- "AttonementHolySmite", -- CD toggler
 		-- "PrayerofHealing",
-		-- "AttonementMindBlast", --CD Toggllwer
 		-- "Renew",
 		-- "Penancelowpriority",
-		"Heal",
+		-- "Heal",
 		"DOTS",
-
-
-
-
+		"VampiricTouch", --CD Toggllwer
+		"AttonementMindBlast",
+		"MovingDispel",
+		"MindFlay",
 	}
 
 	local spells = {
@@ -74,6 +75,10 @@ if cata then
 		DevouringPlague = { id = 2944, name = GetSpellInfo(2944) },
 		PrayerofShadowProtection = { id = 27683, name = GetSpellInfo(27683) },
 		ShadowFiend = { id = 34433, name = GetSpellInfo(34433) },
+		ShadowForm = { id = 15473, name = GetSpellInfo(15473) },
+		VampiricEmbrace = { id = 15286, name = GetSpellInfo(15286) },
+		VampiricTouch = { id = 34914, name = GetSpellInfo(34914) },
+		MindFlay = { id = 15407, name = GetSpellInfo(15407) },
 	}
 
 	local values = {
@@ -116,15 +121,15 @@ if cata then
 		return false
 	end
 	local function OnLoad()
-		ni.combatlog.registerhandler("Tapto Disco", CombatEventCatcher)
-		print("Rotation \124cFF15E615Dalvae Disco pvp")
-		-- ni.GUI.AddFrame("Tapto Disco", items)
+		ni.combatlog.registerhandler("Tapto shadow", CombatEventCatcher)
+		print("Rotation \124cFF15E615Dalvae shadow pvp")
+		-- ni.GUI.AddFrame("Tapto shadow", items)
 	end
 	;
 	local function OnUnload()
-		ni.combatlog.unregisterhandler("Tapto Disco")
+		ni.combatlog.unregisterhandler("Tapto shadow")
 		print("Rotation \124cFFE61515stopped!")
-		-- ni.GUI.DestroyFrame("Tapto Disco")
+		-- ni.GUI.DestroyFrame("Tapto shadow")
 	end
 
 	local t, p = "target", "player"
@@ -179,7 +184,7 @@ if cata then
 	local abilities = {
 		["Cache"] = function()
 			Cache.targets = ni.unit.enemiesinrange(p, 30)
-			Cache.moving = ni.playmovinger.ismoving()
+			Cache.moving = ni.player.ismoving()
 			Cache.members = ni.members.sort()
 		end,
 
@@ -249,7 +254,21 @@ if cata then
 				ni.spell.cast(spells.PrayerofShadowProtection.id)
 			end
 		end,
-
+		["VampiricEmbrace"] = function()
+			if not ni.player.buff(spells.VampiricEmbrace.id)
+					and not UnitAffectingCombat("player")
+					and ni.player.power("mana") > 80
+			then
+				ni.spell.cast(spells.VampiricEmbrace.id)
+			end
+		end,
+		["ShadowForm"] = function()
+			if not ni.player.buff(spells.ShadowForm.id)
+					and ni.player.hp() > 40
+			then
+				ni.spell.cast(spells.ShadowForm.id)
+			end
+		end,
 		["Burst"] = function()
 			if ni.vars.combat.cd
 					and ni.spell.cd(spells.PowerInfusion.id) == 0 then
@@ -625,10 +644,30 @@ if cata then
 				end
 			end
 		end,
-
+		["VampiricTouch"] = function()
+			local enemies = ni.unit.enemiesinrange("player", 40)
+			for i = 1, #enemies do
+				local target = enemies[i].guid
+				-- if ni.spell.valid(spells.ShadowWordDeath.id, target, false, true, false)
+				if ni.player.los(target)
+						and not ni.unit.debuff(target, spells.VampiricTouch.id, p)
+				then
+					ni.spell.cast(spells.VampiricTouch.id, target)
+				end
+			end
+		end,
+		["MindFlay"] = function()
+			if ni.vars.combat.cd
+					and not ni.player.ismoving()
+					and ni.player.los(t)
+					and LosCastStand(spells.MindFlay.name, t)
+			then
+				return true
+			end
+		end,
 	}
 
-	ni.bootstrap.profile("Dalvae_discopvp_cata", queue, abilities, OnLoad, OnUnload)
+	ni.bootstrap.profile("Dalvae_shadowpvp_cata", queue, abilities, OnLoad, OnUnload)
 else
 	local queue = {
 		"Error",
@@ -641,9 +680,12 @@ else
 			end
 		end,
 	};
-	ni.bootstrap.profile("Dalvae_discopvp_cata", queue, abilities);
+	ni.bootstrap.profile("Dalvae_shadowpvp_cata", queue, abilities);
 end
 ;
+-- Evitar doble cast
+-- Auto cache	
+--Aoe o target
 
 --- 40 yards Radians Los escudos
 --Renew
