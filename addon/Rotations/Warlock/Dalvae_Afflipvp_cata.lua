@@ -709,7 +709,8 @@ if cata then
 
 				if class --This could be dangerous if you want to curse pets
 						and ni.player.los(target)
-						and NotInmune(target) then
+						and NotInmune(target)
+						and not ni.unit.debuff(target, spells.CurseoftheElements.id, p) then
 					if (class == "Druid"
 								and ni.unit.buff(target, 24932)) -- Leader of the pack for feral
 							or class == "Rogue"
@@ -740,7 +741,8 @@ if cata then
 
 
 					if class and ni.player.los(target)
-							and NotInmune(target) then
+							and NotInmune(target)
+							and not ni.unit.debuff(target, spells.CurseoftheElements.id, p) then
 						if (class == "Druid"
 									and not ni.unit.buff(target, 24932))
 								or class == "Mage"
