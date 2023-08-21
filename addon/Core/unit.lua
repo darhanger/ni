@@ -25,6 +25,22 @@ local unit = {};
 unit.incombat = function(t)
 	return UnitAffectingCombat(t) or false;
 end;
+unit.itemlvl = function(t)
+    local iLevelSum, iCount = 0, 0 
+    for i = 1, 18 do 
+		if i ~= 4 then 
+			local ItemLink = GetInventoryItemLink(t, i) 
+			if ItemLink then 
+				local _,_,_,l = GetItemInfo(ItemLink) 
+				iLevelSum = iLevelSum + l 
+				iCount = iCount + 1 
+			end 
+		end 
+	end 
+	if iCount > 0 then 
+		return (iLevelSum/iCount);
+	end
+end;
 unit.exists = function(t)
     return UnitExists(t) or (ni.functions.objectexists(t) or false);
 end;

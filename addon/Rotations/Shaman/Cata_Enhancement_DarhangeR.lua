@@ -30,6 +30,8 @@ local items = {
 	{ type = "entry", text = ni.spell.icon(324, 22, 22).." Lightning Shield (Max. |cff0082FFMP|r %)", tooltip = "Use spell when player |cff0082FFMP|r > %.", value = 35, min = 15, max = 85, step = 1, width = 40, key = "lshield" },
 	{ type = "entry", text = ni.spell.icon(52127, 22, 22).." Water Shield (Min. |cff0082FFMP|r %)", tooltip = "Use spell when player |cff0082FFMP|r < %.", value = 15, min = 15, max = 65, step = 1, width = 40, key = "wshield" },
 	{ type = "entry", text = "|cffFF0D00Disable Shields|r", tooltip = "Disabling "..ni.spell.icon(324, 14, 14).."[Lightning Shield] and "..ni.spell.icon(52127, 14, 14).."[Water Shield].", enabled = false, key = "dishield" },
+	{ type = "separator" },	
+	{ type = "entry", text = ni.spell.icon(30823, 22, 22).." Shamanistic Rage (|cff0082FFMP|r)", tooltip = "Use spell when player |cff0082FFMP|r < %.", enabled = true, value = 35, min = 15, max = 65, step = 1, width = 40, key = "rage" },			
 	{ type = "separator" },
 	{ type = "title", text = "|cffFFFF00Important Settings|r" },
 	{ type = "separator" },
@@ -70,6 +72,9 @@ local items = {
 	}, key = "FTotem" },
 	{ type = "page", number = 4, text = "|cff00C957Defensive Settings|r" },
 	{ type = "separator" },
+	{ type = "entry", text = ni.spell.icon(30823, 22, 22).." Shamanistic Rage", tooltip = "Use spell when player |cff00D700HP|r < %.", enabled = true, value = 40, min = 15, max = 100, step = 1, width = 40, key = "rageSave" },		
+	{ type = "separator" },
+	{ type = "entry", text = ni.player.itemicon(5512, 22, 22).." Healthstone", tooltip = "Use Warlock Healthstone (if you have) when player |cff00D700HP|r < %.", enabled = true, value = 35, min = 25, max = 65, step = 1, width = 40, key = "healthstoneuse" },	
 	{ type = "entry", text = ni.player.itemicon(57191, 22, 22).." Heal Potion", tooltip = "Use Heal Potions (if you have) when player |cff00D700HP|r < %.",  enabled = true, value = 30, min = 20, max = 60, step = 1, width = 40, key = "healpotionuse" },
 	{ type = "entry", text = ni.player.itemicon(57192, 22, 22).." Mana Potion", tooltip = "Use Mana Potions (if you have) when player |cff0082FFMP|r < %.", enabled = true, value = 25, min = 15, max = 65, step = 1, width = 40, key = "manapotionuse" },
 };
@@ -118,6 +123,22 @@ local function UsableSilence(spellid, stutter)
 	local spellName = GetSpellInfo(spellid);
 	if not ni.player.isstunned()
 	and not ni.player.issilenced()
+	and ni.spell.available(spellid, stutter)
+	and IsUsableSpell(spellName) then
+		result = true;
+	end
+	return result;
+end;
+local function UsableStun(spellid, stutter)
+	if tonumber(spellid) == nil then
+		spellid = ni.spell.id(spellid)
+	end
+	local result = false;
+	if spellid == nil or spellid == 0 then
+		return false;
+	end
+	local spellName = GetSpellInfo(spellid);
+	if not ni.player.isstunned()
 	and ni.spell.available(spellid, stutter)
 	and IsUsableSpell(spellName) then
 		result = true;
@@ -184,6 +205,7 @@ PurgeSpell = GetSpellInfo(370),
 CleanseSpirit = GetSpellInfo(51886),
 FireNova = GetSpellInfo(1535),
 TotemicRecall = GetSpellInfo(36936),
+ShamanisticRage = GetSpellInfo(30823),
 };
 -- "Cache" Table -- 
 local cache = {
@@ -208,8 +230,10 @@ local queue = {
 	"Enchant Weapon",
 	"Lightning Shield",
 	"Totemic Recall",
+	"Healthstone (Use)",
 	"Heal Potions (Use)",
 	"Mana Potions (Use)",
+	"Shamanistic Rage",
 	"Combat specific Pause",
 	"Wind Shear (Interrupt)",
 	"Pull Totems (Auto)",
@@ -373,6 +397,21 @@ local abilities = {
 			return true;
 		end
 	end,
+-----------------------------------
+	["Healthstone (Use)"] = function()
+		local hpVal, enabled = GetSetting("healthstoneuse");
+		if not enabled then
+			return false;
+		end
+		if not cache.PlayerControled
+		and cache.PlayerCombat
+		and ni.player.hp() <= hpVal then
+			if ni.player.itemready(5512) then
+				ni.player.useitem(5512)
+				return true;
+			end
+		end
+	end,
 -----------------------------------	
 	["Heal Potions (Use)"] = function()
 		local hpVal, enabled = GetSetting("healpotionuse");
@@ -433,10 +472,30 @@ local abilities = {
 			local InterruptTargets = enemies[i].guid;
 				if ni.spell.shouldinterrupt(InterruptTargets)
 				and ni.spell.valid(InterruptTargets, spells.WindShear, true, true)  then
-					ni.spell.cast(spells.WindShear, InterruptTargets)
+					ni.spell.castinterrupt(InterruptTargets)
 					return true;
 				end
 			end
+		end
+	end,
+-----------------------------------
+	["Shamanistic Rage"] = function()
+		local rageHP, hpEnabled = GetSetting("rageSave");
+		local rageMP, mpEnabled =  GetSetting("rage");		
+		if not cache.PlayerCombat
+		or not ni.spell.available(spells.ShamanisticRage) then
+			return false;
+		end
+		if hpEnabled
+		and ni.player.hp() <= rageHP then
+			ni.spell.cast(spells.ShamanisticRage)
+			return true;
+		end
+		if mpEnabled
+		and ni.player.power(0) <= rageMP
+		and cache.GetRange then
+			ni.spell.cast(spells.ShamanisticRage)
+			return true;
 		end
 	end,
 -----------------------------------	
@@ -588,18 +647,26 @@ local abilities = {
 		if not ni.spell.valid("target", spells.FlameShock, true, true) then
 			return false;
 		end
-		local dist = nil;
+		local dist, UseNova = nil, false;
 		if cache.HasFireNovaGlyph then
 			dist = 14;
 		else
 			dist = 9;
 		end
 		local count, enabled = GetSetting("firenovaAoE");
-		local EnemiesCount = #ni.unit.enemiesinrange("target", dist);
-		if UsableSilence(spells.FireNova)
-		and (cache.FlameShock and cache.FlameShockT > 2) then
+		local EnemiesCount = ni.unit.enemiesinrange("target", dist);
+		for i = 1, #EnemiesCount do
+		local tar = EnemiesCount[i].guid;
+			if ni.unit.debuff(tar, spells.FlameShock, "player") then
+				UseNova = true;
+				break;
+			end
+		end
+		if (UseNova 
+		or (cache.FlameShock and cache.FlameShockT > 2))
+		and UsableSilence(spells.FireNova) then
 			if ni.vars.combat.aoe
-			or (enabled and EnemiesCount >= count) then
+			or (enabled and #EnemiesCount >= count) then
 				ni.spell.cast(spells.FireNova)
 				return true;
 			end
@@ -610,18 +677,8 @@ local abilities = {
 		if not cache.GetRange then
 			return false;
 		end
-		if UsableSilence(spells.StormStrike) then
+		if UsableStun(spells.StormStrike) then
 			ni.spell.cast(spells.StormStrike, "target")
-			return true;
-		end
-	end,
------------------------------------
-	["Primal Strike"] = function()
-		if not cache.GetRange then
-			return false;
-		end
-		if UsableSilence(spells.PrimalStrike) then
-			ni.spell.cast(spells.PrimalStrike, "target")
 			return true;
 		end
 	end,
@@ -630,7 +687,7 @@ local abilities = {
 		if not cache.GetRange then
 			return false;
 		end
-		if UsableSilence(spells.LavaLash) then
+		if UsableStun(spells.LavaLash) then
 			ni.spell.cast(spells.LavaLash, "target")
 			return true;
 		end
@@ -680,7 +737,6 @@ local abilities = {
 		if (cure and not cureAlly) then
 			if UsableSilence(spells.CureToxins) then
 				if ni.player.debufftype("Curse")
-				and ni.healing.candispel("player")
 				and (GetTime() - LastCure >= val) then
 					ni.spell.cast(spells.CureToxins, "player")
 					LastCure = GetTime();
@@ -700,10 +756,9 @@ local abilities = {
 			for i = 1, #ni.members.sort() do
 			local ally = ni.members[i];
 				if ally:debufftype("Curse")
-				and ally:dispel()
 				and (GetTime() - LastCure >= val)
 				and ally:valid(spells.CureToxins, false, true) then
-					spellCast(spells.CureToxins, ally.unit)
+					ni.spell.cast(spells.CureToxins, ally.unit)
 					LastCure = GetTime()
 					return true;
 				end

@@ -80,6 +80,19 @@ player.hasitemequipped = function(id)
 	end
 	return false
 end;
+player.hassetequiped = function(tbl, pieces)
+	local count = 0;
+	for i = 1, #tbl do
+		local ids = tbl[i];
+		if IsEquippedItem(ids) then
+			count = count + 1
+			if count >= pieces then
+				return true;
+			end
+		end
+	end
+	return false;
+end;
 player.slotcastable = function(slotnum)
 	if select(1, GetItemSpell(GetInventoryItemID("player", slotnum))) ~= "SpellName0" then
 		return GetItemSpell(GetInventoryItemID("player", slotnum)) ~= nil
@@ -105,7 +118,15 @@ player.checkslots = function()
 			freeslots = freeslots + #GetContainerFreeSlots(i)
 		end
 	end
-	return freeslots
+	return freeslots;
+end;
+player.cancelbuff = function(spellid)
+	local spellName = GetSpellInfo(spellid);
+	if ni.player.buff(spellid) then
+		ni.functions.callprotected("CancelUnitBuff", "player", spellName)
+		return true;
+	end
+	return false;
 end;
 player.itemicon = function(itemid, width, height)
     return "\124T"..(GetItemIcon(itemid) or select(3, GetSpellInfo(24720)))..":"..(height or 25)..":"..(width or 25).."\124t"	

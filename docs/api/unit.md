@@ -494,6 +494,22 @@ if ni.unit.id("target") == 36597 then
 end
 ```
 
+## itemlvl
+
+Arguments:
+
+- **unit** `guid|token`
+
+Returns: `number`
+
+Returns avarage item level.
+
+```lua
+if ni.unit.itemlvl("player") >= 245 then
+	-- Player have avarage 245 ilvl equiped
+end
+```
+
 ## info
 
 Arguments:

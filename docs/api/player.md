@@ -10,6 +10,19 @@ ni.player.hp() -- Same as calling ni.unit.hp("player")
 ```
 
 ---
+## cancelbuff
+
+Arguments:
+
+- **id** `id`
+
+Canceles a specific buff on the player
+
+```lua
+if ni.player.buff(48443) then
+	ni.player.cancelbuff(48443)
+end
+```
 
 ## clickat
 
@@ -24,6 +37,17 @@ Clicks at the specific location.
 ```lua
 ni.player.clickat("target") --Clicks at the targets x/y/z
 ni.player.clickat("mouse") --Clicks at the mouses current location
+```
+
+## checkslots
+
+Returns: `number`
+
+Check free slots in player invetory
+```lua
+if ni.player.checkslots() < 2 then
+	-- Player have less the 2 free slots
+end
 ```
 
 ## hasglyph
@@ -74,6 +98,26 @@ if ni.player.hasitemequipped(51378) then
 end
 ```
 
+## hassetequiped
+
+Arguments:
+
+- **table** `id`
+- **pieces** `number`
+
+
+Returns: `boolean`
+
+Checks if a player has equipped a specific set.
+
+```lua
+local t8 = {46122, 46121, 46120, 46119, 46118, 45339, 45338, 45337, 45336, 45335};
+
+if ni.player.hassetequiped(t8, 4) then
+  -- Player has equipped 4 pieces tier 8
+end
+```
+
 ## interact
 
 Arguments:
@@ -86,6 +130,20 @@ Interacts with the specified unit (e.g. opens a dialog with NPC, loot a containe
 
 ```lua
 ni.player.interact("target")
+```
+
+## itemicon
+
+- **item** `id`
+- **width** `number`
+- **height** `number`
+
+Returns: `string`
+
+Uses for drowing item icon in GUI or tooltips.
+
+```lua
+	{ type = "entry", text = ni.player.itemicon(57191, 22, 22).." Heal Potion", tooltip = "Use Heal Potions (if you have) when player |cff00D700HP|r < %.",  enabled = true, value = 30, min = 20, max = 60, step = 1, width = 40, key = "healpotionuse" },
 ```
 
 ## itemcd
@@ -101,6 +159,22 @@ Checks if a specific inventory item is on cooldown and returns the remaining tim
 ```lua
 if ni.player.itemcd(41119) > 0 then
   -- Saronite Bomb is on cooldown
+end
+```
+
+## itemready
+
+Arguments:
+
+- **slot** `id`
+
+Returns: `boolean`
+
+Checks if a specific inventory item is ready. Player have item, its off cooldown, and can be used.
+
+```lua
+if ni.player.itemready(41119) then
+  -- Player have bomb and can use it
 end
 ```
 
@@ -197,6 +271,22 @@ end
 
 if ni.player.slotcd(10) == 0 then
   -- Gloves on-use is off cooldown
+end
+```
+
+## slotusable
+
+Arguments:
+
+- **slot** `id`
+
+Returns: `boolean`
+
+Checks if the players current slot is a castable spell and it not on cooldown.
+
+```lua
+if ni.player.slotusable(10) then
+  -- Gloves ready for use
 end
 ```
 
