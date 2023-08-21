@@ -97,7 +97,6 @@ if cata then
 		["Interrupts"] = true,
 	}
 	local values  = {
-		["RegrowthTank"] = 85,
 	}
 	local inputs  = {}
 	local menus   = {
@@ -120,7 +119,6 @@ if cata then
 		callback = GUICallback,
 		{ type = "title",    text = "Dalvae Affliction PVP" },
 		{ type = "separator" },
-		{ type = "title",    text = "Fully automated" },
 		{
 			type = "entry",
 			text = "\124T" .. spells.DrainLife.icon .. ":26:26\124tFully automated",
@@ -156,13 +154,7 @@ if cata then
 			enabled = enables["Interrupts"],
 			key = "Interrupts"
 		},
-		{
-			type = "entry",
-			text = "Let Lifebloom Expire",
-			tooltip = "Allows lifebloom to expire instead of refreshing",
-			enabled = enables["LifebloomExpire"],
-			key = "LifebloomExpire"
-		},
+
 	}
 
 	local function LosCast(spell, tar)
