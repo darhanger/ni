@@ -8,6 +8,7 @@ if cata then
 		"InterruptDanger",
 		"WaitForChannel",
 		"Pause",
+		"ShadowBoltST",
 		"CorruptAll", -- TODO Add check for inmunem
 		"CurseMelees", -- TODO Add check for inmune, and check for hybrid classes
 		"CurseCasters", -- TODO Add check for inmune, and check for hybrid classes
@@ -221,7 +222,7 @@ if cata then
 
 	SLASH_BLAH1                 = "/blah"
 	SlashCmdList["BLAH"]        = function()
-		ni.rotation.delay(2)
+		ni.rotation.delay(5)
 	end
 	local spellsdanger          = {
 		-- Death Knight
@@ -614,7 +615,14 @@ if cata then
 				end
 			end
 		end,
-
+		["ShadowBoltST"] = function()
+			if ni.player.buff(17941)
+					and ni.unit.exists(t)
+					and ni.player.los(t)
+			then
+				ni.spell.cast(spells.ShadowBolt.id, t)
+			end
+		end
 
 	}
 	ni.bootstrap.profile("Dalvae_Afflipvp_cata", queue, abilities, OnLoad, OnUnload)
@@ -631,3 +639,10 @@ else
 		end,
 	};
 end
+-- TODO
+-- Add Checks for inmunes,
+-- Find a Way to detect Retrys, Shamnenha, and the same for balance,holy, etc.
+-- Interrupts with DeathCoil or Fear
+-- Fear Focus? why you dont you ask for a fear on focus?
+-- Add fillers to the rotations.
+-- Use CD  and Aoe toggler for (totems?)
