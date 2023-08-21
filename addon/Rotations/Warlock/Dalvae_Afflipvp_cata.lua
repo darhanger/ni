@@ -3,15 +3,16 @@ local cata = build == 40300 or false;
 if cata then
 	local queue   = {
 		"Cache",
+		"InterruptFocus",
 		"InterruptCC",
 		"InterruptHeal",
 		"InterruptDanger",
 		"WaitForChannel",
 		"Pause",
 		"ShadowBoltST",
-		"CorruptAll", -- TODO Add check for inmunem
-		"CurseMelees", -- TODO Add check for inmune, and check for hybrid classes
-		"CurseCasters", -- TODO Add check for inmune, and check for hybrid classes
+		"CorruptAll", --
+		"CurseMelees",
+		"CurseCasters", --
 	}
 	local spells  = {
 		ArmorSkills = { id = 76277, name = GetSpellInfo(76277), icon = select(3, GetSpellInfo(76277)) },
@@ -95,6 +96,8 @@ if cata then
 		["Weakness"] = true,
 		["Tongues"] = true,
 		["Interrupts"] = true,
+		["InterruptAll"] = true,
+		["InterruptFocus"] = false,
 	}
 	local values  = {
 	}
@@ -154,8 +157,76 @@ if cata then
 			enabled = enables["Interrupts"],
 			key = "Interrupts"
 		},
+		{
+			type = "entry",
+			text = "\124T" .. spells.SummonFelhunter.icon .. ":26:26\124t Enable interrupts All enemys",
+			tooltip = "It will only cast interrupt on All enemys",
+			enabled = enables["InterruptAll"],
+			key = "InterruptAll"
+		},
+		{
+			type = "entry",
+			text = "\124T" .. spells.SummonFelhunter.icon .. ":26:26\124t Enable interrupts on focus",
+			tooltip = "It will only cast interrupt on focus",
+			enabled = enables["InterruptFocus"],
+			key = "InterruptsFocus"
+		},
 
 	}
+	local frames = {};
+	local notfram = ni.utils.generaterandomname();
+	frames.especialgui = CreateFrame("frame", notfram, UIParent);
+	frames.especialgui.ranH2, frames.especialgui.ranH = random(91, 95), random(31, 38);
+	frames.especialgui:SetSize(ChatFrame1:GetWidth(), frames.especialgui.ranH)
+	frames.especialgui:Hide()
+	frames.especialgui:SetPoint("BOTTOM", ChatFrame1)
+	frames.especialgui.text = frames.especialgui:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
+	frames.especialgui.text:SetAllPoints()
+	frames.especialgui.texture = frames.especialgui:CreateTexture()
+	frames.especialgui.texture:SetAllPoints()
+	frames.especialgui.texture:SetTexture(0, 0, 0, .50)
+	function frames.especialgui:message(message)
+		local pad = ""
+		for i = 1, random(1, 255) do pad = pad .. "\124r" end
+		self.text:SetText(pad .. message)
+		self:Show()
+	end
+
+	local notfram2 = ni.utils.generaterandomname();
+	frames.especialgui2 = CreateFrame("frame", notfram2, UIParent);
+	frames.especialgui2.ranH2, frames.especialgui2.ranH = random(91, 95), random(31, 38);
+	frames.especialgui2:SetSize(ChatFrame1:GetWidth(), frames.especialgui2.ranH)
+	frames.especialgui2:Hide()
+	frames.especialgui2:SetPoint("BOTTOM", notfram, "TOP")
+	frames.especialgui2.text = frames.especialgui2:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
+	frames.especialgui2.text:SetAllPoints()
+	frames.especialgui2.texture = frames.especialgui2:CreateTexture()
+	frames.especialgui2.texture:SetAllPoints()
+	frames.especialgui2.texture:SetTexture(0, 0, 0, .50)
+	function frames.especialgui2:message(message)
+		local pad = ""
+		for i = 1, random(1, 255) do pad = pad .. "\124r" end
+		self.text:SetText(pad .. message)
+		self:Show()
+	end
+
+	local notfram3 = ni.utils.generaterandomname();
+	frames.especialgui3 = CreateFrame("frame", notfram3, UIParent);
+	frames.especialgui3.ranH2, frames.especialgui3.ranH = random(91, 95), random(31, 38);
+	frames.especialgui3:SetSize(ChatFrame1:GetWidth(), frames.especialgui2.ranH)
+	frames.especialgui3:Hide()
+	frames.especialgui3:SetPoint("BOTTOM", notfram2, "TOP")
+	frames.especialgui3.text = frames.especialgui3:CreateFontString(nil, "OVERLAY", "MovieSubtitleFont")
+	frames.especialgui3.text:SetAllPoints()
+	frames.especialgui3.texture = frames.especialgui3:CreateTexture()
+	frames.especialgui3.texture:SetAllPoints()
+	frames.especialgui3.texture:SetTexture(0, 0, 0, .50)
+	function frames.especialgui3:message(message)
+		local pad = ""
+		for i = 1, random(1, 255) do pad = pad .. "\124r" end
+		self.text:SetText(pad .. message)
+		self:Show()
+	end
 
 	local function LosCast(spell, tar)
 		if ni.player.los(tar)
@@ -192,6 +263,20 @@ if cata then
 		end
 		return false
 	end
+
+	local function NotInmune(tar)
+		if not ni.unit.buff(tar, 48707)       -- Anti
+				and not ni.unit.buff(tar, 19263)  --Deterrence
+				and not ni.unit.buff(tar, 45438)  -- Iceblck
+				and not ni.unit.buff(tar, 642)    -- divine Shield
+				and not ni.unit.buff(tar, 31221) then -- Cloack of Shadows
+			return true
+		end
+		return false
+	end
+
+
+	;
 	local function OnLoad()
 		ni.combatlog.registerhandler("Dalvae Affliction", CombatEventCatcher)
 		ni.GUI.AddFrame("Dalvae Affliction", items)
@@ -205,18 +290,62 @@ if cata then
 		print("Rotation \124cFFE61515stopped!")
 	end
 
-	local t, p                  = "target", "player"
+	local t, p = "target", "player"
 
-	SLASH_STOPGASTING1          = "/stopgasting"
-	SlashCmdList["STOPGASTING"] = function()
+	local function ToggleEnable(enableName)
+		if enables[enableName] ~= nil then
+			enables[enableName] = not enables[enableName]
+			print(enableName .. " has been toggled. New value: " .. tostring(enables[enableName]))
+		else
+			print("Invalid enable name: " .. enableName)
+		end
+	end
+
+	SLASH_INTERRUPTENABLES1          = "/interruptenables"
+	SlashCmdList["INTERRUPTENABLES"] = function()
+		if enables["Interrupts"]
+		then
+			enables["Interrupts"] = false
+			frames.especialgui:Hide()
+		else
+			enables["Interrupts"] = true
+			frames.especialgui:message("\124cFF15E615Interrupt Enable");
+		end
+	end
+	SLASH_INTERRUPTALL1              = "/interruptall"
+	SlashCmdList["INTERRUPTALL"]     = function()
+		if enables["InterruptAll"]
+		then
+			enables["InterruptAll"] = false
+			frames.especialgui2:Hide()
+		else
+			enables["InterruptAll"] = true
+			frames.especialgui2:message("\124cFF15E615Interrupt EVERYONE");
+		end
+	end
+	SLASH_INTERRUPTFOCUS1            = "/interruptfocus"
+	SlashCmdList["INTERRUPTFOCUS"]   = function()
+		if enables["InterruptFocus"]
+		then
+			enables["InterruptFocus"] = false
+			frames.especialgui3:Hide()
+		else
+			enables["InterruptFocus"] = true
+			frames.especialgui3:message("\124cFF15E615Interrupt FOCUS");
+		end
+	end
+	-- Here we can add diferent switches
+
+	SLASH_STOPGASTING1               = "/stopgasting"
+	SlashCmdList["STOPGASTING"]      = function()
 		ni.rotation.delay(2)
 	end
 
-	SLASH_BLAH1                 = "/blah"
-	SlashCmdList["BLAH"]        = function()
+	SLASH_BLAH1                      = "/blah"
+	SlashCmdList["BLAH"]             = function()
 		ni.rotation.delay(5)
 	end
-	local spellsdanger          = {
+	local spellsdanger               = {
 		-- Death Knight
 		-- Druid
 		2912, -- Starfire
@@ -239,7 +368,7 @@ if cata then
 		6353, -- Soul Fire
 	}
 
-	local spellsheal            = {
+	local spellsheal                 = {
 		-- Druid
 		8963, -- Regrowth
 		50464, -- Nourish
@@ -263,7 +392,7 @@ if cata then
 		64843, -- Divine Hymn
 		596, -- Prayer Of Healing
 	}
-	local inmune                = {
+	local inmune                     = {
 		-- Death Knight
 		48707, -- Anti-Magic Shell	
 		-- Hunter
@@ -275,12 +404,12 @@ if cata then
 		-- Rogue
 		31221, -- Cloak of Shadows
 	}
-	local inmuneinterrupt       = {
+	local inmuneinterrupt            = {
 		31821, -- Aura Mastery
 		-- Priest
 		89485, -- Inner Focus
 	}
-	local interruptcc           = {
+	local interruptcc                = {
 		-- Druid
 		88010, -- Cyclone
 		-- Mage
@@ -291,7 +420,7 @@ if cata then
 		5782, -- Fear
 
 	}
-	local breakcc               = {
+	local breakcc                    = {
 		-- Death Knight
 		49203, -- Hungering Cold
 		-- Druid
@@ -333,7 +462,7 @@ if cata then
 		6770, -- Sap
 		-- 31221, -- Cloak of Shadows
 	}
-	local priorityccbuffs       = {
+	local priorityccbuffs            = {
 		5782, -- fear Warlock
 		118, -- Poly Sheep.
 		853, -- Hammer of justice
@@ -343,7 +472,7 @@ if cata then
 
 	}
 
-	local Cache                 = {
+	local Cache                      = {
 		targets = nil,
 		curchannel = nil,
 		iscasting = nil,
@@ -412,7 +541,7 @@ if cata then
 	-- 	ChaosBolt = GetTalentInfo(3, 19),              -- (0/1)
 
 	-- }
-	local abilities             = {
+	local abilities                  = {
 		["Pause"] = function()
 			if
 					IsMounted()
@@ -434,7 +563,9 @@ if cata then
 		end,
 
 		["InterruptCC"] = function()
-			if enables["Interrupts"] then
+			if enables["Interrupts"]
+					and enables["InterruptAll"]
+			then
 				if ni.spell.cd(spells.SpellLock.id) == 0
 				then
 					for i = 1, #Cache.enemies do
@@ -457,7 +588,9 @@ if cata then
 			end
 		end,
 		["InterruptHeal"] = function()
-			if enables["Interrupts"] then
+			if enables["Interrupts"]
+					and enables["InterruptAll"]
+			then
 				if ni.spell.cd(spells.SpellLock.id) == 0
 				then
 					for i = 1, #Cache.enemies do
@@ -480,7 +613,9 @@ if cata then
 		end,
 
 		["InterruptDanger"] = function()
-			if enables["Interrupts"] then
+			if enables["Interrupts"]
+					and enables["InterruptAll"]
+			then
 				if ni.spell.cd(spells.SpellLock.id) == 0
 				then
 					for i = 1, #Cache.enemies do
@@ -498,6 +633,19 @@ if cata then
 								end
 							end
 						end
+					end
+				end
+			end
+		end,
+		["InterruptFocus"] = function()
+			if enables["Interrupts"] then
+				if enables["InterruptFocus"] then
+					if ni.unit.exists("focus")
+							and ni.unit.iscasting("focus")
+							and ni.player.los("focus")
+							and ni.unit.castingpercent("focus") >= 85
+					then
+						ni.spell.cast(spells.SpellLock.id, "focus")
 					end
 				end
 			end
@@ -525,13 +673,6 @@ if cata then
 
 				for i = 1, #Cache.enemies do
 					local target = Cache.enemies[i].guid
-					-- local breakcc = {
-					-- 	-- Mage
-					-- 	118,            -- Poly Sheep.
-					-- 	6770,           -- Sap
-					-- 	spells.Corruption.id, -- corruption
-					-- }
-
 					local hasBreakCC = false
 					for j = 1, #breakcc do
 						if ni.unit.debuff(target, breakcc[j])
@@ -544,9 +685,10 @@ if cata then
 					if not hasBreakCC
 							and ni.player.los(target)
 							and not ni.unit.debuff(target, spells.Corruption.id, p)
+							and NotInmune(target)
+					--Aca hacer una condicion para 	and not ni.unit.buff(target, BUFFINMUNE)
 					then
 						if hasHunterInParty then
-							-- Aca hacer una condicion para saber si hay un hunter en party
 							if ni.unit.exists("focus")
 									and UnitGUID("focus") ~= target
 							then --
@@ -564,8 +706,14 @@ if cata then
 				local target = Cache.enemies[i].guid
 				local _, class = UnitClass(target)
 
-				if class and ni.player.los(target) then
-					if class == "DRUID" or class == "ROGUE" or class == "WARRIOR" or class == "DEATHKNIGHT" then
+				if class --This could be dangerous if you want to curse pets
+						and ni.player.los(target)
+						and NotInmune(target) then
+					if (class == "DRUID"
+								and ni.unit.buff(target, 24932)) -- Leader of the pack for feral
+							or class == "ROGUE"
+							or class == "WARRIOR"
+							or class == "DEATHKNIGHT" then
 						if enables["Weakness"] then
 							if not ni.unit.debuff(target, spells.CurseofWeakness.id, p) then
 								ni.spell.cast(spells.CurseofWeakness.id, target)
@@ -590,13 +738,16 @@ if cata then
 					local name = Cache.enemies[i].name
 
 
-					if class and ni.player.los(target) then
-						if class == "MAGE"
+					if class and ni.player.los(target)
+							and NotInmune(target) then
+						if (class == "DRUID"
+									and not ni.unit.buff(target, 24932))
+								or class == "MAGE"
 								or class == "WARLOCK"
 								or class == "SHAMAN"
 								or class == "PRIEST"
+								or class == "PALADIN"
 								or name == "Ebon Gargoyle"
-						-- We are missing the Druid balance
 						then
 							if not ni.unit.debuff(target, spells.CurseofTongues.id, p) then
 								ni.spell.cast(spells.CurseofTongues.id, target)
@@ -611,10 +762,11 @@ if cata then
 			if ni.player.buff(17941)
 					and ni.unit.exists(t)
 					and ni.player.los(t)
+					and NotInmune(t)
 			then
 				ni.spell.cast(spells.ShadowBolt.id, t)
 			end
-		end
+		end,
 
 	}
 	ni.bootstrap.profile("Dalvae_Afflipvp_cata", queue, abilities, OnLoad, OnUnload)
@@ -632,7 +784,7 @@ else
 	};
 end
 -- TODO
--- Add Checks for inmunes,
+-- One check for "all interrupts", and then nested checks for "interrupt all people" and "interrupt only focus"  The method is done, we neet to apply
 -- Find a Way to detect Retrys, Shamnenha, and the same for balance,holy, etc.
 -- Interrupts with DeathCoil or Fear
 -- Fear Focus? why you dont you ask for a fear on focus?
