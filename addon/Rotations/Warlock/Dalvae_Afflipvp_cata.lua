@@ -684,6 +684,7 @@ if cata then
 
 					if not hasBreakCC
 							and ni.player.los(target)
+							and not ni.unit.istotem(target)
 							and not ni.unit.debuff(target, spells.Corruption.id, p)
 							and NotInmune(target)
 					--Aca hacer una condicion para 	and not ni.unit.buff(target, BUFFINMUNE)
@@ -704,16 +705,16 @@ if cata then
 		["CurseMelees"] = function()
 			for i = 1, #Cache.enemies do
 				local target = Cache.enemies[i].guid
-				local _, class = UnitClass(target)
+				local class = UnitClass(target)
 
 				if class --This could be dangerous if you want to curse pets
 						and ni.player.los(target)
 						and NotInmune(target) then
-					if (class == "DRUID"
+					if (class == "Druid"
 								and ni.unit.buff(target, 24932)) -- Leader of the pack for feral
-							or class == "ROGUE"
-							or class == "WARRIOR"
-							or class == "DEATHKNIGHT" then
+							or class == "Rogue"
+							or class == "Warrior"
+							or class == "Deathknight" then
 						if enables["Weakness"] then
 							if not ni.unit.debuff(target, spells.CurseofWeakness.id, p) then
 								ni.spell.cast(spells.CurseofWeakness.id, target)
@@ -734,20 +735,21 @@ if cata then
 			if enables["Tongues"] then
 				for i = 1, #Cache.enemies do
 					local target = Cache.enemies[i].guid
-					local _, class = UnitClass(target)
+					local class = UnitClass(target)
 					local name = Cache.enemies[i].name
 
 
 					if class and ni.player.los(target)
 							and NotInmune(target) then
-						if (class == "DRUID"
+						if (class == "Druid"
 									and not ni.unit.buff(target, 24932))
-								or class == "MAGE"
-								or class == "WARLOCK"
-								or class == "SHAMAN"
-								or class == "PRIEST"
-								or class == "PALADIN"
-								or name == "Ebon Gargoyle"
+								or class == "Mage"
+								or class == "Warlock"
+								or class == "Shaman"
+								or class == "Priest"
+								or class == "Paladin"
+								or class == "Ebon Gargoyle"
+						-- or class == "Searing Totem" -- Not worth
 						then
 							if not ni.unit.debuff(target, spells.CurseofTongues.id, p) then
 								ni.spell.cast(spells.CurseofTongues.id, target)
