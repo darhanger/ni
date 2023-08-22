@@ -164,6 +164,7 @@ if not ni.loaded then
 		ni.lib.CallbackHandler = require(dir.."addon\\core\\libs\\CallbackHandler-1.0.lua");
 		ni.lib.LibDataBroker = require(dir.."addon\\core\\libs\\LibDataBroker-1.1.lua");
 		ni.lib.LibDBIcon = require(dir.."addon\\core\\libs\\LibDBIcon-1.0.lua");
+		ni.listener = require(dir.."addon\\core\\listener.lua");
 		ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = require(dir.."addon\\core\\frames.lua");
 		ni.unit = require(dir.."addon\\core\\unit.lua");
 		ni.player = require(dir.."addon\\core\\player.lua");

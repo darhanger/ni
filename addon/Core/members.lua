@@ -274,11 +274,15 @@ function memberssetup:create(unit, guid, subgroup)
 	function o:facing()
 		return ni.player.facing(o.unit) == true;
 	end;
+	function o:unfriendly()
+		return UnitIsEnemy("player", o.unit) or false;
+	end;
 	function o:valid(spell, facing, los)
 		local spellid = tonumber(spell)
 		spellid = spellid or ni.spell.id(spell)
 		return (spellid > 0
 		and IsSpellInRange(GetSpellInfo(spellid), o.unit) == 1
+		and not o:unfriendly()
 		and (not facing or o:facing())
 		and (not los or o:los()))
 		or false

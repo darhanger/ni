@@ -27,13 +27,27 @@ player.runtext = function(text)
 	ni.functions.runtext(text)
 end;
 player.getskillinfo = function(prof)
-    for i = 1, GetNumSkillLines() do
-        local name, _, _, skillRank = GetSkillLineInfo(i)
-        if name == prof then
-            return skillRank;
+    if build >= 40300 then
+        for i = 1, 6 do
+            local skillName, _, skillRank = GetProfessionInfo(i)
+            if skillName == prof then
+                return skillRank, print(skillName)
+            end
+        end
+    else
+		for i = 1, GetNumSkillLines() do
+            local name, _, _, skillRank = GetSkillLineInfo(i)
+            if name == prof then
+                return skillRank;
+            end
         end
     end
     return 0;
+end;
+player.getenchantid = function(slotId)
+	local link = GetInventoryItemLink("player", slotId)
+	local itemId, enchantId = link:match("item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)");
+	return enchantId;
 end;
 player.useitem = function(...) --itemid/name[, target]
 	if #{...} > 1 then
