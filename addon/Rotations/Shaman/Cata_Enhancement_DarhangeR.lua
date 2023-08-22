@@ -1,5 +1,5 @@
-local build = select(4, GetBuildInfo());
-local cata = build == 40300 or false;
+local select, GetSpellInfo, ipairs, pairs, GetZoneText, GetInstanceInfo, GetTime, tonumber, IsUsableSpell, IsSpellKnown, IsSpellInRange, UnitExists, UnitCanAttack, GetTotemInfo, wipe, IsMounted, UnitInVehicle, UnitIsDeadOrGhost, UnitChannelInfo, UnitCastingInfo, IsCurrentSpell, GetWeaponEnchantInfo, GetInventoryItemID, BindEnchant, GetItemInfo, IsEquippedItemType, GetItemSpell, GetActionInfo, GetTotemTimeLeft, UnitName, UnitIsEnemy = select, GetSpellInfo, ipairs, pairs, GetZoneText, GetInstanceInfo, GetTime, tonumber, IsUsableSpell, IsSpellKnown, IsSpellInRange, UnitExists, UnitCanAttack, GetTotemInfo, wipe, IsMounted, UnitInVehicle, UnitIsDeadOrGhost, UnitChannelInfo, UnitCastingInfo, IsCurrentSpell, GetWeaponEnchantInfo, GetInventoryItemID, BindEnchant, GetItemInfo, IsEquippedItemType, GetItemSpell, GetActionInfo, GetTotemTimeLeft, UnitName, UnitIsEnemy
+local cata = ni.vars.build == 40300 or false;
 if cata then
 local KnowEngineer = ni.player.getskillinfo(GetSpellInfo(4036)) > 500 or false;
 local AntiAFKTime, LastReset, LastPurge = 0, 0, 0;
@@ -11,7 +11,7 @@ local items = {
 	{ type = "title", text = "Enchantment Shaman by |c0000CED1DarhangeR|r" },
 	{ type = "separator" },
 	{ type = "title", text = "|cffffa500Cataclysm Version|r" },
-	{ type = "title", text = "|cff0082FFProfile version 0.0.3|r" },
+	{ type = "title", text = "|cff0082FFProfile version 0.0.3a|r" },
 	{ type = "separator" },
 	{ type = "page", number = 1, text = "|cffFFFF00Main Settings" },
 	{ type = "separator" },
@@ -121,7 +121,7 @@ local function GetSetting(name)
 		end
 	end
 end;
-local ZoneText = GetZoneText()
+local ZoneText = GetZoneText();
 local InstanceName, InstanceType = GetInstanceInfo();
 -- Local functions for profile --
 --------- Misc ---------
@@ -239,7 +239,7 @@ local function GetMelee(t, spellid)
 			local spellName = GetSpellInfo(spellid);
 			return IsSpellInRange(spellName, t) == 1;	
 		else
-			return plaMelee(t);
+			return ni.player.inmelee(t);
 		end
 	end
 end;
