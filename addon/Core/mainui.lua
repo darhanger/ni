@@ -313,6 +313,7 @@ UIDropDownMenu_Initialize(dropdownmenu2, function(self, level)
 		UIDropDownMenu_AddButton(info, level);
 	end
 end);
+
 UIDropDownMenu_SetWidth(dropdownmenu2, 150);
 UIDropDownMenu_SetButtonWidth(dropdownmenu2, 174);
 UIDropDownMenu_JustifyText(dropdownmenu2, "CENTER");	
@@ -501,6 +502,7 @@ local function CreateKeyDropDown(frame, keys, offset_x, offset_y, var)
 	UIDropDownMenu_Initialize(dropdown, function(self, level)
 		local info = UIDropDownMenu_CreateInfo();
 		local index = 0;
+		local build = ni.vars.build;
 		for k, v in pairs(keys) do
 			index = index + 1;
 			local checked = false;

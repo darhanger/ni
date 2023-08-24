@@ -201,6 +201,10 @@ local function OnKeyHandler(self, keyType, key)
 	return result;
 end;
 
+local function ranvalue(minimum, maximum)
+    return random()*(maximum-minimum) + minimum;
+end;
+
 ni.functions.registercallback(keyevents, OnKeyHandler);
 frames.main = CreateFrame("frame");
 frames.main:RegisterAllEvents();

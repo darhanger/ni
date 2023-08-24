@@ -628,7 +628,7 @@ local abilities = {
     end,
     --------------------------
 };
-ni.bootstrap.profile("elem_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+ni.bootstrap.profile("elem_by_makaren_wrath", queue, abilities, OnLoad, OnUnLoad);
 elseif t4 > 1 then  
     local enables = {
         ["totems"] = true,
@@ -1190,7 +1190,7 @@ elseif t4 > 1 then
         end,
         --------------------------
     };
-    ni.bootstrap.profile("elem_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+    ni.bootstrap.profile("elem_by_makaren_wrath", queue, abilities, OnLoad, OnUnLoad);
 else
     local enables = {
         ["totems"] = true,
@@ -1227,7 +1227,7 @@ else
         end
     end
     local items = {
-        settingsfile = "elem_by_makaren.json",
+        settingsfile = "elem_by_makaren_wrath.json",
         callback = GUICallback,
         { type = "title", text = "Elem_Shaman by |c0000CED1Makaren|r" },
         { type = "separator" },
@@ -1263,10 +1263,10 @@ else
     { type = "entry", text = ni.spell.icon(59159).." Гром и молния", tooltip ="Использует Гром и молния, если мана меньше", enabled = true, value = 60, min = 1, max = 100, step = 1, key = "grom" },
 };
     local function OnLoad()
-        ni.GUI.AddFrame("elem_by_makaren", items);
+        ni.GUI.AddFrame("elem_by_makaren_wrath", items);
     end;
     local function OnUnLoad()  
-        ni.GUI.DestroyFrame("elem_by_makaren");
+        ni.GUI.DestroyFrame("elem_by_makaren_wrath");
     end;
     local cache = {
         IsMoving = false,
@@ -1711,7 +1711,7 @@ else
         end,
         --------------------------
     };
-		ni.bootstrap.profile("elem_by_makaren", queue, abilities, OnLoad, OnUnLoad);
+		ni.bootstrap.profile("elem_by_makaren_wrath", queue, abilities, OnLoad, OnUnLoad);
 	end
 else
 	local queue = {
@@ -1725,5 +1725,5 @@ else
 			end
         end,
     };
-    ni.bootstrap.profile("elem_by_makaren", queue, abilities);
+    ni.bootstrap.profile("elem_by_makaren_wrath", queue, abilities);
 end;

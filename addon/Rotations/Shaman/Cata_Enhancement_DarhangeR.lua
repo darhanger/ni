@@ -1,8 +1,9 @@
-local select, GetSpellInfo, ipairs, pairs, GetZoneText, GetInstanceInfo, GetTime, tonumber, IsUsableSpell, IsSpellKnown, IsSpellInRange, UnitExists, UnitCanAttack, GetTotemInfo, wipe, IsMounted, UnitInVehicle, UnitIsDeadOrGhost, UnitChannelInfo, UnitCastingInfo, IsCurrentSpell, GetWeaponEnchantInfo, GetInventoryItemID, BindEnchant, GetItemInfo, IsEquippedItemType, GetItemSpell, GetActionInfo, GetTotemTimeLeft, UnitName, UnitIsEnemy = select, GetSpellInfo, ipairs, pairs, GetZoneText, GetInstanceInfo, GetTime, tonumber, IsUsableSpell, IsSpellKnown, IsSpellInRange, UnitExists, UnitCanAttack, GetTotemInfo, wipe, IsMounted, UnitInVehicle, UnitIsDeadOrGhost, UnitChannelInfo, UnitCastingInfo, IsCurrentSpell, GetWeaponEnchantInfo, GetInventoryItemID, BindEnchant, GetItemInfo, IsEquippedItemType, GetItemSpell, GetActionInfo, GetTotemTimeLeft, UnitName, UnitIsEnemy
+local select, GetSpellInfo, ipairs, pairs, GetZoneText, GetInstanceInfo, GetTime, tonumber, IsUsableSpell, IsSpellKnown, IsSpellInRange, UnitExists, UnitCanAttack, GetTotemInfo, wipe, IsMounted, UnitInVehicle, UnitIsDeadOrGhost, UnitChannelInfo, UnitCastingInfo, IsCurrentSpell, GetWeaponEnchantInfo, GetInventoryItemID, BindEnchant, GetItemInfo, IsEquippedItemType, GetItemSpell, GetActionInfo, GetTotemTimeLeft, UnitName, UnitIsEnemy = select, GetSpellInfo, ipairs, pairs, GetZoneText, GetInstanceInfo, GetTime, tonumber, IsUsableSpell, IsSpellKnown, IsSpellInRange, UnitExists, UnitCanAttack, GetTotemInfo, wipe, IsMounted, UnitInVehicle, UnitIsDeadOrGhost, UnitChannelInfo, UnitCastingInfo, IsCurrentSpell, GetWeaponEnchantInfo, GetInventoryItemID, BindEnchant, GetItemInfo, IsEquippedItemType, GetItemSpell, GetActionInfo, GetTotemTimeLeft, UnitName, UnitIsEnemy;
+local spellCast, spellValid, spellInstant, playerHP, playerPow, playerBuff, playerBuffSta, playerDistance, playerSlot, playerInventory, playerItemR, playerUseIt, unitDebuff, unitDebuffRem, unitBuffType, unitEnemiesRange, unitDistance, unitBoss, drTrack = ni.spell.cast, ni.spell.valid, ni.spell.isinstant, ni.player.hp, ni.player.power, ni.player.buff, ni.player.buffstacks, ni.player.distance, ni.player.slotusable, ni.player.useinventoryitem, ni.player.itemready, ni.player.useitem, ni.unit.debuff, ni.unit.debuffremaining, ni.unit.bufftype, ni.unit.enemiesinrange, ni.unit.distance, ni.unit.isboss, ni.drtracker.get;
 local cata = ni.vars.build == 40300 or false;
 if cata then
 local KnowEngineer = ni.player.getskillinfo(GetSpellInfo(4036)) > 500 or false;
-local AntiAFKTime, LastReset, LastPurge = 0, 0, 0;
+local AntiAFKTime, LastReset, LastPurge, LastCure = 0, 0, 0, 0;
 local fto, eto, wto, ato = nil, nil, nil, nil;
 local UsePots = false;
 local enemies = {};
@@ -11,7 +12,7 @@ local items = {
 	{ type = "title", text = "Enchantment Shaman by |c0000CED1DarhangeR|r" },
 	{ type = "separator" },
 	{ type = "title", text = "|cffffa500Cataclysm Version|r" },
-	{ type = "title", text = "|cff0082FFProfile version 0.0.3a|r" },
+	{ type = "title", text = "|cff0082FFProfile version 0.0.4|r" },
 	{ type = "separator" },
 	{ type = "page", number = 1, text = "|cffFFFF00Main Settings" },
 	{ type = "separator" },
@@ -163,7 +164,7 @@ local function BossOrCD(t, valueTime, valueTTD, hp, enabled)
 	end;
 	local isboss = false;
 	if enabled then
-		isboss = ni.unit.isboss(t);
+		isboss = unitBoss(t);
 		if not isboss then
 			return false;
 		end
@@ -302,6 +303,27 @@ Dungeon = false;
 HasFireNovaGlyph = false;
 GlyphOfStoneclawTotem = false,
 };
+-- Combat Event --
+local FShockMiss = false;
+local FlameShock = {[GetSpellInfo(8050)] = true };
+local function CombatEventCatcher(event, ...)
+	local pGUID = UnitGUID("player");
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+	local _, type, _, sourceGUID, _, _, _, _, _, _, _, _, spellName = ...	
+		if type == "SPELL_MISSED"
+		and sourceGUID == pGUID then 
+			if FlameShock[spellName] then
+				FShockMiss = true;
+			end	
+		end	
+		if (type == "SPELL_AURA_APPLIED" or type == "SPELL_AURA_REFRESH")
+		and sourceGUID == pGUID then 		
+			if FlameShock[spellName] then
+				FShockMiss = false;
+			end	
+		end	
+	end
+end;
 -- Update Cache Events --
 local update_cache = {
     "PLAYER_ENTERING_WORLD",
@@ -326,11 +348,13 @@ local function OnLoad()
         end
     end)
 	ni.listener:call("PLAYER_ENTERING_WORLD");
+	ni.combatlog.registerhandler("Cata_Enhancement_DarhangeR", CombatEventCatcher);
 	ni.GUI.AddFrame("Cata_Enhancement_DarhangeR", items);
 end;
 -- Unload GUI / Wipe Cache -- 
 local function OnUnLoad()
 	ni.listener:remove("update_cache", update_cache);
+	ni.combatlog.unregisterhandler("Cata_Enhancement_DarhangeR");
 	ni.GUI.DestroyFrame("Cata_Enhancement_DarhangeR");
 end;
 -- Rotation Priorities --
@@ -339,7 +363,6 @@ local AoEQueu = {
 	"Get Totems ID",
 	"Universal Pause",
 	"AutoTarget",
-	"Purge",
 	"Enchant Weapon",
 	"Lightning Shield",
 	"Totemic Recall",
@@ -367,9 +390,9 @@ local AoEQueu = {
 	"Fire Nova (AoE)",
 	"Chain Lightning/Bolt",
 	"Stormstrike",
-	"Purge",
 	"Cure Toxins (Self)",
-	"Cure Toxins (Ally)",
+	"Cure Toxins (Ally)",	
+	"Purge",
 	"Earth Shock",
 };
 local SoloQueu = {
@@ -377,7 +400,6 @@ local SoloQueu = {
 	"Get Totems ID",
 	"Universal Pause",
 	"AutoTarget",
-	"Purge",
 	"Enchant Weapon",
 	"Lightning Shield",
 	"Totemic Recall",
@@ -404,9 +426,9 @@ local SoloQueu = {
 	"Flame Shock",
 	"Lava Lash",
 	"Stormstrike",
-	"Purge",
 	"Cure Toxins (Self)",
-	"Cure Toxins (Ally)",
+	"Cure Toxins (Ally)",	
+	"Purge",
 	"Earth Shock",
 };
 -- Abilities Code Table --
@@ -444,16 +466,16 @@ local abilities = {
 		cache.PlayerCombat = ni.player.incombat() or false;
 		cache.UnitAttackable = (UnitExists("target") and UnitCanAttack("player", "target")) or false;
 		cache.PlayerControled = (ni.player.issilenced() or ni.player.isstunned() or ni.player.isconfused() or ni.player.isfleeing()) or false;
-		cache.ActiveEnemies = #ni.unit.enemiesinrange("target", 8) or 0;
+		cache.ActiveEnemies = #unitEnemiesRange("target", 8) or 0;
 		cache.fireTotem = select(2, GetTotemInfo(1)) or false;
 		cache.earthTotem = select(2, GetTotemInfo(2)) or false;
 		cache.waterTotem = select(2, GetTotemInfo(3)) or false;
 		cache.airTotem = select(2, GetTotemInfo(4)) or false;
-		cache.NoMaelstrom = ni.player.buffstacks(spells.Maelstorm) < 5 or false;
+		cache.NoMaelstrom = playerBuffSta(spells.Maelstorm) < 5 or false;
 		if cache.UnitAttackable then
 			cache.GetRange = GetMelee("target", spells.PrimalStrike) or false;
-			cache.FlameShock = ni.unit.debuff("target", spells.FlameShock, "player") or false;
-			local FST = ni.unit.debuffremaining("target", spells.FlameShock, "player");
+			cache.FlameShock = (unitDebuff("target", spells.FlameShock, "player") or FShockMiss) or false;
+			local FST = unitDebuffRem("target", spells.FlameShock, "player");
 			if FST then
 				cache.FlameShockT = FST;
 			else
@@ -507,7 +529,7 @@ local abilities = {
 					and not ni.unit.istotem(tar)
 					and ni.player.isfacing(tar) then
 						ni.player.target(tar)
-						ni.spell.cast(GetSpellInfo(6603), tar)
+						spellCast(GetSpellInfo(6603), tar)
 						return true;
 					end
 				end
@@ -522,7 +544,7 @@ local abilities = {
 		if GetInventoryItemID("player", 16) ~= nil then
 			if not enchantMain
 			and UsableSilence(MainHandSpell) then
-				ni.spell.cast(MainHandSpell)
+				spellCast(MainHandSpell)
 				BindEnchant()
 				return true;
 			end
@@ -533,7 +555,7 @@ local abilities = {
 				if not IsEquippedItemType("Shields") then
 					if not enchantSecond
 					and UsableSilence(OffHandSpell) then
-						ni.spell.cast(OffHandSpell)
+						spellCast(OffHandSpell)
 						BindEnchant()
 						return true;
 					end
@@ -545,13 +567,13 @@ local abilities = {
 	["Lightning Shield"] = function()
 		local _, enabled = GetSetting("dishield");
 		if enabled
-		or ni.player.buff(spells.LightningShield)
+		or playerBuff(spells.LightningShield)
 		or not UsableSilence(spells.LightningShield) then
 			return false;
 		end
 		local value = GetSetting("lshield");
-		if ni.player.power(0) >= value then
-			ni.spell.cast(spells.LightningShield)
+		if playerPow(0) >= value then
+			spellCast(spells.LightningShield)
 			return true;
 		end
 	end,
@@ -559,13 +581,13 @@ local abilities = {
 	["Water Shield"] = function()
 		local _, enabled = GetSetting("dishield");	
 		if enabled
-		or ni.player.buff(spells.WaterShield)
+		or playerBuff(spells.WaterShield)
 		or not UsableSilence(spells.WaterShield) then
 			return false;
 		end
 		local value = GetSetting("wshield");	
-		if ni.player.power(0) <= value then
-			ni.spell.cast(spells.WaterShield)
+		if playerPow(0) <= value then
+			spellCast(spells.WaterShield)
 			return true;
 		end
 	end,
@@ -577,9 +599,9 @@ local abilities = {
 		end
 		if not cache.PlayerControled
 		and cache.PlayerCombat
-		and ni.player.hp() <= hpVal then
-			if ni.player.itemready(5512) then
-				ni.player.useitem(5512)
+		and playerHP() <= hpVal then
+			if playerItemR(5512) then
+				playerUseIt(5512)
 				return true;
 			end
 		end
@@ -593,11 +615,11 @@ local abilities = {
 		local hpot = { 57191, 43569, 40087, 41166, 33447, 39671, 22829, 33934, 28100, 13446, 3928, 1710, 929, 4596, 858, 118 };
 		if not cache.PlayerControled
 		and cache.PlayerCombat
-		and ni.player.hp() <= hpVal then
+		and playerHP() <= hpVal then
 			for i = 1, #hpot do
 			local a = hpot[i];
-				if ni.player.itemready(a) then
-					ni.player.useitem(a)
+				if playerItemR(a) then
+					playerUseIt(a)
 					return true;
 				end
 			end
@@ -612,11 +634,11 @@ local abilities = {
 		local mpot = { 43570, 40087, 42545, 33448, 40067, 22832, 33935, 28101, 13444, 13443, 6149, 3827, 3385, 2455 };
 		if not cache.PlayerControled
 		and cache.PlayerCombat
-		and ni.player.power(0) <= mpVal then
+		and playerPow(0) <= mpVal then
 			for i = 1, #mpot do
 			local a = mpot;
-				if ni.player.itemready(a) then
-					ni.player.useitem(a)
+				if playerItemR(a) then
+					playerUseIt(a)
 					return true;
 				end
 			end
@@ -632,10 +654,10 @@ local abilities = {
 		if PotEnabled then
 			if PotID ~= 0 then
 				local PotSpell = GetItemSpell(PotID);
-				if ni.player.itemready(PotID)
-				and not ni.player.buff(PotSpell)
+				if playerItemR(PotID)
+				and not playerBuff(PotSpell)
 				and (BossOrCD("target", 1, 5, 1, enabled) or UsePots) then
-					ni.player.useitem(PotID)
+					playerUseIt(PotID)
 					UsePots = false;
 					return true;
 				end
@@ -655,21 +677,21 @@ local abilities = {
 	["Racial Stuff"] = function()
 		local _, enabled = GetSetting("detect");
 		local hBuffs = {26297, 33697};
-		if ni.player.hp() <= 25 then
+		if playerHP() <= 25 then
 			if UsableStun(20524)
-			and not ni.player.buff(20524) then
-				ni.spell.cast(20524)
+			and not playerBuff(20524) then
+				spellCast(20524)
 				return true;
 			end
 			if UsableStun(59547)
-			and not ni.player.buff(59547) then
-				ni.spell.cast(59547)
+			and not playerBuff(59547) then
+				spellCast(59547)
 				return true;
 			end
 		end
 		if UsableStun(69041)
-		and ni.spell.valid("target", 69041, true, true) then
-			ni.spell.cast(69041, "target")
+		and spellValid("target", 69041, true, true) then
+			spellCast(69041, "target")
 			return true;
 		end
 		if BossOrCD("target", 5, 5, 1, enabled)
@@ -677,7 +699,7 @@ local abilities = {
 			for i = 1, #hBuffs do
 				local b = hBuffs[i];
 				if UsableStun(b) then
-					ni.spell.cast(b)
+					spellCast(b)
 					return true;
 				end
 			end
@@ -695,14 +717,14 @@ local abilities = {
 			for _, slot_id in ipairs(trinket_slots) do
 				local trinket_id = GetInventoryItemID("player", slot_id)
 				if trinket_id 
-				and ni.player.slotusable(slot_id) then
-					ni.player.useinventoryitem(slot_id)
+				and playerSlot(slot_id) then
+					playerInventory(slot_id)
 					return true;
 				end
 			end
 			if KnowEngineer then
-				if ni.player.slotusable(10) then
-					ni.player.useinventoryitem(10, "target")
+				if playerSlot(10) then
+					playerInventory(10, "target")
 					return true;
 				end		
 			end
@@ -719,7 +741,7 @@ local abilities = {
 		if UsableSilence(spells.FeralSpirit) 
 		and BossOrCD("target", 5, 5, 1, enabled)
 		and cache.GetRange then
-			ni.spell.cast(spells.FeralSpirit)
+			spellCast(spells.FeralSpirit)
 			return true;
 		end
 	end,
@@ -735,8 +757,8 @@ local abilities = {
 		for i = 1, #enemies do
 			local InterruptTargets = enemies[i].guid;
 				if ni.spell.shouldinterrupt(InterruptTargets)
-				and ni.spell.valid(InterruptTargets, spells.WindShear, true, true)  then
-					ni.spell.cast(spells.WindShear, InterruptTargets)
+				and spellValid(InterruptTargets, spells.WindShear, true, true)  then
+					spellCast(spells.WindShear, InterruptTargets)
 					return true;
 				end
 			end
@@ -751,14 +773,14 @@ local abilities = {
 			return false;
 		end
 		if hpEnabled
-		and ni.player.hp() <= rageHP then
-			ni.spell.cast(spells.ShamanisticRage)
+		and playerHP() <= rageHP then
+			spellCast(spells.ShamanisticRage)
 			return true;
 		end
 		if mpEnabled
-		and ni.player.power(0) <= rageMP
+		and playerPow(0) <= rageMP
 		and cache.GetRange then
-			ni.spell.cast(spells.ShamanisticRage)
+			spellCast(spells.ShamanisticRage)
 			return true;
 		end
 	end,
@@ -774,7 +796,7 @@ local abilities = {
 		end
 		local _, enabled = GetSetting("totemcallBoss");
 		if enabled
-		and not ni.unit.isboss("target") then
+		and not unitBoss("target") then
 			return false;
 		end
 		if UsableSilence(CallTotem)
@@ -783,7 +805,7 @@ local abilities = {
 		and cache.waterTotem == "" and cache.airTotem == ""
 		or (cache.earthTotem ~= "" and cache.fireTotem ~= ""
 		and cache.waterTotem ~= "" and cache.airTotem ~= "")) then
-			ni.spell.cast(CallTotem)
+			spellCast(CallTotem)
 			return true;
 		end
 	end,
@@ -799,7 +821,7 @@ local abilities = {
 		end
 		local _, enabled = GetSetting("totemcallBoss");
 		if enabled
-		and not ni.unit.isboss("target") then
+		and not unitBoss("target") then
 			return false;
 		end
 		local _, EarthTotem = GetActionInfo(eto);
@@ -808,19 +830,19 @@ local abilities = {
 		if CombatStart(4) then
 			if cache.earthTotem == "" then
 				if UsableSilence(EarthTotem) then
-					ni.spell.cast(EarthTotem)
+					spellCast(EarthTotem)
 					return true;
 				end
 			end
 			if cache.waterTotem == "" then
 				if UsableSilence(WaterTotem) then
-					ni.spell.cast(WaterTotem)
+					spellCast(WaterTotem)
 					return true;
 				end
 			end
 			if cache.airTotem == "" then
 				if UsableSilence(AirTotem) then
-					ni.spell.cast(AirTotem)
+					spellCast(AirTotem)
 					return true;
 				end
 			end
@@ -846,7 +868,7 @@ local abilities = {
 			and GetTotemTimeLeft(2) < 30
 			and GetTotemTimeLeft(3) < 30
 			and GetTotemTimeLeft(4) < 30) then
-				ni.spell.cast(spells.TotemicRecall)
+				spellCast(spells.TotemicRecall)
 				ni.vars.combat.counter = 0;
 				return true;
 			end
@@ -867,8 +889,8 @@ local abilities = {
 			for b = 1, 4 do
 				local totemN = "totem"..a
 				local totemN2 = "totem"..b
-				local totem_distance = ni.unit.distance(totemN, "target");	
-				local totem2_player_distance = ni.player.distance(totemN2);
+				local totem_distance = unitDistance(totemN, "target");	
+				local totem2_player_distance = playerDistance(totemN2);
 					if (cache.fireTotem ~= ""
 					and UnitName(totemN) == cache.fireTotem
 					and totem_distance and totem_distance > 12)
@@ -879,7 +901,7 @@ local abilities = {
 					and (GetTotemTimeLeft(2) < 30
 					and GetTotemTimeLeft(3) < 30
 					and GetTotemTimeLeft(4) < 30)) then
-						ni.spell.cast(spells.TotemicRecall)
+						spellCast(spells.TotemicRecall)
 						return true;
 					end
 				end
@@ -896,11 +918,11 @@ local abilities = {
 		and cache.GetRange then
 			for i = 1, 4 do
 			local totemN = "totem"..i
-			local totem_distance = ni.unit.distance(totemN, "target");
+			local totem_distance = unitDistance(totemN, "target");
 				if (cache.fireTotem == ""
 				or (cache.fireTotem ~= "" and UnitName(totemN) == cache.fireTotem
 				and totem_distance and totem_distance > 10)) then
-					ni.spell.cast(FTotem)
+					spellCast(FTotem)
 					return true;
 				end
 			end
@@ -908,7 +930,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Fire Nova (AoE)"] = function()	
-		if not ni.spell.valid("target", spells.FlameShock, true, true) then
+		if not spellValid("target", spells.FlameShock, true, true) then
 			return false;
 		end
 		local dist, UseNova = nil, false;
@@ -918,10 +940,10 @@ local abilities = {
 			dist = 9;
 		end
 		local count, enabled = GetSetting("firenovaAoE");
-		local EnemiesCount = ni.unit.enemiesinrange("target", dist);
+		local EnemiesCount = unitEnemiesRange("target", dist);
 		for i = 1, #EnemiesCount do
 		local tar = EnemiesCount[i].guid;
-			if ni.unit.debuff(tar, spells.FlameShock, "player") then
+			if unitDebuff(tar, spells.FlameShock, "player") then
 				UseNova = true;
 				break;
 			end
@@ -929,7 +951,7 @@ local abilities = {
 		if (UseNova 
 		or (cache.FlameShock and cache.FlameShockT > 2))
 		and UsableSilence(spells.FireNova) then
-			ni.spell.cast(spells.FireNova)
+			spellCast(spells.FireNova)
 			return true;
 		end
 	end,
@@ -939,8 +961,8 @@ local abilities = {
 			return false;
 		end
 		if UsableStun(spells.UnleashElements) 
-		and ni.spell.valid("target", spells.UnleashElements, false, true) then
-			ni.spell.cast(spells.UnleashElements, "target")
+		and spellValid("target", spells.UnleashElements, false, true) then
+			spellCast(spells.UnleashElements, "target")
 			return true;
 		end
 	end,
@@ -951,7 +973,7 @@ local abilities = {
 			return false;
 		end
 		if UsableStun(spells.StormStrike) then
-			ni.spell.cast(spells.StormStrike, "target")
+			spellCast(spells.StormStrike, "target")
 			return true;
 		end
 	end,
@@ -961,8 +983,9 @@ local abilities = {
 		or not cache.GetRange then
 			return false;
 		end	
-		if UsableStun(spells.LavaLash) then
-			ni.spell.cast(spells.LavaLash, "target")
+		if cache.FlameShock
+		and UsableStun(spells.LavaLash) then
+			spellCast(spells.LavaLash, "target")
 			return true;
 		end
 	end,
@@ -971,10 +994,10 @@ local abilities = {
 		if not UsableSilence(spells.FlameShock) then
 			return false;
 		end
-		if (ni.player.buff(73683) or not ni.player.buff(73683)) then
+		if (playerBuff(73683) or not playerBuff(73683)) then
 			if (not cache.FlameShock or cache.FlameShockT < 2)
-			and ni.spell.valid("target", spells.FlameShock, true, true) then
-				ni.spell.cast(spells.FlameShock, "target")
+			and spellValid("target", spells.FlameShock, true, true) then
+				spellCast(spells.FlameShock, "target")
 				return true;
 			end
 		end
@@ -985,8 +1008,8 @@ local abilities = {
 			return false;
 		end
 		if (cache.FlameShock and cache.FlameShockT > 2)
-		and ni.spell.valid("target", spells.EarthShock, true, true) then
-			ni.spell.cast(spells.EarthShock, "target")
+		and spellValid("target", spells.EarthShock, true, true) then
+			spellCast(spells.EarthShock, "target")
 			return true;
 		end
 	end,
@@ -997,26 +1020,25 @@ local abilities = {
 		end
 		local ChainCount, ChainEnabled = GetSetting("chain");
 		local _, ChainAlways = GetSetting("chainAlways");
-		if ni.spell.isinstant(spells.LightningBolt)
-		and ni.spell.valid("target", spells.LightningBolt, true, true) 
-		or (not cache.GetRange 
-		and ni.spell.valid("target", spells.LightningBolt, true, true)) then
+		if spellInstant(spells.LightningBolt)
+		and spellValid("target", spells.LightningBolt, true, true) 
+		or (not cache.GetRange and spellValid("target", spells.LightningBolt, true, true)) then
 			if (not UsableSilence(spells.ChainLightning) or not ChainEnabled) then
 				if UsableSilence(spells.LightningBolt) then 
-					ni.spell.cast(spells.LightningBolt, "target")
+					spellCast(spells.LightningBolt, "target")
 					return true;
 				end
 			end
 			if ChainEnabled then	
 				if cache.ActiveEnemies < 1 then
 					if UsableSilence(spells.LightningBolt) then 
-						ni.spell.cast(spells.LightningBolt, "target")
+						spellCast(spells.LightningBolt, "target")
 						return true;
 					end
 				end	
 				if (cache.ActiveEnemies >= ChainCount or ChainAlways) then
 					if UsableSilence(spells.ChainLightning) then 
-						ni.spell.cast(spells.ChainLightning, "target")
+						spellCast(spells.ChainLightning, "target")
 						return true;
 					end
 				end
@@ -1030,10 +1052,10 @@ local abilities = {
 			return false;
 		end
 		if UsableSilence(spells.PurgeSpell) then
-			if ni.unit.bufftype("target", "Magic")
+			if unitBuffType("target", "Magic")
 			and (GetTime() - LastPurge >= timer)
-			and ni.spell.valid("target", spells.PurgeSpell, false, true) then
-				ni.spell.cast(spells.PurgeSpell, "target")
+			and spellValid("target", spells.PurgeSpell, false, true) then
+				spellCast(spells.PurgeSpell, "target")
 				LastPurge = GetTime();
 				return true;
 			end
@@ -1045,11 +1067,11 @@ local abilities = {
 		local _, cureAlly = GetSetting("toxinsmemb");
 		local val = GetSetting("DispelDelay");
 		if (cure and not cureAlly) then
-			if UsableSilence(spells.CureToxins) then
+			if UsableSilence(spells.CleanseSpirit) then
 				if ni.player.debufftype("Curse")
+				and ni.healing.candispel("player")
 				and (GetTime() - LastCure >= val) then
-					print("Ворк на мне")
-					ni.spell.cast(spells.CureToxins, "player")
+					spellCast(spells.CleanseSpirit, "player")
 					LastCure = GetTime();
 					return true;
 				end
@@ -1063,14 +1085,14 @@ local abilities = {
 			return false;
 		end
 		local val = GetSetting("DispelDelay");	
-		if UsableSilence(spells.CureToxins) then
+		if UsableSilence(spells.CleanseSpirit) then
 			for i = 1, #ni.members.sort() do
 			local ally = ni.members[i];
 				if ally:debufftype("Curse")
+				and ally:dispel()
 				and (GetTime() - LastCure >= val)
-				and ally:valid(spells.CureToxins, false, true) then
-					print("Ворк на союзниках")
-					ni.spell.cast(spells.CureToxins, ally.unit)
+				and ally:valid(spells.CleanseSpirit, false, true) then
+					spellCast(spells.CleanseSpirit, ally.unit)
 					LastCure = GetTime()
 					return true;
 				end
@@ -1086,10 +1108,10 @@ local abilities = {
 		end
 		if (not cache.Dungeon or always) then
 			if not cache.NoMaelstrom 
-			and ni.player.hp() <= hpVal
-			and ni.spell.isinstant(spells.GreaterHealingWave) then
+			and playerHP() <= hpVal
+			and spellInstant(spells.GreaterHealingWave) then
 				if UsableSilence(spells.GreaterHealingWave) then
-					ni.spell.cast(spells.GreaterHealingWave, "player")
+					spellCast(spells.GreaterHealingWave, "player")
 					return true;
 				end
 			end
@@ -1105,9 +1127,9 @@ local abilities = {
 		or not cache.PlayerCombat then
 			return false;
 		end
-		if ni.player.hp() <= valHP
+		if playerHP() <= valHP
 		and UsableStun(spells.StoneclawTotem) then 
-			ni.spell.cast(spells.StoneclawTotem)
+			spellCast(spells.StoneclawTotem)
 			return true;
 		end
 	end,
@@ -1125,16 +1147,16 @@ local abilities = {
 			for i = 1, #enemies do
 			local tar = enemies[i].guid; 
 				if ni.unit.creaturetype(tar) == 4
-				and (ni.unit.isboss(tar)
-				or ni.unit.debuff(tar, spells.BindElemental)
-				or ni.drtracker.get(tar, "Disorients") == 0) then
+				and (unitBoss(tar)
+				or unitDebuff(tar, spells.BindElemental)
+				or drTrack(tar, "Disorients") == 0) then
 					NotUseBind = true;
 					break;
 				end
 			if not NotUseBind then
-				if ni.drtracker.get(tar, "Disorients") >= 0.5
-				and ni.spell.valid(tar, spells.BindElemental, false, true) then
-					ni.spell.cast(spells.BindElemental, tar)
+				if drTrack(tar, "Disorients") >= 0.5
+				and spellValid(tar, spells.BindElemental, false, true) then
+					spellCast(spells.BindElemental, tar)
 					return true;
 				end
 			end
@@ -1147,15 +1169,15 @@ local abilities = {
 		or cache.IsMoving then
 			return false;
 		end
-		if ni.spell.isinstant(spells.Hex)
+		if spellInstant(spells.Hex)
 		and UsableSilence(spells.Hex) then
 			for i = 1, #ni.members do
 			local ally = ni.members[i];
 				if ally:unfriendly()
 				and not ally:buffs("768||5487", "EXACT")then
-					if ni.drtracker.get(ally.unit, "Disorients") >= 0.5				
+					if drTrack(ally.unit, "Disorients") >= 0.5				
 					and ally:valid(spells.Hex, false, true) then
-						ni.spell.cast(spells.Hex, ally.unit)
+						spellCast(spells.Hex, ally.unit)
 						return true;
 					end
 				end
@@ -1171,7 +1193,7 @@ local function queue()
 		dist = 9;
 	end
 	local count, enabled = GetSetting("firenovaAoE");
-	local EnemiesCount = ni.unit.enemiesinrange("target", dist);
+	local EnemiesCount = unitEnemiesRange("target", dist);
 	if (cache.PlayerCombat and UnitIsEnemy("player", "target"))
 	and ni.vars.combat.aoe or (enabled and #EnemiesCount >= count) then
 		return AoEQueu;

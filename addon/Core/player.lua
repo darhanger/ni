@@ -31,7 +31,7 @@ player.getskillinfo = function(prof)
         for i = 1, 6 do
             local skillName, _, skillRank = GetProfessionInfo(i)
             if skillName == prof then
-                return skillRank, print(skillName)
+                return skillRank;
             end
         end
     else
