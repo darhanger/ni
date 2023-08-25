@@ -443,14 +443,14 @@ if wotlk then
 			end
 		end,
 
-		["InervateHealer"] = function()
-			for i = 1, #ni.members do
-				if ni.members[i].name == "Tapto" --values["Healer"]
-				then
-					ni.spell.cast(spells.Inervate.id, ni.members[i].unit)
-				end
-			end
-		end,
+		-- ["InervateHealer"] = function()
+		-- 	for i = 1, #ni.members do
+		-- 		if ni.members[i].name == "Tapto" --values["Healer"]
+		-- 		then
+		-- 			ni.spell.cast(spells.Inervate.id, ni.members[i].unit)
+		-- 		end
+		-- 	end
+		-- end,
 
 		["Interrupter"] = function()
 			if ni.spell.available(spells.Maim.id)
