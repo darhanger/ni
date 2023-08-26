@@ -77,7 +77,7 @@ player.hasglyph = function(glyphid)
 		else
 			enabled, _, glyph_id = GetGlyphSocketInfo(slot)
 		end
-		if enabled and glyph_id == id then
+		if enabled and glyph_id == glyphid then
 			return true;
 		end
 	end

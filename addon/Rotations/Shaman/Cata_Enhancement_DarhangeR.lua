@@ -948,8 +948,8 @@ local abilities = {
 				break;
 			end
 		end
-		if (UseNova 
-		or (cache.FlameShock and cache.FlameShockT > 2))
+		if ni.spell.cd(spells.LavaLash) >= 2
+		and (UseNova or (cache.FlameShock and cache.FlameShockT > 2))
 		and UsableSilence(spells.FireNova) then
 			spellCast(spells.FireNova)
 			return true;
