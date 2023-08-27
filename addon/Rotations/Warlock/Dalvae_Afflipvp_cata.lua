@@ -570,14 +570,17 @@ if cata then
 				then
 					for i = 1, #Cache.enemies do
 						local target = Cache.enemies[i].guid
-						if ni.unit.iscasting(target)
+						if (ni.unit.ischanneling(target)
+									or ni.unit.castingpercent(target) >= 85)
+								and ni.unit.isplayer(target)
 								and ni.player.los(target)
 						then
 							-- print("pass")
 							local castingSpell = select(3, UnitCastingInfo(target))
 							for j = 1, #interruptcc do
 								if castingSpell == GetSpellInfo(interruptcc[j])
-										and ni.unit.castingpercent(target) >= 85
+										and ni.unit.ischanneling(target)
+										or ni.unit.castingpercent(target) >= 85
 								then
 									ni.spell.cast(spells.SpellLock.id, target)
 								end
@@ -595,8 +598,9 @@ if cata then
 				then
 					for i = 1, #Cache.enemies do
 						local target = Cache.enemies[i].guid
-						if ni.unit.iscasting(target)
-								and ni.player.los(target)
+						if (ni.unit.ischanneling(target)
+									or ni.unit.castingpercent(target) >= 85)
+								and ni.unit.isplayer(target)
 						then
 							local castingSpell = select(3, UnitCastingInfo(target))
 							for j = 1, #spellsheal do
@@ -620,8 +624,9 @@ if cata then
 				then
 					for i = 1, #Cache.enemies do
 						local target = Cache.enemies[i].guid
-						if ni.unit.iscasting(target)
-								and ni.player.los(target)
+						if (ni.unit.ischanneling(target)
+									or ni.unit.castingpercent(target) >= 85)
+								and ni.unit.isplayer(target)
 						then
 							-- print("pass")
 							local castingSpell = select(3, UnitCastingInfo(target))
@@ -643,7 +648,8 @@ if cata then
 					if ni.unit.exists("focus")
 							and ni.unit.iscasting("focus")
 							and ni.player.los("focus")
-							and ni.unit.castingpercent("focus") >= 85
+							and (ni.unit.ischanneling("focus")
+								or ni.unit.castingpercent("focus") >= 85)
 					then
 						ni.spell.cast(spells.SpellLock.id, "focus")
 					end
@@ -662,6 +668,7 @@ if cata then
 			if enables["CorruptAll"] then
 				local hasHunterInParty = false
 
+
 				for i = 1, GetNumGroupMembers() do
 					local unit = "party" .. i
 					local _, class = UnitClass(unit)
@@ -674,6 +681,7 @@ if cata then
 				for i = 1, #Cache.enemies do
 					local target = Cache.enemies[i].guid
 					local hasBreakCC = false
+					local class = UnitClass(target)
 					for j = 1, #breakcc do
 						if ni.unit.debuff(target, breakcc[j])
 						then
@@ -687,16 +695,21 @@ if cata then
 							and not ni.unit.istotem(target)
 							and not ni.unit.debuff(target, spells.Corruption.id, p)
 							and NotInmune(target)
-					--Aca hacer una condicion para 	and not ni.unit.buff(target, BUFFINMUNE)
 					then
-						if hasHunterInParty then
-							if ni.unit.exists("focus")
-									and UnitGUID("focus") ~= target
-							then --
+						if class == "MAGE"
+								and not ni.unit.isplayer(target)
+						then
+							break
+						else
+							if hasHunterInParty then
+								if ni.unit.exists("focus")
+										and UnitGUID("focus") ~= target
+								then --
+									ni.spell.delaycast(spells.Corruption.id, target, 1.5)
+								end
+							else
 								ni.spell.delaycast(spells.Corruption.id, target, 1.5)
 							end
-						else
-							ni.spell.delaycast(spells.Corruption.id, target, 1.5)
 						end
 					end
 				end
