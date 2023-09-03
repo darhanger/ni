@@ -171,7 +171,7 @@ if cata then
 	local abilities = {
 		["Cache"] = function()
 			Cache.targets = ni.unit.enemiesinrange(p, 30)
-			Cache.moving = ni.players.ismoving()
+			Cache.moving = ni.player.ismoving()
 			Cache.members = ni.members.sort()
 		end,
 
