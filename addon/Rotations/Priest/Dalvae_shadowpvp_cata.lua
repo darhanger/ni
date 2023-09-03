@@ -43,11 +43,13 @@ if cata then
 		-- "Renew",
 		-- "Penancelowpriority",
 		-- "Heal",
-		"DOTS",
-		"VampiricTouch", --CD Toggllwer
 		"AttonementMindBlast",
-		"MovingDispel",
+		"DOTS",
 		"MindFlay",
+		-- "ManaRegen",
+		"VampiricTouch", --CD Toggllwer
+		"MovingDispel",
+
 	}
 
 	local spells = {
@@ -103,6 +105,25 @@ if cata then
 			ni.player.lookat(tar)
 			ni.player.stopmoving()
 			ni.spell.cast(spell, tar)
+			return true
+		end
+		return false
+	end
+
+	local function NotInmune(tar)
+		if not ni.unit.buff(tar, 48707)       -- Anti
+				and not ni.unit.buff(tar, 19263)  --Deterrence
+				and not ni.unit.buff(tar, 45438)  -- Iceblck
+				and not ni.unit.buff(tar, 642)    -- divine Shield
+				and not ni.unit.buff(tar, 31221) then -- Cloack of Shadows
+			return true
+		end
+		return false
+	end
+	local lastSpell, lastTarget = "", ""
+
+	local function DoubleCast(spell, tar)
+		if lastSpell == spell and lastTarget == UnitGUID(tar) then
 			return true
 		end
 		return false
@@ -319,8 +340,7 @@ if cata then
 			end
 		end,
 		["AttonementMindBlast"] = function()
-			if ni.vars.combat.cd
-					and not ni.player.ismoving()
+			if not ni.player.ismoving()
 					and ni.player.los(t)
 					and LosCast(spells.MindBlast.name, t)
 			then
@@ -657,12 +677,10 @@ if cata then
 			end
 		end,
 		["MindFlay"] = function()
-			if ni.vars.combat.cd
-					and not ni.player.ismoving()
+			if not ni.player.ismoving()
 					and ni.player.los(t)
-					and LosCastStand(spells.MindFlay.name, t)
 			then
-				return true
+				ni.spell.cast(spells.MindBlast.id, t)
 			end
 		end,
 	}
@@ -686,6 +704,7 @@ end
 -- Evitar doble cast
 -- Auto cache	
 --Aoe o target
+---
 
 --- 40 yards Radians Los escudos
 --Renew
