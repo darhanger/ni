@@ -295,13 +295,13 @@ if wotlk then
 		"Barkskin",
 		"Survival",
 		"Tigers Fury",
-		"Interrupter",
+		-- "Interrupter",
 		"FeralCharge",
 		"Berserkfear",
 		"Antireflect",
 		"Cycloneinterupt",
 		"CycloneFocus",
-		"Swipesnakes",
+		"Swipe",
 		"Faerie fire",
 		"Antislow",
 		"DispelHEX",
@@ -466,14 +466,16 @@ if wotlk then
 			end
 		end,
 		["MangleDebuff"] = function()
+			if enables["Automated"] then
 			if cat
 			and ni.spell.available(spells.Manglecat.id)
-					and (not ni.unit.debuff(t, spells.Manglecat.id)
-					or not ni.unit.debuff(t, 48563)
-					or not ni.unit.debuff(t, 46856)
-					or not ni.unit.debuff(t, 55218)) then
+					and not ni.unit.debuff(t, spells.Manglecat.id)
+					and not ni.unit.debuff(t, 48563)
+					and not ni.unit.debuff(t, 46856)
+					and not ni.unit.debuff(t, 55218) then
 				ni.spell.cast(spells.Manglecat.id)
 			end
+		end
 		end,
 
 		-- ["InervateHealer"] = function()
@@ -556,10 +558,11 @@ if wotlk then
 				end
 			end
 		end,
-		["Swipesnakes"] = function()
+		["Swipe"] = function()
 			if ni.vars.combat.aoe then
 				local enemies = ni.unit.enemiesinrange("player", 7)
 				if ni.player.buff(spells.CatForm.id)
+				and ni.unit.buffremaining("player", "52610", "player") <= 2 
 						and #enemies > 3 then
 					ni.spell.cast(62078)
 				end
@@ -577,7 +580,34 @@ if wotlk then
 				end
 			end
 		end,
+		["Ferocious Bite"] = function()
+			Savagertimer = ni.unit.buffremaining("player", "52610", "player")
+			Riptimer = ni.unit.debuffremaining("target", "49800", "player")
+		 if ni.spell.available("48577")
+		 and Savagertimer >= 8
+		 and Riptimer >= 10
+		 and GetComboPoints("player", "target") == 5 then
+			 ni.spell.cast("48577")
+			 return true;
+				 end
+		 end,
 
+		 ["WILD"] = function()
+			local _, enabled = GetSetting("getSetting_CCbuf")
+			if enabled then
+				if ni.spell.available("48470")
+				and ni.player.power(3) < 20
+				and not ni.unit.buff("player", "53909", "player")
+				and not ni.unit.buff("player", "54758", "player")
+				and not ni.unit.buff("player", "16870", "player")	
+				and GetComboPoints("player", "target") < 5
+				and ni.player.power(0) >= 40 then
+					ni.spell.cast("48470")
+					ni.player.runtext("/stopattack")
+				return true;
+				end
+			end
+		end,
 		["Ferocious Bite1"] = function()
 			if ni.spell.available(spells.FerociusBite.id)
 					and ni.unit.hp("target") < 30
@@ -660,7 +690,7 @@ if wotlk then
 			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
 						and not ni.player.buff(spells.SavageRoar.id)
-						and GetComboPoints("player", "target") > 0
+						and GetComboPoints("player", "target") > 1
 				then
 					ni.spell.cast(spells.SavageRoar.id, "target")
 				end
@@ -708,13 +738,13 @@ if wotlk then
 				and UnitCanAttack("player", "target")
 				and ni.unit.inmelee("player", "target")
 				and ni.spell.available(spells.Demoralazing.id)
-					and (not ni.unit.debuff(t, spells.Demoralazing.id)
-					or not ni.unit.debuff(t, 62102)
-					or not ni.unit.debuff(t, 16862)
-					or not ni.unit.debuff(t, 702)
-					or not ni.unit.debuff(t, 18179)
-					or not ni.unit.debuff(t, 67)
-					or not ni.unit.debuff(t, 12879))
+					and not ni.unit.debuff(t, spells.Demoralazing.id)
+					and not ni.unit.debuff(t, 62102)
+					and not ni.unit.debuff(t, 16862)
+					and not ni.unit.debuff(t, 702)
+					and not ni.unit.debuff(t, 18179)
+					and not ni.unit.debuff(t, 67)
+					and not ni.unit.debuff(t, 12879)
 			then
 				ni.spell.cast(spells.Demoralazing.id)
 			end
