@@ -311,6 +311,7 @@ if wotlk then
 		"Shreadcc",
 		"Shred100",
 		"Rake",
+		"MangleDebuff",
 		"Shredauto",
 		"SavageRoar",
 		"Rip",
@@ -462,6 +463,16 @@ if wotlk then
 					and GetComboPoints("player", "target") < 5
 					and not ni.unit.debuff("target", spells.Rake.id, "player") then
 				ni.spell.cast(spells.Rake.id)
+			end
+		end,
+		["MangleDebuff"] = function()
+			if cat
+			and ni.spell.available(spells.Manglecat.id)
+					and (not ni.unit.debuff(t, spells.Manglecat.id)
+					or not ni.unit.debuff(t, 48563)
+					or not ni.unit.debuff(t, 46856)
+					or not ni.unit.debuff(t, 55218)) then
+				ni.spell.cast(spells.Manglecat.id)
 			end
 		end,
 
@@ -694,9 +705,16 @@ if wotlk then
 		end,
 		["Demoralazing"] = function()
 			if ni.player.buff(spells.BearForm.id)
-					and not ni.unit.debuff("target", spells.Demoralazing.id, "player")
-					and ni.unit.inmelee("player", "target")
-					and ni.spell.available(spells.Demoralazing.id)
+				and UnitCanAttack("player", "target")
+				and ni.unit.inmelee("player", "target")
+				and ni.spell.available(spells.Demoralazing.id)
+					and (not ni.unit.debuff(t, spells.Demoralazing.id)
+					or not ni.unit.debuff(t, 62102)
+					or not ni.unit.debuff(t, 16862)
+					or not ni.unit.debuff(t, 702)
+					or not ni.unit.debuff(t, 18179)
+					or not ni.unit.debuff(t, 67)
+					or not ni.unit.debuff(t, 12879))
 			then
 				ni.spell.cast(spells.Demoralazing.id)
 			end
