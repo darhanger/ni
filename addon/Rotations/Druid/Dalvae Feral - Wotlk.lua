@@ -73,6 +73,7 @@ if wotlk then
 	local enables = {
 		["CatForm"] = true,
 		["Invi"] = true,
+		["CCBuff"] = true,
 		["Automated"] = true,
 		["BerserkFear"] = true,
 		["ChargeBear"] = true,
@@ -133,7 +134,13 @@ if wotlk then
 			enabled = enables["Invi"],
 			key = "Invi"
 		},
-
+		{
+			type = "entry",
+			text = "\124T" .. select(3, GetSpellInfo(spells.GOTW.id)) .. ":26:26\124t Hunt for clearcasting",
+			tooltip = "It will Buff for cc",
+			enabled = enables["CCBuff"],
+			key = "CCBuff"
+		},
 		{
 			type = "separator",
 		},
@@ -231,7 +238,6 @@ if wotlk then
 		else
 			ni.player.lookat("target")
 			if ni.unit.isbehind("player", "target")
-					and IsUsableSpell(spells.Shred.name)
 					and GetComboPoints("player", "target") < 5
 			then
 				ni.spell.cast(spells.Shred.id)
@@ -281,15 +287,29 @@ if wotlk then
 	local t, p = "target", "player"
 	local cat = ni.player.buff(spells.CatForm.id)
 	local bear = ni.player.buff(spells.BearForm.id)
+	local savagertimer = ni.player.buffremaining(spells.SavageRoar.id)
+	local riptimer = ni.unit.debuffremaining("target", "49800", "player")
+
+	local Cache = {
+		targets = nil,
+		curchannel = nil,
+		iscasting = nil,
+		moving = ni.player.ismoving(),
+		enemies = ni.unit.enemiesinrange(p, 25),
+		riptimer = ni.unit.debuffremaining("target", spells.Rip.id, "player"),
+		savagertimer = ni.player.buffremaining(spells.SavageRoar.id),
+		cat = ni.player.buff(spells.CatForm.id),
+		bear = ni.player.buff(spells.BearForm.id)
+	}
 	local queue = {
 		--buffs
-		"cache",
+		"Cache",
 		"GOTW",
 		"Thorns",
 		"Pounce",
 		"INVI",
-		"Pause Rotation",
 		"Catform",
+		"Pause Rotation",
 		"Start Attack",
 		"Auto Target",
 		"Barkskin",
@@ -306,14 +326,17 @@ if wotlk then
 		"Antislow",
 		"DispelHEX",
 		"AbolishPoison",
+		"Ferocious Bite",
 		"Ferocious Bite1",
 		"Ferocious Bite2",
 		"Shreadcc",
+		"WILD",
 		"Shred100",
-		"Rake",
-		"MangleDebuff",
-		"Shredauto",
 		"SavageRoar",
+		"Ingrediente Secreto",
+		"MangleDebuff",
+		"Rake",
+		"Shredauto",
 		"Rip",
 		--bear
 		"FrenziedRegeneration",
@@ -332,16 +355,16 @@ if wotlk then
 
 
 	local abilities = {
-		-- ["cache"] function ()
-		--     local enemies = ni.unit.enemiesinrange("player", 25)
-		--     local target = enemies[i].guid
-		--     local name = enemies[i].name
-		--     local distance = enemies[i].distance
-		-- end
-		-- local enemies = ni.unit.enemiesinrange("player", 25)
-		-- local target = enemies[i].guid
-		-- local name = enemies[i].name
-		-- local distance = enemies[i].distance
+		["Cache"] = function()
+			Cache.moving = ni.player.ismoving()
+			Cache.curchannel = UnitChannelInfo(p)
+			Cache.enemies = ni.unit.enemiesinrange(p, 25)
+			Cache.iscasting = UnitCastingInfo(p)
+			Cache.riptimer = ni.unit.debuffremaining("target", spells.Rip.id, "player")
+			Cache.savagertimer = ni.player.buffremaining(spells.SavageRoar.id)
+			Cache.cat = ni.player.buff(spells.CatForm.id)
+			Cache.bear = ni.player.buff(spells.BearForm.id)
+		end,
 
 		["Pounce"] = function()
 			if ni.spell.available(spells.Pounce.id)
@@ -358,26 +381,33 @@ if wotlk then
 				return true;
 			end
 		end,
-
 		["Catform"] = function()
-			if enables["CatForm"]
-					and ni.spell.available(spells.CatForm.id)
-			then
-				if not IsMounted()
-						and not cat
-						and not ni.player.buff(spells.BearForm.id) then
-					ni.spell.cast(spells.CatForm.id)
+			if enables["CatForm"] and not IsMounted() then
+				local hasProtectorTalent = select(5, GetTalentInfo(2, 22))
+				if hasProtectorTalent > 2
+				then
+					if not Cache.bear
+							and not Cache.cat
+					then
+						ni.spell.cast(spells.BearForm.id)
+					end
+				else
+					if not Cache.cat
+					then
+						ni.spell.cast(spells.CatForm.id)
+					end
 				end
 			end
 		end,
+
 
 		["INVI"] = function()
 			if enables["Invi"] then
 				if ni.spell.available(spells.Prowl.id)
 						and not UnitAffectingCombat("player")
 						and cat
-						and not ni.unit.buff("player", spells.Prowl.id, "player") 
-						then
+						and not ni.unit.buff("player", spells.Prowl.id, "player")
+				then
 					ni.spell.cast(spells.Prowl.id)
 				end
 			end
@@ -424,7 +454,7 @@ if wotlk then
 		end,
 
 		["Shreadcc"] = function()
-			if IsUsableSpell(spells.Shred.id)
+			if cat
 					and ni.unit.buffremaining("player", spells.ClearCast.id, "player") >= 1
 					and ni.unit.isbehind("player", "target")
 			then
@@ -433,17 +463,19 @@ if wotlk then
 		end,
 
 		["Shred100"] = function()
-			if ni.spell.available(spells.Shred.id)
+			if Cache.cat
+					and ni.spell.available(spells.Shred.id)
 					and ni.player.powerraw("energy") >= 99
-					and ni.unit.isbehind("player", "target") 
-					then
-						ni.spell.cast(spells.Shred.id)
+					and riptimer >= 3
+					and ni.unit.isbehind("player", "target")
+			then
+				ni.spell.cast(spells.Shred.id)
 			end
 		end,
 
 		["Tigers Fury"] = function()
-			if ni.player.buff(spells.CatForm.id)
-					and ni.spell.available(spells.TigersFury.id)
+			if cat
+					and ni.spell.cd(spells.TigersFury.id) == 0
 					and ni.player.power() < 35 then
 				ni.spell.cast(spells.TigersFury.id)
 			end
@@ -467,15 +499,15 @@ if wotlk then
 		end,
 		["MangleDebuff"] = function()
 			if enables["Automated"] then
-			if cat
-			and ni.spell.available(spells.Manglecat.id)
-					and not ni.unit.debuff(t, spells.Manglecat.id)
-					and not ni.unit.debuff(t, 48563)
-					and not ni.unit.debuff(t, 46856)
-					and not ni.unit.debuff(t, 55218) then
-				ni.spell.cast(spells.Manglecat.id)
+				if cat
+						and ni.spell.available(spells.Manglecat.id)
+						and not ni.unit.debuff(t, spells.Manglecat.id)
+						and not ni.unit.debuff(t, 48563)
+						and not ni.unit.debuff(t, 46856)
+						and not ni.unit.debuff(t, 55218) then
+					ni.spell.cast(spells.Manglecat.id)
+				end
 			end
-		end
 		end,
 
 		-- ["InervateHealer"] = function()
@@ -488,15 +520,50 @@ if wotlk then
 		-- end,
 
 		["Interrupter"] = function()
-			if ni.spell.available(spells.Maim.id)
-					and GetComboPoints("player", "target") >= 1
-					and ni.unit.iscasting("target")
-					and ni.drtracker.get("target", "Controlled stuns") > 0
-					and (ni.unit.castingpercent("target") >= 80
-						or ni.unit.ischanneling("target")) then
-				ni.spell.cast(spells.Maim.id)
+			if enables["Interrupts"]
+			then
+				if Cache.bear
+				then
+					for i = 1, #Cache.enemies do
+						local target = Cache.enemies[i].guid
+						local name = Cache.enemies[i].name
+						local distance = Cache.enemies[i].distance
+						if (ni.unit.iscasting(target)
+									or ni.unit.ischanneling(target))
+						then
+							if distance >= 8
+									and ni.spell.cd(spells.Charge.id) == 0
+									and (ni.unit.castingpercent(target) >= 70
+										or ni.unit.ischanneling(target))
+									and ni.spell.valid(target, spells.Charge.id, false, true)
+							then
+								ni.player.lookat(target)
+								ni.spell.cast(spells.Charge.id, target)
+								print("charge" .. name)
+							else
+								if distance <= 4
+										and ni.spell.cd(spells.Bash.id) == 0
+										and (ni.unit.castingpercent(target) >= 50
+											or ni.unit.ischanneling(target))
+								then
+									ni.player.lookat(target)
+									ni.spell.cast(spells.Bash.id, target)
+								else
+									if ni.spell.cd(20549) == 0
+											and distance <= 8
+											and (ni.unit.castingpercent(target) >= 50
+												or ni.unit.ischanneling(target))
+									then
+										ni.spell.cast(20549)
+									end
+								end
+							end
+						end
+					end
+				end
 			end
 		end,
+
 		["Cycloneinterupt"] = function()
 			if enables["CycloneInterupt"] then
 				if ni.player.buff(spells.InstantCast.id) then
@@ -528,7 +595,8 @@ if wotlk then
 						and ni.drtracker.get("focus", "Cyclone") > 0
 						and ni.spell.valid("focus", spells.Cyclone.id, false, true)
 				then
-					ni.spell.cast(spells.Cyclone.id, "socus")
+					print("cyclone on focis")
+					ni.spell.cast(spells.Cyclone.id, "focus")
 				end
 			end
 		end,
@@ -560,10 +628,10 @@ if wotlk then
 		end,
 		["Swipe"] = function()
 			if ni.vars.combat.aoe then
-				local enemies = ni.unit.enemiesinrange("player", 7)
+				local enemies = ni.unit.enemiesinrange("player", 8)
 				if ni.player.buff(spells.CatForm.id)
-				and ni.unit.buffremaining("player", "52610", "player") <= 2 
-						and #enemies > 3 then
+						and ni.player.buff(spells.SavageRoar.id)
+						and #enemies >= 3 then
 					ni.spell.cast(62078)
 				end
 			end
@@ -581,36 +649,19 @@ if wotlk then
 			end
 		end,
 		["Ferocious Bite"] = function()
-			Savagertimer = ni.unit.buffremaining("player", "52610", "player")
-			Riptimer = ni.unit.debuffremaining("target", "49800", "player")
-		 if ni.spell.available("48577")
-		 and Savagertimer >= 8
-		 and Riptimer >= 10
-		 and GetComboPoints("player", "target") == 5 then
-			 ni.spell.cast("48577")
-			 return true;
-				 end
-		 end,
-
-		 ["WILD"] = function()
-			local _, enabled = GetSetting("getSetting_CCbuf")
-			if enabled then
-				if ni.spell.available("48470")
-				and ni.player.power(3) < 20
-				and not ni.unit.buff("player", "53909", "player")
-				and not ni.unit.buff("player", "54758", "player")
-				and not ni.unit.buff("player", "16870", "player")	
-				and GetComboPoints("player", "target") < 5
-				and ni.player.power(0) >= 40 then
-					ni.spell.cast("48470")
-					ni.player.runtext("/stopattack")
-				return true;
-				end
+			if ni.spell.available(spells.FerociusBite.id)
+					and GetComboPoints("player", "target") == 5
+					and Cache.savagertimer >= 8
+					and Cache.riptimer >= 10 then
+				print("peo")
+				ni.spell.cast(spells.FerociusBite.id)
 			end
 		end,
+
 		["Ferocious Bite1"] = function()
 			if ni.spell.available(spells.FerociusBite.id)
 					and ni.unit.hp("target") < 30
+					and not ni.unit.isboss(t)
 					and GetComboPoints("player", "target") >= 4 then
 				ni.spell.cast(spells.FerociusBite.id)
 				return true;
@@ -620,6 +671,7 @@ if wotlk then
 		["Ferocious Bite2"] = function()
 			if ni.spell.available(spells.FerociusBite.id)
 					and ni.unit.hp("target") < 20
+					and not ni.unit.isboss(t)
 					and GetComboPoints("player", "target") >= 3 then
 				ni.spell.cast(spells.FerociusBite.id)
 				return true;
@@ -674,7 +726,7 @@ if wotlk then
 				if ni.player.buff(spells.CatForm.id)
 						and GetComboPoints("player", "target") < 5 then
 					if ni.unit.isbehind("player", "target")
-							and IsUsableSpell(spells.Shred.id)
+					-- and IsUsableSpell(spells.Shred.id)
 					then
 						ni.spell.cast(spells.Shred.id, "target")
 					elseif ni.spell.available(spells.Manglecat.id)
@@ -696,6 +748,35 @@ if wotlk then
 				end
 			end
 		end,
+		["Ingrediente Secreto"] = function()
+			if cat then
+				if ni.spell.available(spells.SavageRoar.id)
+						and GetComboPoints("player", "target") >= 2
+						and ni.unit.buffremaining("player", spells.SavageRoar.id, "player") <= 6 -- this is savage
+						and ni.unit.debuffremaining("target", spells.Rip.id, "player") <= 8 -- this is rip
+						and ni.unit.debuffremaining("target", spells.Rip.id, "player") >= 4 then -- rip
+					ni.spell.cast(spells.SavageRoar.id, "target")
+					return true;
+				end
+			end
+		end,
+		["WILD"] = function()
+			if enables["CCBuff"] then
+				if ni.spell.available("48470")
+						and ni.player.power(3) < 20
+						and ni.spell.cd(spells.TigersFury.id) > 3
+						and not ni.unit.buff("player", "53909", "player")
+						and not ni.unit.buff("player", "54758", "player")
+						and not ni.unit.buff("player", "16870", "player")
+						and GetComboPoints("player", "target") < 5
+						and ni.player.power(0) >= 40 then
+					ni.spell.cast("48470")
+					ni.player.runtext("/stopattack")
+					return true;
+				end
+			end
+		end,
+
 		["Rip"] = function()
 			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
@@ -709,7 +790,7 @@ if wotlk then
 
 		["SwipeBear"] = function()
 			if ni.vars.combat.aoe then
-				local enemies = ni.unit.enemiesinrange("player", 7)
+				local enemies = ni.unit.enemiesinrange("player", 8)
 				if ni.player.buff(spells.BearForm.id)
 						and ni.player.power("rage") > 10
 						and #enemies > 3
@@ -734,10 +815,10 @@ if wotlk then
 			end
 		end,
 		["Demoralazing"] = function()
-			if ni.player.buff(spells.BearForm.id)
-				and UnitCanAttack("player", "target")
-				and ni.unit.inmelee("player", "target")
-				and ni.spell.available(spells.Demoralazing.id)
+			if Cache.bear
+					and UnitCanAttack("player", "target")
+					and ni.unit.inmelee("player", "target")
+					and ni.spell.available(spells.Demoralazing.id)
 					and not ni.unit.debuff(t, spells.Demoralazing.id)
 					and not ni.unit.debuff(t, 62102)
 					and not ni.unit.debuff(t, 16862)
@@ -750,7 +831,7 @@ if wotlk then
 			end
 		end,
 		["Maul"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.Maul.id)
 					and ni.player.power("rage") > 50
 					and not IsCurrentSpell(spells.Maul.id)
@@ -759,7 +840,7 @@ if wotlk then
 			end
 		end,
 		["Lacerate"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.Lacerate.id)
 					and ni.unit.debuffremaining("target", spells.Lacerate.id, "player") <= 3 then
 				ni.spell.cast(spells.Lacerate.id, "target")
@@ -767,14 +848,14 @@ if wotlk then
 		end,
 
 		["Laceratestack"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.Lacerate.id)
 					and ni.unit.debuffstacks("target", spells.Lacerate.id, "player") < 5 then
 				ni.spell.cast(spells.Lacerate.id, "target")
 			end
 		end,
 		["FaerieFirebear"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.FaerieFire.id)
 					and ni.unit.exists("target")
 					and UnitCanAttack("player", "target")
