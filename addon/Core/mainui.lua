@@ -1005,7 +1005,7 @@ function MiniMapLDB:OnClick(button)
         end
     end
     if button == "RightButton" then
-        ni.functions.open("https://github.com/darhanger/ni-v2/releases")
+        ni.functions.open("https://github.com/darhanger/ni/releases")
     end 	
     if button == "MiddleButton" then
         ni.functions.open("https://discord.gg/xBFKJc6QRr")
@@ -1015,7 +1015,7 @@ function MiniMapLDB:OnDragStop()
     ni.vars.ui.iconPos = self.db.minimapPos
 end;
 function MiniMapLDB:OnTooltipShow()
-    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.60")
+    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.61")
     self:AddLine(" ")
     self:AddLine(Localization.LeftClick)
 	self:AddLine(Localization.RightClick)
