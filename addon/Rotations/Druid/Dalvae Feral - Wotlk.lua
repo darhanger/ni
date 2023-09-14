@@ -77,6 +77,7 @@ if wotlk then
 		["Automated"] = true,
 		["BerserkFear"] = true,
 		["ChargeBear"] = true,
+		["Interrupts"] = true,
 		["CycloneInterupt"] = true,
 		["CycloneFocus"] = true,
 
@@ -167,6 +168,13 @@ if wotlk then
 			tooltip = "Will Auto use feral chare on any in range target that is casting",
 			enabled = enables["ChargeBear"],
 			key = "ChargeBear"
+		},
+		{
+			type = "entry",
+			text = "\124T" .. select(3, GetSpellInfo(20549)) .. ":26:26\124t interupt",
+			tooltip = "It will use all ways of interupts",
+			enabled = enables["Interrupts"],
+			key = "Interrupts"
 		},
 		{
 			type = "entry",
@@ -300,6 +308,7 @@ if wotlk then
 		savagertimer = ni.player.buffremaining(spells.SavageRoar.id),
 		cat = ni.player.buff(spells.CatForm.id),
 		bear = ni.player.buff(spells.BearForm.id)
+
 	}
 	local queue = {
 		--buffs
@@ -315,7 +324,7 @@ if wotlk then
 		"Barkskin",
 		"Survival",
 		"Tigers Fury",
-		-- "Interrupter",
+		"Interrupter",
 		"FeralCharge",
 		"Berserkfear",
 		"Antireflect",
@@ -364,6 +373,27 @@ if wotlk then
 			Cache.savagertimer = ni.player.buffremaining(spells.SavageRoar.id)
 			Cache.cat = ni.player.buff(spells.CatForm.id)
 			Cache.bear = ni.player.buff(spells.BearForm.id)
+
+			-- if ni.unit.debuff("target", "Сглаз")
+			-- 		or ni.unit.debuff("target", "Устрашающий крик")
+			-- 		or ni.unit.debuff("target", "Гнев деревьев")
+			-- 		or ni.unit.debuff("target", "Смерч")
+			-- 		or ni.unit.debuff("target", "Превращение")
+			-- 		or ni.unit.debuff("target", "Замораживающая ловушка")
+			-- 		or ni.unit.debuff("target", "Покаяние")
+			-- 		or ni.unit.debuff("target", "Ослепление")
+			-- 		or ni.unit.debuff("target", "Ошеломление")
+			-- 		or ni.unit.debuff("target", "Вой ужаса")
+			-- 		or ni.unit.debuff("target", "Изгнание")
+			-- 		or ni.unit.debuff("target", "Страх")
+			-- 		or ni.unit.debuff("target", "Спячка")
+			-- 		or ni.unit.debuff("target", "Отпугивание зверя")
+			-- 		or ni.unit.debuff("target", "Ментальный крик")
+			-- then
+			-- 	Cache.control = true
+			-- else
+			-- 	Cache.control = false
+			-- end
 		end,
 
 		["Pounce"] = function()
@@ -393,6 +423,7 @@ if wotlk then
 					end
 				else
 					if not Cache.cat
+							and ni.player.hp() > 85
 					then
 						ni.spell.cast(spells.CatForm.id)
 					end
@@ -522,14 +553,14 @@ if wotlk then
 		["Interrupter"] = function()
 			if enables["Interrupts"]
 			then
-				if Cache.bear
-				then
-					for i = 1, #Cache.enemies do
-						local target = Cache.enemies[i].guid
-						local name = Cache.enemies[i].name
-						local distance = Cache.enemies[i].distance
-						if (ni.unit.iscasting(target)
-									or ni.unit.ischanneling(target))
+				for i = 1, #Cache.enemies do
+					local target = Cache.enemies[i].guid
+					local name = Cache.enemies[i].name
+					local distance = Cache.enemies[i].distance
+					if (ni.unit.iscasting(target)
+								or ni.unit.ischanneling(target))
+					then
+						if Cache.bear
 						then
 							if distance >= 8
 									and ni.spell.cd(spells.Charge.id) == 0
@@ -554,6 +585,29 @@ if wotlk then
 											and (ni.unit.castingpercent(target) >= 50
 												or ni.unit.ischanneling(target))
 									then
+										ni.player.stopmoving()
+										ni.spell.cast(20549)
+									end
+								end
+							end
+						else
+							if Cache.cat
+							then
+								if GetComboPoints("player", target) > 1
+										and ni.spell.cd(spells.Maim.id) == 0
+										and ni.drtracker.get(target, "Controlled Stuns") > 0
+										and (ni.unit.castingpercent(target) >= 90
+											or ni.unit.ischanneling(target))
+										and distance <= 4
+								then
+									ni.spell.cast(spells.Maim.id, target)
+								else
+									if ni.spell.cd(20549) == 0
+											and distance <= 8
+											and (ni.unit.castingpercent(target) >= 50
+												or ni.unit.ischanneling(target))
+									then
+										ni.player.stopmoving()
 										ni.spell.cast(20549)
 									end
 								end
@@ -639,7 +693,8 @@ if wotlk then
 		["Berserkfear"] = function()
 			if enables["BerserkFear"] then
 				local fears = { 10890, 20511, 6215, 17928 }
-				if ni.spell.cd(spells.Berserk.id) == 0 then
+				if ni.spell.cd(spells.Berserk.id) == 0
+						and cat then
 					for d = 1, #fears do
 						if ni.player.debuff(fears[d]) then
 							ni.spell.cast(spells.Berserk.id)
