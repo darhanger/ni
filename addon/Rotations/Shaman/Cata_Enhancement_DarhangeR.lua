@@ -9,7 +9,7 @@ local UsePots = false;
 local enemies = {};
 local items = {
 	settingsfile = "EnchShammy_Free_Cata.json",
-	{ type = "title", text = "Enchantment Shaman by |c0000CED1DarhangeR|r" },
+	{ type = "title", text = ">   Enchantment Shaman by |c0000CED1DarhangeR|r   <" },
 	{ type = "separator" },
 	{ type = "title", text = "|cffffa500Cataclysm Version|r" },
 	{ type = "title", text = "|cff0082FFProfile version 0.0.4|r" },
@@ -278,10 +278,12 @@ CleanseSpirit = GetSpellInfo(51886),
 FireNova = GetSpellInfo(1535),
 TotemicRecall = GetSpellInfo(36936),
 StoneclawTotem = GetSpellInfo(5730),
+TremorTotem = GetSpellInfo(8143),
 ShamanisticRage = GetSpellInfo(30823),
 Hex = GetSpellInfo(51514),
 BindElemental = GetSpellInfo(76780),
 GreaterHealingWave = GetSpellInfo(77472),
+ChainHeal = GetSpellInfo(1064),
 	-- Procs --
 Maelstorm = GetSpellInfo(53817),
 };
@@ -363,6 +365,7 @@ local AoEQueu = {
 	"Get Totems ID",
 	"Universal Pause",
 	"AutoTarget",
+	"Tremor Totem",
 	"Enchant Weapon",
 	"Lightning Shield",
 	"Totemic Recall",
@@ -400,6 +403,7 @@ local SoloQueu = {
 	"Get Totems ID",
 	"Universal Pause",
 	"AutoTarget",
+	"Tremor Totem",
 	"Enchant Weapon",
 	"Lightning Shield",
 	"Totemic Recall",
@@ -1110,6 +1114,12 @@ local abilities = {
 			if not cache.NoMaelstrom 
 			and playerHP() <= hpVal
 			and spellInstant(spells.GreaterHealingWave) then
+				local count = #ni.members.inrangebelow("player", 20, 85);
+				if count >= 2
+				and UsableSilence(spells.ChainHeal) then
+					spellCast(spells.ChainHeal, "player")
+					return true;
+				end
 				if UsableSilence(spells.GreaterHealingWave) then
 					spellCast(spells.GreaterHealingWave, "player")
 					return true;
@@ -1182,6 +1192,16 @@ local abilities = {
 					end
 				end
 			end
+		end
+	end,
+-----------------------------------
+	["Tremor Totem"] = function()
+		if not UsableSilence(spells.TremorTotem) then
+			return false;
+		end
+		if ni.player.isfleeing() then
+			spellCast(spells.TremorTotem)
+			return true;
 		end
 	end,
 };

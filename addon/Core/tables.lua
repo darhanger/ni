@@ -1447,5 +1447,8 @@ local tables = {
 		[71407] = "Amber",
 		[36980] = "Ice Tomb"
 	},
+	blacklisttauntunits = {
+	
+	},	
 }
 return tables;

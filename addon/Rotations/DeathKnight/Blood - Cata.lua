@@ -150,14 +150,14 @@ local items = {
 		enabled = enables["BoneShield"],
 		key = "BoneShield"
 	},
-	{
-		type = "entry",
-		text = "\124T" .. spells.DancingRuneWeapon.icon .. ":20:20\124t " .. spells.DancingRuneWeapon.name,
-		tooltip = "Use Dancing Rune Weapon when below this Hp pct",
-		value = values["DancingRuneWeapon"],
-		enabled = enables["DancingRuneWeapon"],
-		key = "DancingRuneWeapon"
-	},
+	-- {
+		-- type = "entry",
+		-- text = "\124T" .. spells.DancingRuneWeapon.icon .. ":20:20\124t " .. spells.DancingRuneWeapon.name,
+		-- tooltip = "Use Dancing Rune Weapon when below this Hp pct",
+		-- value = values["DancingRuneWeapon"],
+		-- enabled = enables["DancingRuneWeapon"],
+		-- key = "DancingRuneWeapon"
+	-- },
 	{
 		type = "entry",
 		text = "\124T" .. spells.IceboundFortitude.icon .. ":20:20\124t " .. spells.IceboundFortitude.name,
