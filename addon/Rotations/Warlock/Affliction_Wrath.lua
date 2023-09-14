@@ -2,7 +2,7 @@ local build = select(4, GetBuildInfo());
 local wotlk = build == 30300 or false;
 if wotlk then
 	local queue = {
-		"Interact",
+		-- "Interact",
 		"AutoLoot",
 		"SummonImp",
 		"SummonVoidwalker",
