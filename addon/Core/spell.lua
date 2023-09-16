@@ -98,7 +98,7 @@ spell.lastcast = function(spellid) -- Is current spellid == prev spellid  <- las
 end
 
 
-spell.is_casted = function(spellid, sec) -- is spell N casted in prev. N seconds <- not lastcast.
+spell.is_casted = function(spellid, sec) -- <- not lastcast.
 	if tonumber(spellid) == nil then
 		spellid = spell.id(spellid)
 		if spellid == 0 then
