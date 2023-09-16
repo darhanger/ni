@@ -71,7 +71,34 @@ spell.isqueued = function()
 	end
 	return false;
 end;
-spell.lastcast = function(spellid, sec)
+
+
+local trigger_spell_succeed = CreateFrame("Frame")
+trigger_spell_succeed:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED");
+trigger_spell_succeed:SetScript("OnEvent", function(self, event, ...)
+    return self[event](self, ...)
+end)
+
+local spell_lastcast
+
+function trigger_spell_succeed:UNIT_SPELLCAST_SUCCEEDED(...)
+    local unit, spell, rank, num = ...
+    local spellId = ni.spell.id(spell)
+    if unit == "player" then
+		spell_lastcast = spellId
+    end
+end
+
+spell.lastcast = function(spellid) -- Is current spellid == prev spellid  <- lastcsat, no doubles after that check.
+	if spell_lastcast == spellid then
+			return true
+		else
+			return false
+	end
+end
+
+
+spell.is_casted = function(spellid, sec) -- is spell N casted in prev. N seconds <- not lastcast.
 	if tonumber(spellid) == nil then
 		spellid = spell.id(spellid)
 		if spellid == 0 then
@@ -98,6 +125,7 @@ spell.lastcast = function(spellid, sec)
 	end
 	return false;
 end;
+
 spell.available = function(spellid, stutter)
 	if not stutter then
 		if spell.gcd() or spell.isqueued() then
