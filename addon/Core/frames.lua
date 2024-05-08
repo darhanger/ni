@@ -173,7 +173,7 @@ function frames.floatingtext:message(message)
 		self.text:SetText(pad .. message)
 		UIFrameFadeOut(self, 2.5, 1, 0)
 	else
-		print(pad .. message)
+		ni.utils.print(pad..message)
 	end
 end;
 
@@ -280,7 +280,7 @@ frames.OnUpdate = function(self, elapsed)
 			v();
 			delays[k] = nil;
 		end
-	end		
+	end
 	local Localization = {
 		Enabled = "\124cff00ff00Enabled",
 		Disabled = "\124cffff0000Disabled",

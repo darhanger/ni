@@ -878,7 +878,7 @@ unit.hasheal = function(t)
 		return false;
 	end
 end;
-local function UnitEvents(event, ...)
+local function UnitEvents(event, ...)	
 	if event == "UI_ERROR_MESSAGE" then
 		local errorMessage = ...;
 		if errorMessage == SPELL_FAILED_NOT_BEHIND then
@@ -886,5 +886,5 @@ local function UnitEvents(event, ...)
 		end
 	end
 end;
-ni.combatlog.registerhandler("Internal Unit Handler", UnitEvents);
+ni.listener:add("Internal Unit Handler", "UI_ERROR_MESSAGE", UnitEvents)
 return unit;

@@ -1,4 +1,4 @@
-local ru = GetLocale() == "ruRU" or false;
+local ru = ni.vars.locale == "ruRU" or false;
 local main_ui = {};
 local Localization = {
 	Assistant = "Rotation Assistant",
@@ -1015,7 +1015,7 @@ function MiniMapLDB:OnDragStop()
     ni.vars.ui.iconPos = self.db.minimapPos
 end;
 function MiniMapLDB:OnTooltipShow()
-    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.62")
+    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.63")
     self:AddLine(" ")
     self:AddLine(Localization.LeftClick)
 	self:AddLine(Localization.RightClick)

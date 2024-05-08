@@ -1,5 +1,5 @@
 local GetLocale, GetTime, IsLeftShiftKeyDown, GetCurrentKeyBoardFocus, IsLeftControlKeyDown, IsLeftAltKeyDown, IsRightShiftKeyDown, IsRightControlKeyDown, IsRightAltKeyDown = GetLocale, GetTime, IsLeftShiftKeyDown, GetCurrentKeyBoardFocus, IsLeftControlKeyDown, IsLeftAltKeyDown, IsRightShiftKeyDown, IsRightControlKeyDown, IsRightAltKeyDown
-local ru = GetLocale() == "ruRU" or false;
+local ru = ni.vars.locale == "ruRU" or false;
 local togglemod, cdtogglemod, customtogglemod = 0, 0, 0
 local function AddDelay(t)
 	ni.vars.profiles.delay = t;
