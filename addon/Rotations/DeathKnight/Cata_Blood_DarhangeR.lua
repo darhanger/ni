@@ -222,6 +222,39 @@ local function ActiveGhoul()
 		end
 	end
 end;
+--------- Tank Functions ---------
+local function UnitIsTankable(t)
+    if not t then
+        return nil;
+    end
+    for _, member in ipairs(ni.members) do
+		local isTanking = UnitDetailedThreatSituation(member.unit, t); 
+		if isTanking and not member:istank() then
+			return member.unit;
+		end
+    end
+    return nil;
+end;
+local function UnitTankingUnit(t)
+    if not t then
+        return nil;
+    end
+    for _, member in ipairs(ni.members) do
+        local isTanking = UnitDetailedThreatSituation(member.unit, t); 
+		if isTanking and member:istank() then
+			return member.guid;
+		end
+    end
+    return nil;
+end;
+local function UnitAggroble(t)
+    local unitID = ni.unit.id(t);
+    if ni.tables.blacklisttauntunits[unitID] then
+        return false;
+    else
+        return true;
+    end
+end;
 -- Spells Table --
 local spells = {
 BloodStrike = GetSpellInfo(45902),
@@ -508,12 +541,15 @@ local abilities = {
 			for i = 1, #enemies do
 			local threatUnit = enemies[i].guid;
 			local _, _, AgrPercent = UnitDetailedThreatSituation("player", threatUnit);
-				if (AgrPercent ~= nil and AgrPercent < 100) then
-					if drTrack(threatUnit, "Taunts") > 0
-					and not unitDebuffs(threatUnit, AgroSpells, "EXACT") 
-					and spellValid(threatUnit, spells.DarkCommand, false, true) then
-						spellCast(spells.DarkCommand, threatUnit)
-						return true;
+				if UnitIsTankable(threatUnit)
+				and UnitAggroble(threatUnit) then
+					if (AgrPercent ~= nil and AgrPercent < 100) then
+						if drTrack(threatUnit, "Taunts") > 0
+						and not unitDebuffs(threatUnit, AgroSpells, "EXACT") 
+						and spellValid(threatUnit, spells.DarkCommand, false, true) then
+							spellCast(spells.DarkCommand, threatUnit)
+							return true;
+						end
 					end
 				end
 			end
@@ -532,12 +568,15 @@ local abilities = {
 			for i = 1, #enemies do
 			local threatUnit = enemies[i].guid;
 			local _, _, AgrPercent = UnitDetailedThreatSituation("player", threatUnit);
-				if (AgrPercent ~= nil and AgrPercent < 100) then
-					if drTrack(threatUnit, "Taunts") > 0
-					and not unitDebuffs(threatUnit, AgroSpells, "EXACT") 
-					and spellValid(threatUnit, spells.DeathGrip, true, true) then
-						spellCast(spells.DeathGrip, threatUnit)
-						return true;
+				if UnitIsTankable(threatUnit)
+				and UnitAggroble(threatUnit) then
+					if (AgrPercent ~= nil and AgrPercent < 100) then
+						if drTrack(threatUnit, "Taunts") > 0
+						and not unitDebuffs(threatUnit, AgroSpells, "EXACT") 
+						and spellValid(threatUnit, spells.DeathGrip, true, true) then
+							spellCast(spells.DeathGrip, threatUnit)
+							return true;
+						end
 					end
 				end
 			end

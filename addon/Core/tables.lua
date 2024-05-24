@@ -1120,6 +1120,7 @@ local tables = {
 			[9484] = "disorient",
 			[9485] = "disorient",
 			[10955] = "disorient",
+			[76780] = "disorient",
 			-- Polymorph
 			[118] = "disorient",
 			[12824] = "disorient",

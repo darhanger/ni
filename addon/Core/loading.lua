@@ -55,7 +55,7 @@ ni.loadstuff = function()
 	ni.bootstrap = req(fold.."addon\\core\\bootstrap.lua");
 	ni.tables = req(fold.."addon\\core\\tables.lua");
 	ni.drtracker = req(fold.."addon\\core\\drtracker.lua");	
-	ni.utils.req = req;
+	ni.utils.require = req;
 	ni.utils.json = json;
 	ni.utils.savesetting = function(filename, settings)
 		if type(settings) == "table" then

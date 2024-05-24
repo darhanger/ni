@@ -8,11 +8,19 @@ local registeredevents = {
 	["UNIT_DIED"] = true
 };
 local drtracker_events = function(self, event, ...)
-	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...;
+	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType
+	if ni.vars.build == 30300 then
+		timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...
+	elseif ni.vars.build >= 40300 then
+		local arg = {...}
+		timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = 
+		arg[1], arg[2], arg[4], arg[5], arg[6], arg[8], arg[9], arg[10], arg[12], arg[13], arg[14], arg[15];
+	end
+	
 	if (not registeredevents[eventType]) then
 		return
 	end
-
+	
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		-- Enemy gained a debuff
 		if (eventType == "SPELL_AURA_APPLIED") then
@@ -61,7 +69,14 @@ icdtracker.get = function(item)
 	return -1;
 end;
 local icdtracker_events = function(self, event, ...)
-	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...;
+	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType
+	if ni.vars.build == 30300 then
+		timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...
+	elseif ni.vars.build >= 40300 then
+		local arg = {...}
+		timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = 
+		arg[1], arg[2], arg[4], arg[5], arg[6], arg[8], arg[9], arg[10], arg[12], arg[13], arg[14], arg[15];
+	end
 	if not icdevents[eventType] then
 		return
 	end
@@ -205,6 +220,25 @@ local function ranvalue(minimum, maximum)
     return random()*(maximum-minimum) + minimum;
 end;
 
+local casting_events = function(self, event, ...)
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" or event == "COMBAT_LOG_EVENT" then
+		local subevent, source, dest, spellID, spellName
+		if ni.vars.build == 30300 then
+			_, subevent, _, source, _, _, dest, _, spellID, spellName = ...
+		elseif ni.vars.build >= 40300 then
+			local arg = {...}
+			subevent, source, dest, spellID, spellName = arg[2], arg[5], arg[9], arg[12], arg[13];
+		end	
+		if source == UnitName("player") then
+			if subevent == "SPELL_CAST_SUCCESS" or subevent == "SPELL_CAST_FAILED" and not isspelltoignore(spellName) then
+				if ni.vars.combat.casting then
+					ni.vars.combat.casting = false
+				end
+			end
+		end
+	end
+end;
+
 ni.functions.registercallback(keyevents, OnKeyHandler);
 frames.main = CreateFrame("frame");
 frames.main:RegisterAllEvents();
@@ -214,7 +248,7 @@ frames.OnEvent = function(self, event, ...)
 	end
 	for _, v in pairs(events) do
 		v(event, ...);
-	end
+	end	
 	if event == "PLAYER_LEAVING_WORLD" then
 		ni.functions.freemaps();
 		ni.utils.savesetting(UnitName("player")..".json", ni.utils.json.encode(ni.vars));
@@ -236,13 +270,9 @@ frames.OnEvent = function(self, event, ...)
 			ni.vars.combat.casting = true
 		end
 	end
-	if (event == "UNIT_SPELLCAST_SUCCEEDED"
-	 or event == "UNIT_SPELLCAST_FAILED"
-	 or event == "UNIT_SPELLCAST_FAILED_QUIET"
-	 or event == "UNIT_SPELLCAST_INTERRUPTED"
-	 or event == "UNIT_SPELLCAST_CHANNEL_STOP"
-	 or event == "UNIT_SPELLCAST_STOP")
-	 and ni.vars.combat.casting == true then
+	if (event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_FAILED_QUIET" 
+	or event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_STOP")
+	and ni.vars.combat.casting == true then
 		local unit, spell = ...
 		if unit == "player" and not isspelltoignore(spell) then
 			if ni.vars.combat.casting then
@@ -250,18 +280,11 @@ frames.OnEvent = function(self, event, ...)
 			end
 		end
 	end
-	if event == "COMBAT_LOG_EVENT_UNFILTERED" or event == "COMBAT_LOG_EVENT" then
-		local _, subevent, _, source, _, _, dest, _, spellID, spellName = ...
-		if source == UnitName("player") then
-			if subevent == "SPELL_CAST_SUCCESS" or subevent == "SPELL_CAST_FAILED" and not isspelltoignore(spellName) then
-				if ni.vars.combat.casting then
-					ni.vars.combat.casting = false
-				end
-			end
-		end
-	end
+
+	casting_events(self, event, ...);
 	icdtracker_events(self, event, ...);
 	drtracker_events(self, event, ...);
+	
 	if (event == "PARTY_MEMBERS_CHANGED" or event == "RAID_ROSTER_UPDATE" or event == "GROUP_ROSTER_UPDATE" or event == "PARTY_CONVERTED_TO_RAID" or event == "ZONE_CHANGED" or event == "PLAYER_ENTERING_WORLD") then
 		ni.members.reset();
 	end
