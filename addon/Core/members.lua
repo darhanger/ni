@@ -15,6 +15,7 @@ local tankTalents, BuildTalents, inspectFrame, DoInspect
 local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
 local wotlk = ni.vars.build == 30300;
+local cata = ni.vars.build == 40300;
 local inspect = { unit = "", tainted = false };
 local playerInCombat
 local pGuid
