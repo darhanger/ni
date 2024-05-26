@@ -5,7 +5,7 @@ local UnitAffectingCombat, UnitHealth, UnitHealthMax, CheckInteractDistance, Uni
 local CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange, GetRaidRosterInfo = CreateFrame, CanInspect, GetTalentInfo, GetSpellInfo, IsSpellInRange, GetRaidRosterInfo
 local GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents = GetNumTalentTabs, GetActiveTalentGroup, GetTalentTabInfo, GetNumTalents
 --[[WARNING: Don't put NotifyInspect as local]]
-
+local isFunction = ni.utils.isfunction;
 local members = {};
 local memberssetup = { cache = { _cache = {} } };
 local roster = memberssetup.cache
@@ -14,8 +14,7 @@ local _cache = roster._cache
 local tankTalents, BuildTalents, inspectFrame, DoInspect
 local INSPECT_TIMEOUT = 3; -- If, during this time, we do not obtain the "INSPECT_TALENT_READY" trigger, we skip the unit and increase its INSPECT_DELAY.
 local INSPECT_DELAY	= 10;  -- NotifyInspect delay per unit.
-local wotlk = ni.vars.build == 30300 or false;
-local cata = ni.vars.build == 40300 or false;
+local wotlk = ni.vars.build == 30300;
 local inspect = { unit = "", tainted = false };
 local playerInCombat
 local pGuid
@@ -37,7 +36,7 @@ setmetatable(members, {
             local unit = groupType .. i
             local guid = UnitGUID(unit)
 			if guid then
-				subgroup = groupType == "raid" and select(3, GetRaidRosterInfo(i)) or 1
+				subgroup = groupType == "raid" and select(3, GetRaidRosterInfo(i)) or 1;
 				if guid ~= pGuid then
 					local o = memberssetup:create(unit, guid, subgroup)
 					if o then
@@ -57,8 +56,8 @@ setmetatable(members, {
 
 local dontCache = {	["updatemember"] = true, ["updatemembers"] = true, ["reset"] = true, ["addcustom"] = true, ["removecustom"] = true };
 local function addCache(t)
-	for n,v in pairs(t) do
-		if type(v) == "function" and not dontCache[n] then
+	for n, v in pairs(t) do
+		if isFunction(v) and not dontCache[n] then
 			t[n] = memberssetup.Do(t[n], _cache)
 		end
 	end
@@ -167,7 +166,6 @@ if wotlk then
         end
     end);
 end;
-
 function memberssetup:create(unit, guid, subgroup)
 	if roster[guid] then return end
 	local o = {}
@@ -203,7 +201,7 @@ function memberssetup:create(unit, guid, subgroup)
 		return 0, 0, 0, 0;
 	end;
 	function o:combat()
-		return UnitAffectingCombat(o.unit) == 1;
+		return ni.unit.incombat(o.unit);
 	end
 	function o:aura(aura)
 		return ni.unit.aura(o.unit, aura);
@@ -234,12 +232,9 @@ function memberssetup:create(unit, guid, subgroup)
 	end;	
 	function o:debuffstacks(debuff, filter)
 		return ni.unit.debuffstacks(o.unit, debuff, filter) or 0;
-	end;	
+	end;
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
-	end;
-	function o:cast(spell)
-		return ni.spell.cast(spell, o.unit) or true;
 	end;
 	function o:hpraw()
 		return UnitHealth(o.unit);
@@ -250,15 +245,18 @@ function memberssetup:create(unit, guid, subgroup)
 	--------------------------------------
 	function o:hp()
 		local hp = o:hpraw()/o:hpmax() * 100;
-		if hp == 100 or hp <= 0 or UnitIsGhost(o.unit) == 1 then
+		if hp == 100 or hp <= 0 or o:isdead() then
 			return 100;
 		end
-		for _,id in ipairs(ni.tables.cantheal) do
-			if o:debuff(id) then return 100 end
+		--------------------------------------
+		for i = 1, #ni.tables.cantheal do
+		local cantheal = ni.tables.cantheal[i];
+			if o:debuff(cantheal) then return 100 end
 		end;
-		for _,id in ipairs(ni.tables.notneedheal) do
-			if o:buff(id) then return 100 end
-		end;
+		for i = 1, #ni.tables.notneedheal do
+		local notneedheal = ni.tables.notneedheal[i];
+			if o:buff(notneedheal) then return 100 end
+		end;		
 		hp = o:istank() and (hp - 5) or hp;
 		hp = o:dispel() and (hp - 2) or hp;
 		return hp;
@@ -268,6 +266,10 @@ function memberssetup:create(unit, guid, subgroup)
 		local dist = ni.player.distance(o.unit) or 999;
         return dist < reqDist or false;
     end;
+	function o:distance(tar)
+		local t = true and tar or pla;
+		return ni.unit.distance(o.unit, t);		
+	end;
 	function o:los()
 		return ni.player.los(o.unit) == true;
 	end;
@@ -275,21 +277,24 @@ function memberssetup:create(unit, guid, subgroup)
 		return ni.player.facing(o.unit) == true;
 	end;
 	function o:unfriendly()
-		return UnitIsEnemy("player", o.unit) or false;
+		return ni.player.isenemy(o.unit);
 	end;
+	function o:isdead()
+		return ni.unit.unitisdead(o.unit);
+	end;	
 	function o:valid(spell, facing, los)
 		local spellid = tonumber(spell)
 		spellid = spellid or ni.spell.id(spell)
 		return (spellid > 0
 		and IsSpellInRange(GetSpellInfo(spellid), o.unit) == 1
-		and not o:unfriendly()
+		and not o:unfriendly() and not o:isdead()
 		and (not facing or o:facing())
 		and (not los or o:los()))
-		or false
+		or false;
 	end;
 	function o:threat()
 		return ni.unit.threat(o.unit) or false;
-	end;
+	end;	
 	function o:getRole()
 		if not wotlk then
 			return UnitGroupRolesAssigned(o.unit) or "NONE";
@@ -404,7 +409,7 @@ function memberssetup:create(unit, guid, subgroup)
 		end
 		
 	end;
-
+	
 	-- Attributes
 	o.unit			= unit
 	o.guid			= guid

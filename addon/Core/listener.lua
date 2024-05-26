@@ -1,5 +1,5 @@
-local pairs, type = _G.pairs, _G.type
-local CreateFrame = _G.CreateFrame
+local pairs, type = _G.pairs, _G.type;
+local CreateFrame = _G.CreateFrame;
 
 local listener = {};
 local tbl = {};
@@ -11,8 +11,8 @@ local onEvent = function(_, event, ...)
 	end
 end;
 
-local frame = CreateFrame('Frame')
-frame:SetScript('OnEvent', onEvent)
+local frame = CreateFrame('Frame');
+frame:SetScript('OnEvent', onEvent);
 
 function listener.add(_, name, event, callback, overwrite)
 	if type(event) == "table" then
@@ -22,7 +22,7 @@ function listener.add(_, name, event, callback, overwrite)
 		return;
 	end
 	if not tbl[event] then
-		frame:RegisterEvent(event)
+		frame:RegisterEvent(event);
 		tbl[event] = {};
 	end
 	if tbl[event][name] then
@@ -42,12 +42,12 @@ function listener.remove(_, name, event)
 	end
 	if tbl[event] then
 		tbl[event][name] = nil
-		if next(tbl[event])==nil then
+		if next(tbl[event]) == nil then
 			tbl[event] = nil;
 			frame:UnregisterEvent(event);
 		end		
 	end
-end;
+end
 
 function listener.call(_, event, ...)
 	onEvent(nil, event, ...);

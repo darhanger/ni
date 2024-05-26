@@ -25,6 +25,24 @@ local unit = {};
 unit.incombat = function(t)
 	return UnitAffectingCombat(t) or false;
 end;
+unit.canattack = function(tar1, tar2)
+	return UnitCanAttack(tar1, tar2) or false;
+end;
+unit.canassist = function(tar1, tar2)
+	return UnitCanAssist(tar1, tar2) or false;
+end;
+unit.isenemy = function(tar1, tar2)
+	return UnitIsEnemy(tar1, tar2) or false;
+end;
+unit.unitisdead = function(t)
+	return UnitIsDeadOrGhost(t) or false;
+end;
+unit.exists = function(t)
+    return ni.functions.objectexists(t);
+end;
+unit.isunit = function(tar1, tar2)
+	return UnitIsUnit(tar1, tar2);
+end;
 unit.itemlvl = function(t)
     local iLevelSum, iCount = 0, 0 
     for i = 1, 18 do 
@@ -47,12 +65,16 @@ end;
 unit.los = function(...) --target, target/x1,y1,z1,x2,y2,z2 [optional, hitflags]
 	local _, t = ...;
 	if tonumber(t) == nil then
-		local unitid = unit.id(t)
+		local unitid = unit.id(t);
 		if unitid then
 			if (ni.tables.whitelistedlosunits[unitid]) then
 				return true;
 			end
 		end
+		local mapid = ni.functions.getmapid();
+		if (ni.tables.whitelistedlosmaps[mapid]) then
+			return true;
+		end		
 	end
 	return los(...);
 end;
@@ -142,24 +164,25 @@ unit.movingtime = function(target)
     return 0;
 end;
 unit.id = function(t)
-	if unit.exists(t) then
-		if not unit.isplayer(t) then
-			local bitfrom = -7
-			local bitto = -10
-			if ni.vars.build == 40300 then
-				bitfrom = -9
-				bitto = -12
-			elseif ni.vars.build == 50400 then
-				bitfrom = 10
-				bitto = 6
-			end
-			if tonumber(t) then
-				return tonumber((t):sub(bitto, bitfrom), 16);
-			else
-				return tonumber((UnitGUID(t)):sub(bitto, bitfrom), 16);
-			end
-		end
+    if not unit.exists(t) or not unit.unitis(t) then
+        return nil;
+    end
+	local bitfrom = -7;
+	local bitto = -11;
+	local id_hex
+	if ni.vars.build == 40300 then
+		bitfrom = -9;
+		bitto = -12;
+	elseif ni.vars.build == 50400 then
+		bitfrom = 10;
+		bitto = 6;
 	end
+    if tonumber(t) then
+        id_hex = string.sub(t, bitto, bitfrom);
+    else
+        id_hex = string.sub(UnitGUID(t), bitto, bitfrom);
+    end
+    return tonumber(id_hex, 16);
 end;
 unit.shortguid = function(t)
 	if UnitExists(t) then
@@ -178,7 +201,7 @@ unit.ttd = function(t)
 	if unit.isdummy(t) then
 		return 999;
 	end
-	if unit.exists(t) and (not UnitIsDeadOrGhost(t) and UnitCanAttack("player", t) == 1) then
+	if unit.exists(t) and (not unit.unitisdead(t) and ni.player.canattack()) then
 		t = UnitGUID(t);
 	else
 		return -2;
@@ -189,7 +212,7 @@ unit.ttd = function(t)
 	return -1;
 end;
 unit.hp = function(t)
-    if (UnitIsDeadOrGhost(t) == 1 or unit.debuff(t, 8326)) then
+    if (unit.unitisdead(t) or unit.debuff(t, 8326)) then
         return 100;
     end
 	for _, spellId in ipairs(ni.tables.cantheal) do
@@ -676,7 +699,7 @@ unit.enemiesinrange = function(t, n)
 	if t then
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) 
+				if k ~= t and v:canattack() and not unit.unitisdead(k) 
 				and unit.readablecreaturetype(k) ~= "Critter" then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
@@ -694,7 +717,7 @@ unit.enemiesinrangewithbufftype = function(t, n, str)
 	if t then
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-				if k ~= t and v:canattack() and not UnitIsDeadOrGhost(k) 
+				if k ~= t and v:canattack() and not unit.unitisdead(k) 
 				and unit.bufftype(k, str) and unit.readablecreaturetype(k) ~= "Critter" 
 				and unit.readablecreaturetype(k) ~= "Totem" then
 					local distance = v:distance(t)
@@ -713,7 +736,7 @@ unit.friendsinrange = function(t, n)
 	if t then
 		for k, v in pairs(ni.objects) do
 			if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-				if k ~= t and v:canassist() and not UnitIsDeadOrGhost(k) then
+				if k ~= t and v:canassist() and not unit.unitisdead(k) then
 					local distance = v:distance(t)
 					if (distance ~= nil and distance <= n) then
 						tinsert(friendstable, {guid = k, name = v.name, distance = distance});
@@ -733,7 +756,7 @@ unit.unitstargeting = function(t, friendlies)
 		if not f then
 			for k, v in pairs(ni.objects) do
 				if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
-					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) <= 4 and not UnitIsDeadOrGhost(k) then
+					if k ~= t and UnitReaction(t, k) ~= nil and UnitReaction(t, k) <= 4 and not unit.unitisdead(k) then
 						local target = v:target()
 						if target ~= nil and target == t then
 							tinsert(targetingtable, {name = v.name, guid = k});
@@ -855,7 +878,20 @@ unit.isimmune = function(t)
 	return (unit.exists(t) and select(32, unit.flags(t))) or false;
 end;
 unit.isplayer = function(t)
-	return select(5, unit.info(t)) == 4;
+	local _, _, _, _, unittype = unit.info(t);
+	if unittype == 4 then
+		return true;
+	else
+		return false;
+	end
+end;
+unit.unitis = function(t)
+	local _, _, _, _, unittype = unit.info(t);
+	if unittype == 3 then
+		return true;
+	else
+		return false;
+	end
 end;
 unit.transport = function(t)
 	return ni.functions.transport(t);

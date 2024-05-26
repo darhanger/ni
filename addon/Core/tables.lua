@@ -1,7 +1,7 @@
 local tables = {
 	blacklistedaoeunits = {},
 	blacklisteddispels = {
-	2819, 2824, 11355, 11356, 16427, 20184, 20185, 20186, 25351, 26967, 27186, GetSpellInfo(30129), 31803, 32859, 34616, 34856, 36814, 37132, 37930, 38136, 38141, 38142, 38143, 39042, 41486, GetSpellInfo(47843), GetSpellInfo(48160), 53742, 55360, GetSpellInfo(57970), 57973, 57972, 60667, 60814, 61429, 61840, 68055, 68786, 69674, 70337, 70405, 70867, 70964, 71224, 71889, 72908, 74562, 74567, 74792, 74795
+	2819, 2824, 6411, 6727, 11355, 11356, 16427, 20184, 20185, 20186, 25351, 26967, 27186, GetSpellInfo(30129), 31803, 32859, 34616, 34856, 36814, 37930, 38136, 38142, 38143, 39042, 41486, GetSpellInfo(47843), GetSpellInfo(48160), 53742, 55360, GetSpellInfo(57970), 57973, 57972, 60667, 60814, 61429, 61840, 68055, 68786, 69674, 70337, 70405, 70867, 70964, 71224, 71889, 72908, 74562, 74567, 74792, 74795, 308750
 	},
 	bosses = {
 		-- Ragefire Chasm
@@ -1420,36 +1420,50 @@ local tables = {
 		}
 	},
 	whitelistedlosunits = {
-		[36897] = "Little Ooze",
-		[38138] = "Little Ooze",
-		[34797] = "Icehowl",
-		[35447] = "Icehowl",
-		[35448] = "Icehowl",
-		[35449] = "Icehowl",
-		[34799] = "Dreadscale",
-		[35514] = "Dreadscale",
-		[35515] = "Dreadscale",
-		[35516] = "Dreadscale",
-		[35144] = "Acidmaw",
-		[35511] = "Acidmaw",
-		[35512] = "Acidmaw",
-		[35513] = "Acidmaw",
+		-- --
+		[19514] = "Al'ar",
+		--Nax--	
+		[15936] = "Heigan the Unclean",
+		[29701] = "Heigan the Unclean",
+		--TEoE--
+		[30245] = "Nexus Lord",
+		[30249] = "Scion of Eternity",
+		-- VoA --
+		[38456] = "Frozen Orb",
+		[38698] = "Frozen Orb",
+		-- Ulduar --
+		[33142] = "Leviathan Defense Turret",
 		[32934] = "Right Arm",
 		[32933] = "Left Arm",
 		[33329] = "Heart of the Deconstructor",
-		[30245] = "Nexus Lord",
-		[30249] = "Scion of Eternity",
 		[33651] = "VX-001",
 		[33432] = "Leviathan Mk II",
 		[33670] = "Aerial Command Unit",
 		[32955] = "Collapsing Star",
-		[33142] = "Leviathan Defense Turret",
-		[56754] = "Azure Serpent",
-		[71407] = "Amber",
-		[36980] = "Ice Tomb"
+		-- ICC --
+		[36619] = "Bone Spike",
+		[38233] = "Bone Spike",
+		[38459] = "Bone Spike",
+		[38460] = "Bone Spike",
+		[36897] = "Little Ooze",
+		[38138] = "Little Ooze",
+		[36980] = "Ice Tomb",
+		[38320] = "Ice Tomb",
+		[38321] = "Ice Tomb",
+		[38322] = "Ice Tomb"		
+	},
+	whitelistedlosmaps = {
+		[565] = "Gruul Lair",
+		[544] = "Magtheridon Lair",
+		[615] = "Obsidian Sanctum",
+		[616] = "Eye of Eternity",
+		[649] = "TotC",
+		[650] = "ToC",
+		[724] = "Ruby Sanctum",
 	},
 	blacklisttauntunits = {
-	
+		[40681] = "Living Inferno",
+		[40682] = "Living Inferno",		
 	},	
 }
 return tables;

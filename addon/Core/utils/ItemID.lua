@@ -1,8 +1,7 @@
 -----------------------------------------------
 --------------- Spell & Item ID ---------------
 -----------------------------------------------
-local ru = GetLocale() == "ruRU" or false;
-local build = ni.vars.build;
+local ru = ni.vars.locale == "ruRU" or false;
 local hooksecurefunc, select, UnitBuff, UnitDebuff, UnitAura, UnitGUID, GetGlyphSocketInfo, tonumber, strfind =
 	  hooksecurefunc, select, UnitBuff, UnitDebuff, UnitAura, UnitGUID, GetGlyphSocketInfo, tonumber, strfind
 local types = {
@@ -107,12 +106,6 @@ local function attachItemTooltip(self)
 		if id then addLine(self, id, types.item) end
 	end
 end;
-GameTooltip:HookScript("OnTooltipSetItem", attachItemTooltip)
-ItemRefTooltip:HookScript("OnTooltipSetItem", attachItemTooltip)
-ItemRefShoppingTooltip1:HookScript("OnTooltipSetItem", attachItemTooltip)
-ItemRefShoppingTooltip2:HookScript("OnTooltipSetItem", attachItemTooltip)
-ShoppingTooltip1:HookScript("OnTooltipSetItem", attachItemTooltip)
-ShoppingTooltip2:HookScript("OnTooltipSetItem", attachItemTooltip)
 -- Glyphs Hooks ----------------------------------------------------------------
 hooksecurefunc(GameTooltip, "SetGlyph", function(self, ...)
 	local enabled, id
@@ -123,6 +116,12 @@ hooksecurefunc(GameTooltip, "SetGlyph", function(self, ...)
 	end	
 	if enabled and id then addLine(self, id, types.glyph) end
 end)
+GameTooltip:HookScript("OnTooltipSetItem", attachItemTooltip)
+ItemRefTooltip:HookScript("OnTooltipSetItem", attachItemTooltip)
+ItemRefShoppingTooltip1:HookScript("OnTooltipSetItem", attachItemTooltip)
+ItemRefShoppingTooltip2:HookScript("OnTooltipSetItem", attachItemTooltip)
+ShoppingTooltip1:HookScript("OnTooltipSetItem", attachItemTooltip)
+ShoppingTooltip2:HookScript("OnTooltipSetItem", attachItemTooltip)
 -- Achievement Frame Hooks -----------------------------------------------------
 local f = CreateFrame("frame")
 f:RegisterEvent("ADDON_LOADED")

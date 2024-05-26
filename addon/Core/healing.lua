@@ -1,6 +1,4 @@
-local UnitClass, UnitDebuff, UnitHealthMax = UnitClass, UnitDebuff, UnitHealthMax
-local select, strlower, tContains, tinsert, wipe, sort, unpack, ipairs = select, strlower, tContains, tinsert, wipe, sort, unpack, ipairs
-
+local sort, UnitClass, select, strlower, tContains, tinsert, UnitDebuff, ipairs, type, UnitHealthMax, unpack = sort, UnitClass, select, strlower, tContains, tinsert, UnitDebuff, ipairs, type, UnitHealthMax, unpack
 local class = strlower(select(2, UnitClass("player")));
 
 healing = {};
@@ -54,8 +52,8 @@ local function allTrim(s)
 end;
 local function gettanks()
     local tanks = {};
-    local vT = {ni.vars.units.mainTankEnabled and allTrim(ni.vars.units.mainTank) or false,
-                ni.vars.units.offTankEnabled and allTrim(ni.vars.units.offTank) or false};   
+    local vT = { ni.vars.units.mainTankEnabled and allTrim(ni.vars.units.mainTank) or false,
+                 ni.vars.units.offTankEnabled and allTrim(ni.vars.units.offTank) or false };   
     local ni_members = ni.members
     for _,name in ipairs(vT) do 
         if name and name ~= "" then
@@ -73,7 +71,7 @@ local function gettanks()
                 tinsert(tempTable, m)
             end
         end
-        if #tempTable > 1 then table.sort(tempTable, function(x, y) return x.hpMax > y.hpMax end) end
+        if #tempTable > 1 then sort(tempTable, function(x, y) return x.hpMax > y.hpMax end) end
         for i = #tanks + 1, 2 do
             tinsert(tanks, tempTable[n] or {})
             n = n + 1

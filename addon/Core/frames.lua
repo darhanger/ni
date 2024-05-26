@@ -1,4 +1,11 @@
 local UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type = UnitCanAttack, IsInInstance, select, GetTime, UnitGUID, pairs, GetSpellInfo, random, print, UnitName, GetLocale, rawset, UnitExists, UnitAffectingCombat, IsMounted, UnitIsUnit, UnitCastingInfo, UnitChannelInfo, tremove, unpack, tinsert, type
+local ru = ni.vars.locale == "ruRU";
+local _, pClass = UnitClass("player");
+
+local function ranvalue(minimum, maximum)
+    return random()*(maximum-minimum) + minimum;
+end;
+
 ---DR Tracker
 local registeredevents = {
 	["SPELL_AURA_APPLIED"] = true,
@@ -90,8 +97,8 @@ local icdtracker_events = function(self, event, ...)
 end;
 -------------
 
-local lastclick = 0;
-local totalelapsed = 0;
+local lastclick, totalelapsed, lastEvent, objectPulse = 0, 0, 0, 0;
+local instanceType
 
 local maul, cleave, heroicstrike, runestrike, raptorstrike, shadowcleave = GetSpellInfo(6807), GetSpellInfo(845), GetSpellInfo(78), GetSpellInfo(56815), GetSpellInfo(2973), GetSpellInfo(50581);
 
@@ -109,6 +116,25 @@ end;
 local events = {};
 local delays = {};
 local frames = {};
+local dnc, mtime, isrange = 1, ranvalue(1, 2), false;
+
+frames.distancecheck = function()
+	if (ni.player.caster() or pClass == "HUNTER") then
+		isrange = true;
+		if ni.vars.combat.melee == true then
+			dnc = 1;
+			mtime = ranvalue(1, 2);
+		else
+			dnc = 10;
+			mtime = ranvalue(.3, .8);
+		end
+	else
+		isrange = false;
+		dnc = 1;
+		mtime = ranvalue(1, 2);
+	end
+end;
+frames.distancecheck()
 
 local notfram = ni.utils.generaterandomname();
 frames.notification = CreateFrame("frame", notfram, UIParent);
@@ -173,7 +199,7 @@ end;
 
 local floattext = ni.utils.generaterandomname();
 frames.floatingtext = CreateFrame("Frame", floattext)
-frames.floatingtext.ranW, frames.floatingtext.ranH = random(410, 435), random(32, 40);
+frames.floatingtext.ranW, frames.floatingtext.ranH = random(510, 535), random(32, 40);
 frames.floatingtext:SetSize(frames.floatingtext.ranW, frames.floatingtext.ranH)
 frames.floatingtext:SetAlpha(0)
 frames.floatingtext:SetPoint("CENTER", 0, 80)
@@ -181,15 +207,33 @@ frames.floatingtext.text = frames.floatingtext:CreateFontString(nil, "OVERLAY", 
 frames.floatingtext.text:SetAllPoints()
 frames.floatingtext.texture = frames.floatingtext:CreateTexture()
 frames.floatingtext.texture:SetAllPoints()
-function frames.floatingtext:message(message)
-	local pad = ""
-	for i = 1, random(1,255) do pad = pad .. "\124r" end
-	if not ni.vars.stream then	
-		self.text:SetText(pad .. message)
-		UIFrameFadeOut(self, 2.5, 1, 0)
-	else
-		ni.utils.print(pad..message)
-	end
+local function FadeOut(frame, duration)
+    local alpha = 1;
+    local start = GetTime();
+    frame:SetScript("OnUpdate", function(self, elapsed)
+        local now = GetTime();
+        local progress = (now - start) / duration;
+        alpha = 1 - progress;
+        if alpha <= 0 then
+            alpha = 0;
+            self:SetScript("OnUpdate", nil);
+        end
+        self:SetAlpha(alpha);
+        self.text:SetAlpha(alpha);
+    end)
+end;
+function frames.floatingtext:message(message, fadeTime)
+	fadeTime = fadeTime or 2.5; 
+    local pad = "";
+    for i = 1, random(1, 255) do pad = pad .. "\124r" end
+    if not delStuff then    
+        self.text:SetText(pad .. message);
+        self:SetAlpha(1);
+        self.text:SetAlpha(1);
+        FadeOut(self, fadeTime);
+    else
+        ni.utils.print(pad .. message);
+    end
 end;
 
 local keyevents = {};
@@ -254,20 +298,20 @@ frames.OnEvent = function(self, event, ...)
 		ni.utils.savesetting(UnitName("player")..".json", ni.utils.json.encode(ni.vars));
 	end
 	if event == "PLAYER_REGEN_DISABLED" then
-		ni.vars.combat.counter = ni.vars.combat.counter + 1
-		ni.vars.combat.started = true
-		ni.vars.combat.time = GetTime()
-		ni.vars.combat.ended = 0
+		ni.vars.combat.counter = ni.vars.combat.counter + 1;
+		ni.vars.combat.started = true;
+		ni.vars.combat.time = GetTime();
+		ni.vars.combat.ended = 0;
 	end
 	if event == "PLAYER_REGEN_ENABLED" then
-		ni.vars.combat.started = false
-		ni.vars.combat.time = 0
-		ni.vars.combat.ended = GetTime()
+		ni.vars.combat.started = false;
+		ni.vars.combat.time = 0;
+		ni.vars.combat.ended = GetTime();
 	end
 	if (event == "UNIT_SPELLCAST_SENT" or event == "UNIT_SPELLCAST_CHANNEL_START") and ni.vars.combat.casting == false then
 		local unit, spell = ...
 		if unit == "player" and not isspelltoignore(spell) then
-			ni.vars.combat.casting = true
+			ni.vars.combat.casting = true;
 		end
 	end
 	if (event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_FAILED_QUIET" 
@@ -276,7 +320,7 @@ frames.OnEvent = function(self, event, ...)
 		local unit, spell = ...
 		if unit == "player" and not isspelltoignore(spell) then
 			if ni.vars.combat.casting then
-				ni.vars.combat.casting = false
+				ni.vars.combat.casting = false;
 			end
 		end
 	end
@@ -288,14 +332,28 @@ frames.OnEvent = function(self, event, ...)
 	if (event == "PARTY_MEMBERS_CHANGED" or event == "RAID_ROSTER_UPDATE" or event == "GROUP_ROSTER_UPDATE" or event == "PARTY_CONVERTED_TO_RAID" or event == "ZONE_CHANGED" or event == "PLAYER_ENTERING_WORLD") then
 		ni.members.reset();
 	end
+	
+	if event == "ZONE_CHANGED_NEW_AREA" then
+		if #ni.utils.name_for_func > 55 then
+			local numToDelete = math.min(15, #ni.utils.name_for_func);
+			for i = 1, numToDelete do
+				tremove(ni.utils.name_for_func, #ni.utils.name_for_func);
+			end
+		end;
+		local type = select(2, IsInInstance())
+		if (instanceType and type ~= instanceType) then
+			CombatLogClearEntries();
+		end
+		instanceType = type;
+	end	
 end;
 frames.OnUpdate = function(self, elapsed)
 	if not ni.functionsregistered() then
 		totalelapsed = 0;
-		return true
+		return true;
 	end
 	if select(11, ni.player.debuff(9454)) == 9454 then
-		return true
+		return true;
 	end
 	local time = GetTime();
 	for k, v in pairs(delays) do
@@ -308,7 +366,7 @@ frames.OnUpdate = function(self, elapsed)
 		Enabled = "\124cff00ff00Enabled",
 		Disabled = "\124cffff0000Disabled",
 	};
-	if (GetLocale() == "ruRU") then
+	if ru then
 		Localization.Enabled = "\124cff00ff00Включено"
 		Localization.Disabled = "\124cffff0000Выключено"
 	end;
@@ -319,8 +377,8 @@ frames.OnUpdate = function(self, elapsed)
 				local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;
 				frames.notification:message("\124cffFFC300AoE: "..aoe_str.." \124cffFFC300CD: "..cd_str);
 			end
-			ni.rotation.aoetoggle()
-			ni.rotation.cdtoggle()
+			ni.rotation.aoetoggle();
+			ni.rotation.cdtoggle();
 		end
 	else
 		if frames.notification:IsShown() then
@@ -333,27 +391,35 @@ frames.OnUpdate = function(self, elapsed)
 				local cd_str = ni.vars.combat.cd and Localization.Enabled or Localization.Disabled;
 				local aoe_str = ni.vars.combat.aoe and Localization.Enabled or Localization.Disabled;	
 			end
-			ni.rotation.aoetoggle()
-			ni.rotation.cdtoggle()
+			ni.rotation.aoetoggle();
+			ni.rotation.cdtoggle();
 		end
 	end;
-	local throttle = ni.vars.latency / 1000
+	
+	local latency = ni.vars.latency
+	local randomLatency = ni.utils.ranval(latency, latency * 1.5) / 1000;
+	local throttle = randomLatency;
 	totalelapsed = totalelapsed + elapsed;
-	self.st = elapsed + (self.st or 0)
+	self.st = elapsed + (self.st or 0);
 
 	if self.st > throttle then
 		totalelapsed = totalelapsed - throttle;
 		self.st = 0;
 		
-		if ni.objects ~= nil then
+		if ni.objects then
+			local xtime = GetTime();
 			local tmp = ni.objectmanager.get() or {};
 			for i = 1, #tmp do
 				local ob = ni.objects:new(tmp[i].guid, tmp[i].type, tmp[i].name);
 				if ob then
-					rawset(ni.objects, tmp[i].guid, ob);
+					ni.objects[tmp[i].guid] = ob;
 				end
 			end
-			ni.objects:updateobjects();
+
+			if xtime - objectPulse > .4 then
+				ni.objects:updateobjects();
+				objectPulse = xtime;
+			end
 		end
 		
 		ni.drtracker.updateresettime();
@@ -367,47 +433,59 @@ frames.OnUpdate = function(self, elapsed)
 			end
 		end
 
+		if ni.player.incombat() and (GetTime() - lastEvent >= 1) then
+			CombatLogClearEntries();
+	    end		
+		
 		if ni.vars.units.followEnabled and ni.vars.units.follow ~= nil and ni.vars.units.follow ~= "" then
 			if UnitExists(ni.vars.units.follow) or ni.objectmanager.contains(ni.vars.units.follow) then
 				local unit = ni.vars.units.follow;
 				local uGUID = UnitGUID(unit) or ni.objectmanager.objectGUID(unit);
-				local mtime = ranvalue(1, 2);
 				local followTar = nil;
 				local distance = nil;
 
-				if UnitAffectingCombat(uGUID) then
-					local oTar = select(6, ni.unit.info(uGUID))
+				if ni.unit.incombat(uGUID) then
+					local oTar = select(6, ni.unit.info(uGUID));
 					if oTar ~= nil then
-						followTar = oTar
+						followTar = oTar;
 					end
 				end
 
 				distance = ni.player.distance(uGUID)
-
-				if not IsMounted() then
-					if followTar ~= nil and ni.vars.combat.melee == true then
-						distance = ni.player.distance(followTar)
-						uGUID = followTar
+				if not ni.player.unitisdead() then
+					if not IsMounted() then
+						if (followTar ~= nil and followTar ~= "0x0000000000000000") then
+							if (ni.vars.combat.melee == true and not isrange) then
+								distance = ni.player.distance(followTar);
+								uGUID = followTar;
+							end
+						end
 					end
-				end
-
-				if followTar ~= nil then
-					if not UnitIsUnit("target", followTar) then
-						ni.player.target(followTar)
+					
+					if (followTar ~= nil and followTar ~= "0x0000000000000000") then
+						if not UnitIsUnit("target", followTar) then
+							ni.player.target(followTar);
+							if not ni.player.isfacing(followTar) then
+								if not isrange then
+									ni.player.moveto(followTar);
+								end
+								ni.player.lookat(followTar);
+							end
+						end
 					end
 				end
 				
-				if not UnitIsDeadOrGhost(uGUID) then
-					if not UnitCastingInfo("player") and not UnitChannelInfo("player") 
-					and distance ~= nil and distance > 1 and distance < 45
+				if not ni.unit.unitisdead(uGUID) then
+					if not UnitCastingInfo(pla) and not UnitChannelInfo(pla) 
+					and distance ~= nil and distance > dnc and distance < 45
 					and GetTime() - lastclick > tonumber(format("%.1f", mtime)) then
-						ni.player.moveto(uGUID)
-						lastclick = GetTime()
+						ni.player.moveto(uGUID);
+						lastclick = GetTime();
 					end
 				end
 					
-				if distance ~= nil and distance <= 1 and ni.player.ismoving() then
-					ni.player.stopmoving()
+				if distance ~= nil and distance <= dnc and ni.player.ismoving() then
+					ni.player.stopmoving();
 				end
 			end
 		end;
@@ -418,51 +496,51 @@ frames.OnUpdate = function(self, elapsed)
 				return true;
 			end
 			if not ni.rotation.started then
-				ni.rotation.started = true
+				ni.rotation.started = true;
 			end
 			if ni.vars.profiles.useEngine then
-				ni.members:updatemembers()
+				ni.members:updatemembers();
 			end
 			if ni.rotation.stopmod() then
-				return true
+				return true;
 			end
 			local count = #ni.spell.queue
 			local i = 1
 			while i <= count do
 				local qRec = tremove(ni.spell.queue, i)
-				local func = tremove(qRec, 1)
-				local args = tremove(qRec, 1)
-				local id, tar = unpack(args)
-				frames.spellqueue.update(id, true)
+				local func = tremove(qRec, 1);
+				local args = tremove(qRec, 1);
+				local id, tar = unpack(args);
+				frames.spellqueue.update(id, true);
 
 				if ni.spell.available(id) and ((not ni.spell.isinstant(id) and not ni.player.ismoving()) or ni.spell.isinstant(id)) and not ni.spell.isqueued() then
-					count = count - 1
-					func(id, tar)
+					count = count - 1;
+					func(id, tar);
 				else
-					tinsert(ni.spell.queue, i, {func, args})
-					i = i + 1
+					tinsert(ni.spell.queue, i, {func, args});
+					i = i + 1;
 				end
 			end
 			if #ni.spell.queue == 0 then
-				frames.spellqueue.update()
+				frames.spellqueue.update();
 			end
 			if ni.vars.profiles.genericenabled then
 				if ni.vars.profiles.generic ~= "none" and ni.vars.profiles.generic ~= "None" then
 					if ni.rotation.profile[ni.vars.profiles.generic] then
-						ni.rotation.profile[ni.vars.profiles.generic]:execute()
+						ni.rotation.profile[ni.vars.profiles.generic]:execute();
 					end
 				end
 			end
 			if ni.vars.profiles.enabled then
 				if ni.vars.profiles.active ~= "none" and ni.vars.profiles.active ~= "None" then
 					if ni.rotation.profile[ni.vars.profiles.active] then
-						ni.rotation.profile[ni.vars.profiles.active]:execute()
+						ni.rotation.profile[ni.vars.profiles.active]:execute();
 					end
 				end
 			end
 		else
 			if ni.rotation.started then
-				ni.rotation.started = false
+				ni.rotation.started = false;
 			end
 		end
 	end
@@ -486,10 +564,10 @@ local combatlog = {
 };
 local function delayfor(delay, callback)
 	if type(delay) ~= "number" or type(callback) ~= "function" then
-		return false
+		return false;
 	end
 	delays[GetTime() + delay] = callback;
-	return true
+	return true;
 end;
 
 return frames, combatlog, delayfor, icdtracker, keyevents;

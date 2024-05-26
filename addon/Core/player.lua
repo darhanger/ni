@@ -15,6 +15,21 @@ player.stopmoving = function()
 	ni.functions.callprotected(TurnRightStop);
 	ni.functions.stopmoving();
 end;
+player.inparty = function()
+	inParty, inRaid = GetNumRaidMembers(), GetNumPartyMembers();
+	return inParty >= 1 or inRaid >= 1 or false;
+end;
+player.isswimming = function()
+	local isSwimming = IsSwimming();
+	return isSwimming;
+end;
+player.isoutdoors = function()
+	local isOutdoors = IsOutdoors();
+	return isOutdoors;
+end;
+player.ismounted = function()
+	return IsMounted() or false;
+end;
 player.lookat = function(target, inv) --inv true to look away
 	ni.debug.print(format("Look on %s", target))
 	ni.functions.lookat(target, inv)
@@ -25,6 +40,59 @@ end;
 player.runtext = function(text)
 	ni.debug.print(format("Running: %s", text))
 	ni.functions.runtext(text)
+end;
+player.getspec = function()
+	local p = "player";
+	local NumTalentTabs = GetNumTalentTabs(p);
+	local maxPoints = 0;
+	local mostTalentedSpec = "Unknown";
+	if NumTalentTabs > 0 then
+		local group = GetActiveTalentGroup(p)
+		for tab = 1, NumTalentTabs do
+			local _, _, points, specName = GetTalentTabInfo(tab, p);
+			if points > maxPoints then
+				maxPoints = points;
+				mostTalentedSpec = specName;
+			end
+		end
+	end	
+	return mostTalentedSpec;
+end;
+player.melee = function()
+	local _, class = UnitClass("player");
+	local result = false;
+	if class == "DEATHKNIGHT"
+	or class == "ROGUE" or class == "WARRIOR" or class == "HUNTER"
+	or (class == "DRUID" and player.getspec() == "DruidFeralCombat")
+	or (class == "PALADIN" and player.getspec() ~= "PaladinHoly")
+	or (class == "SHAMAN" and player.getspec() == "ShamanEnhancement" ) then
+		result = true;
+	end
+	return result;
+end;
+player.tank = function()
+	local p = "player";
+	local _, class = UnitClass(p);
+	local result = false;
+	if (class == "DEATHKNIGHT" and (ni.player.aura(p, 57339) or ni.player.aura(p, 57340)))
+	or (class == "DRUID" and player.getspec() == "DruidFeralCombat" and ni.unit.auras(p, "9634||5487"))
+	or (class == "PALADIN" and player.getspec() == "PaladinProtection")
+	or (class == "WARRIOR" and player.getspec() == "WarriorProtection") then
+		result = true;
+	end
+	return result;
+end;
+player.caster = function()
+	local p = "player";
+	local _, class = UnitClass(p);
+	local result = false;
+	if (class == "DRUID" and player.getspec() ~= "DruidFeralCombat")
+	or (class == "PALADIN" and player.getspec() == "PaladinHoly")
+	or (class == "SHAMAN" and player.getspec() ~= "ShamanEnhancement") 
+	or class == "MAGE" or class == "PRIEST" or class == "WARLOCK" then
+		result = true;
+	end
+	return result;
 end;
 player.getskillinfo = function(prof)
     if build >= 40300 then

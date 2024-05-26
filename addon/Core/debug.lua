@@ -5,9 +5,6 @@ local debug = {
 			ni.utils.print("\124cffff0000" .. string);
 		end
 	end,
-	log = function(string)
-	
-	end
 };
 local memory = {
 	baseaddress = function()
