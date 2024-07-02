@@ -201,7 +201,7 @@ unit.ttd = function(t)
 	if unit.isdummy(t) then
 		return 999;
 	end
-	if unit.exists(t) and (not unit.unitisdead(t) and ni.player.canattack()) then
+	if unit.exists(t) and (not unit.unitisdead(t) and unit.canattack("player", t)) then
 		t = UnitGUID(t);
 	else
 		return -2;

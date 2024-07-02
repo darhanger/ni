@@ -46,10 +46,15 @@ player.getspec = function()
 	local NumTalentTabs = GetNumTalentTabs(p);
 	local maxPoints = 0;
 	local mostTalentedSpec = "Unknown";
+	local points, specName
 	if NumTalentTabs > 0 then
 		local group = GetActiveTalentGroup(p)
 		for tab = 1, NumTalentTabs do
-			local _, _, points, specName = GetTalentTabInfo(tab, p);
+			if ni.vars.build == 30300 then
+				name, icontexture, points, specName = GetTalentTabInfo(tab, p);
+			elseif ni.vars.build < 50400 then
+				specID, name, description, icontexture, points, specName = GetTalentTabInfo(tab, p);
+			end
 			if points > maxPoints then
 				maxPoints = points;
 				mostTalentedSpec = specName;
