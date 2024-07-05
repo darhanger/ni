@@ -206,31 +206,31 @@ if wotlk then
 	end
 
 
-	-- -- Slashcommands
-	-- SLASH_SHRED1 = "/shred"
-	-- SlashCmdList["SHRED"] = function(msg)
-	-- 	ni.player.lookat("target")
-	-- 	if ni.unit.isbehind("player", "target")
-	-- 			and ni.spell.available(spells.Shred.id)
-	-- 			and GetComboPoints("player", "target") < 5 then
-	-- 		ni.spell.cast(spells.Shred.id)
-	-- 		ni.player.lookat("target")
-	-- 	elseif not ni.unit.isbehind("player", "target")
-	-- 			and GetComboPoints("player", "target") < 5
-	-- 			and ni.player.powerraw("energy") >= 45 then
-	-- 		ni.player.lookat("target")
-	-- 		ni.spell.cast(spells.Manglecat.id, "target")
-	-- 	end
-	-- -- end
+	-- Slashcommands
+	SLASH_SHRED1 = "/shred"
+	SlashCmdList["SHRED"] = function(msg)
+		ni.player.lookat("target")
+		if ni.unit.isbehind("player", "target")
+				and ni.spell.available(spells.Shred.id)
+				and GetComboPoints("player", "target") < 5 then
+			ni.spell.cast(spells.Shred.id)
+			ni.player.lookat("target")
+		elseif not ni.unit.isbehind("player", "target")
+				and GetComboPoints("player", "target") < 5
+				and ni.player.powerraw("energy") >= 45 then
+			ni.player.lookat("target")
+			ni.spell.cast(spells.Manglecat.id, "target")
+		end
+	end
 
-	-- SLASH_CHARGE1 = "/charge"
-	-- SlashCmdList["CHARGE"] = function(msg)
-	-- 	if ni.spell.cd(spells.Charge.id) == 0 then
-	-- 		ni.player.runtext("/cast [noform:1] Dire Bear Form")
-	-- 		ni.player.lookat("mouseover")
-	-- 		ni.player.runtext("/cast [@mouseover,harm,nodead][]Feral Charge - Bear()")
-	-- 	end
-	-- end
+	SLASH_CHARGE1 = "/charge"
+	SlashCmdList["CHARGE"] = function(msg)
+		if ni.spell.cd(spells.Charge.id) == 0 then
+			ni.player.runtext("/cast [noform:1] Dire Bear Form")
+			ni.player.lookat("mouseover")
+			ni.player.runtext("/cast [@mouseover,harm,nodead][]Feral Charge - Bear()")
+		end
+	end
 
 	SLASH_HEAL1 = "/heal"
 	SlashCmdList["HEAL"] = function(msg)
@@ -421,7 +421,7 @@ if wotlk then
 		["Tigers Fury"] = function()
 			if ni.player.buff(spells.CatForm.id)
 					and ni.spell.available(spells.TigersFury.id)
-					and ni.player:power() < 35 then
+					and ni.player.power() < 35 then
 				ni.spell.cast(spells.TigersFury.id)
 			end
 		end,

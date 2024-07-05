@@ -412,7 +412,7 @@ if c == 30300 and b then
     }
     local K = {PlayerIsMoving = false, InCombat = false, Controled = false, Moved = false}
     local L = {
-        
+        "Window",
         "Cache",
         "Pause",
         "Non Combat Healing",

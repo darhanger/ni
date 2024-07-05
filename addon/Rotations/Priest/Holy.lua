@@ -241,7 +241,7 @@ if d == 30300 and e == 80 and a then
     local u = {PlayerIsMoving = false, InCombat = false, Controled = false}
     local v = {Bloezn = GetSpellInfo(556), Magic = GetSpellInfo(988)}
     local w = {
-        
+        "Window",
         "cache",
         "Universal pause",
         "Inner Fire",

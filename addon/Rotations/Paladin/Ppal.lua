@@ -259,7 +259,7 @@ if d == 30300 and e == 80 and a then
     end
     local x = {JudgmentOfWisdom = GetSpellInfo(53408), Jagaorg = GetSpellInfo(20271), Jagared = GetSpellInfo(53407)}
     local y = {
-        
+        "Window",
         "Universal pause",
         "AutoTarget",
         "Pechati mchenia",

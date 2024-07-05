@@ -190,7 +190,7 @@ if b == 30300 and a then
         StolenSoul = GetSpellInfo(47855)
     }
     local K = {
-        
+        "Window",
         "Cache",
         "Pause",
         "FoulArmor",

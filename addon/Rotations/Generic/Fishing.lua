@@ -37,9 +37,9 @@ end
 local items = {
 	settingsfile = "ni_fishing.xml",
 	callback = GUICallback,
-	{ type = "title",    text = "Fish Bot" },
+	{ type = "title", text = "Fish Bot" },
 	{ type = "separator" },
-	{
+	{ 
 		type = "entry",
 		text = "Auto Lure",
 		enabled = enables["lure"],
@@ -48,8 +48,8 @@ local items = {
 		width = 50,
 		key = "lure",
 	},
-	{
-		type = "entry",
+	{ 
+		type = "entry", 
 		text = "Auto Swap Weapons for Combat",
 		enabled = enables["weapon_swap"],
 		tooltip = "Enable/Disable this for the profile to swap weapons to the id's you specifiy below",
@@ -106,9 +106,9 @@ local items = {
 	{
 		type = "dropdown",
 		menu = {
-			{ selected = (menus["full_bags"] == "AFK"),         value = "AFK" },
+			{ selected = (menus["full_bags"] == "AFK"), value = "AFK" },
 			{ selected = (menus["full_bags"] == "Hearthstone"), value = "Hearthstone" },
-			{ selected = (menus["full_bags"] == "Logout"),      value = "Logout" },
+			{ selected = (menus["full_bags"] == "Logout"), value = "Logout" },
 		},
 		key = "full_bags",
 	},
@@ -148,8 +148,8 @@ local abilities = {
 				ni.vars.profiles.enabled = false;
 			elseif action == "Hearthstone" then
 				if not UnitAffectingCombat("player")
-						and not UnitCastingInfo("player")
-						and not UnitChannelInfo("player") then
+				 and not UnitCastingInfo("player")
+				 and not UnitChannelInfo("player") then
 					ni.player.useitem(6948);
 					ni.frames.floatingtext:message("Bags are full, time to go home!");
 					ni.vars.profiles.enabled = false;
@@ -194,9 +194,9 @@ local abilities = {
 			end
 			local lure_enchant = GetWeaponEnchantInfo();
 			if IsEquippedItem(pole)
-					and not lure_enchant
-					and not UnitAffectingCombat("player")
-					and ni.player.hasitem(values["lure"]) then
+			 and not lure_enchant
+			 and not UnitAffectingCombat("player")
+			 and ni.player.hasitem(values["lure"]) then
 				lure_applied = GetTime();
 				ni.spell.stopcasting();
 				ni.spell.stopchanneling();
@@ -209,11 +209,11 @@ local abilities = {
 	end,
 	["pause"] = function()
 		if IsMounted()
-				or UnitInVehicle("player")
-				or UnitIsDeadOrGhost("player")
-				or UnitCastingInfo("player")
-				or UnitAffectingCombat("player")
-				or ni.player.ismoving() then
+		 or UnitInVehicle("player")
+		 or UnitIsDeadOrGhost("player")
+		 or UnitCastingInfo("player")
+		 or UnitAffectingCombat("player")
+		 or ni.player.ismoving() then
 			return true;
 		end
 	end,
@@ -244,7 +244,7 @@ local abilities = {
 										return true;
 									end
 								end
-							end
+							end 
 						end
 					end
 				end
@@ -259,10 +259,8 @@ local abilities = {
 					end
 				end
 			end
-			ni.delayfor(0.5, function()
-				ni.spell.delaycast(Fishing, nil, 1.5);
-				ni.utils.resetlasthardwareaction();
-			end)
+			ni.spell.delaycast(Fishing, nil, 1.5);
+			ni.utils.resetlasthardwareaction();
 		end
 	end,
 }
