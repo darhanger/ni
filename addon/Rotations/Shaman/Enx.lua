@@ -242,7 +242,7 @@ if d == 30300 and e == 80 and a then
         TidalWaves = GetSpellInfo(53390)
     }
     local N = {
-        "Window",
+        
         "Cache",
         "Universal pause",
         "AutoTarget",

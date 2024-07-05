@@ -71,7 +71,7 @@ if d == 30300 and e == 80 and a then
         ni.GUI.DestroyFrame("Dc")
     end
     local u = {
-        "Window",
+        
         "Universal pause",
         "Divine Hymn",
         "Inner Fire",

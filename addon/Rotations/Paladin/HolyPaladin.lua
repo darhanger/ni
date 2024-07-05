@@ -433,7 +433,7 @@ if b == 30300 and a then
         Sindra_metka = GetSpellInfo(70126)
     }
     local L = {
-        "Window",
+        
         "Cache",
         "Pause",
         "Save",

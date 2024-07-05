@@ -110,7 +110,7 @@ local abilities = {
 		if ni.spell.available(legacyoftheemperor) then
 			if
 				not cache.mounted and not cache.coc and not cache.dog and not cache.eod and
-					not ni.player.buffs("115921||20217||1126||90363")
+					not ni.player.("115921||20217||1126||90363")
 			 then
 				ni.spell.cast(legacyoftheemperor, "player")
 				return true

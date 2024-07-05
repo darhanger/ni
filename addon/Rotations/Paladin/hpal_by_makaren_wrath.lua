@@ -1,6 +1,6 @@
 local Sirus = GetItemInfo(100455) ~= nil or false;
 
--- if Sirus then
+if Sirus then
 
 local t4 = 0
 if ni.player.hasitemequipped(29061) then
@@ -1039,17 +1039,17 @@ end,
     -----------------------------------
 };
 	ni.bootstrap.profile("hpal_by_makaren_wrath", queue, abilities, OnLoad, OnUnLoad);
--- else
-	-- local queue = {
-        -- "Error",
-    -- };
-    -- local abilities = {
-        -- ["Error"] = function()
-            -- ni.vars.profiles.enabled = false;
-			-- if not Sirus then
-				-- ni.frames.floatingtext:message("Only for SIRUS.SU")
-			-- end
-        -- end,
-    -- };
-    -- ni.bootstrap.profile("hpal_by_makaren_wrath", queue, abilities);
--- end;
+else
+	local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not Sirus then
+				ni.frames.floatingtext:message("Only for SIRUS.SU")
+			end
+        end,
+    };
+    ni.bootstrap.profile("hpal_by_makaren_wrath", queue, abilities);
+end;

@@ -1,6 +1,3 @@
-local build = select(4, GetBuildInfo());
-local mop = build == 50400 or false;
-if mop then
 local stqueue = {
 	"pause",
 	"Start Attack",
@@ -342,18 +339,4 @@ local function queue()
 	end
 	return stqueue;
 end
-	ni.bootstrap.rotation("Blood - MoP", queue, abilities);
-else
-    local queue = {
-        "Error",
-    };
-    local abilities = {
-        ["Error"] = function()
-            ni.vars.profiles.enabled = false;
-			if not mop then
-				ni.frames.floatingtext:message("This profile for MoP!")
-            end
-        end,
-    };
-    ni.bootstrap.profile("Blood - MoP", queue, abilities);
-end;
+ni.bootstrap.rotation("Blood - MoP", queue, abilities);

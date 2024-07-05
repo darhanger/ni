@@ -1,5 +1,5 @@
 --------------------------------
--- TaptoRotations  - Feral Pvp
+-- TaptoRotations  - Feral levening classic
 -- Version - 1.0.3
 -- Author - Tapto
 --------------------------------
@@ -48,6 +48,7 @@ if wotlk then
 		FrenziedRegeneration = { id = 22842, name = GetSpellInfo(22842), icon = select(3, GetSpellInfo(22842)) },
 		Charge = { id = 16979, name = GetSpellInfo(16979), icon = select(3, GetSpellInfo(16979)) },
 		Bash = { id = 8983, name = GetSpellInfo(8983), icon = select(3, GetSpellInfo(8983)) },
+		SwipeBear = { id = 48562, name = GetSpellInfo(48562), icon = select(3, GetSpellInfo(48562)) },
 		-- Resto
 		Rejuv = { id = 48441, name = GetSpellInfo(48441), icon = select(3, GetSpellInfo(48441)) },
 		Lifebloom = { id = 48451, name = GetSpellInfo(48451), icon = select(3, GetSpellInfo(48451)) },
@@ -69,168 +70,66 @@ if wotlk then
 		ClearCast = { id = 16870, name = GetSpellInfo(16870), icon = select(3, GetSpellInfo(16870)) },
 		NatureGrasp = { id = 27009, name = GetSpellInfo(27009), icon = select(3, GetSpellInfo(27009)) },
 	}
-	local enables = {
-	}
-	local values = {
-	}
-	local inputs = {}
-	local menus = {}
-	local function GUICallback(key, item_type, value)
-		if item_type == "enabled" then
-			enables[key] = value
-		elseif item_type == "value" then
-			values[key] = value
-		elseif item_type == "input" then
-			inputs[key] = value
-		elseif item_type == "menu" then
-			menus[key] = value
-		end
-	end
-
-	local items = {
-		settingsfile = "Feral-PVP.json",
-		callback = GUICallback,
-		{ type = "title",    text = "|cff00ccffFeral-PVP" },
-		{ type = "separator" },
-		{ type = "separator" },
-		{
-			type = "entry",
-			text = "\124T" .. ":26:26\124t Auto pause when not in Combat",
-			tooltip = "It going to auto start a fight if not enable",
-			enabled = true,
-			key = "getSetting_Pause"
-		},
-		{
-			type = "separator",
-		},
-		{
-			type = "title",
-			text = "|cff71C671Cat Settings",
-		},
-		{
-			type = "separator",
-		},
-		{
-			type = "entry",
-			text = "\124T" .. select(3, GetSpellInfo(spells.CatForm.id)) .. ":26:26\124t Auto Cat form",
-			tooltip = "It will be in catform if its in combat",
-			enabled = true,
-			key = "getSetting_CatForm"
-		},
-		{
-			type = "entry",
-			text = "\124T" .. select(3, GetSpellInfo(spells.Prowl.id)) .. ":26:26\124t Auto Invi",
-			tooltip = "It will be using Prowl when possible",
-			enabled = true,
-			key = "getSetting_Invi"
-		},
-
-		{
-			type = "separator",
-		},
-		{
-			type = "entry",
-			text = "|cFFFF0000\124T" ..
-					select(3, GetSpellInfo(spells.FerociusBite.id)) .. ":26:26\124t Full Automated rotation|r",
-			tooltip = "It will be automatically do Rip, FB, Savage Roar NOT OPTIMAL!",
-			enabled = true,
-			key = "getSetting_Automated"
-		},
-
-		{
-			type = "entry",
-			text = "\124T" .. select(3, GetSpellInfo(spells.Berserk.id)) .. ":26:26\124t Berserk Fear",
-			tooltip = "Auto Berserk when feared",
-			enabled = true,
-			key = "getSetting_BerserkFear"
-		},
-
-		{
-			type = "entry",
-			text = "\124T" .. select(3, GetSpellInfo(spells.Charge.id)) .. ":26:26\124t Charge interupt",
-			tooltip = "Will Auto use feral chare on any in range target that is casting",
-			enabled = true,
-			key = "getSetting_ChargeBear"
-		},
-		{
-			type = "entry",
-			text = "\124T" .. select(3, GetSpellInfo(spells.Cyclone.id)) .. ":26:26\124t Cyclone interupt",
-			tooltip = "Will Auto use cyclone instant cast if someone is casting",
-			enabled = true,
-			key = "getSetting_CycloneInterupt"
-		},
-		{
-			type = "entry",
-			text = "\124T" .. select(3, GetSpellInfo(spells.Cyclone.id)) .. ":26:26\124t Cyclone Focus",
-			tooltip = "Will Auto use instant cast to cyclone focus target",
-			enabled = true,
-			key = "getSetting_CycloneFocus"
-		},
-
-	}
-
-	local function GetSetting(name)
-		for k, v in ipairs(items) do
-			if v.type == "entry"
-					and v.key ~= nil
-					and v.key == name then
-				return v.value, v.enabled
-			end
-			if v.type == "dropdown"
-					and v.key ~= nil
-					and v.key == name then
-				for k2, v2 in pairs(v.menu) do
-					if v2.selected then
-						return v2.value
-					end
-				end
-			end
-			if v.type == "input"
-					and v.key ~= nil
-					and v.key == name then
-				return v.value
-			end
-		end
-	end
-	;
 
 
 	local function onload()
-		ni.GUI.AddFrame("Feral PVP", items)
-		print("Rotation \124cFF15E615Feral PVP")
+		print("Rotation \124cFF15E615Feral leveling classic")
 	end
 
 	local function onunload()
-		ni.GUI.DestroyFrame("Feral PVP")
 		print("Rotation \124cFFE61515stopped!")
 	end
 
 
-	-- -- Slashcommands
-	-- SLASH_SHRED1 = "/shred"
-	-- SlashCmdList["SHRED"] = function(msg)
-	-- 	ni.player.lookat("target")
-	-- 	if ni.unit.isbehind("player", "target")
-	-- 			and ni.spell.available(spells.Shred.id)
-	-- 			and GetComboPoints("player", "target") < 5 then
-	-- 		ni.spell.cast(spells.Shred.id)
-	-- 		ni.player.lookat("target")
-	-- 	elseif not ni.unit.isbehind("player", "target")
-	-- 			and GetComboPoints("player", "target") < 5
-	-- 			and ni.player.powerraw("energy") >= 45 then
-	-- 		ni.player.lookat("target")
-	-- 		ni.spell.cast(spells.Manglecat.id, "target")
-	-- 	end
-	-- -- end
+	-- Slashcommands
+	SLASH_STUNT1                = "/STUNT"
+	SlashCmdList["STUNT"]       = function(msg)
+		if ni.spell.cd(spells.Bash.id) == 0
+		then
+			ni.spell.castqueue(spells.Bash.id, "target")
+		end
+	end
 
-	-- SLASH_CHARGE1 = "/charge"
-	-- SlashCmdList["CHARGE"] = function(msg)
-	-- 	if ni.spell.cd(spells.Charge.id) == 0 then
-	-- 		ni.player.runtext("/cast [noform:1] Dire Bear Form")
-	-- 		ni.player.lookat("mouseover")
-	-- 		ni.player.runtext("/cast [@mouseover,harm,nodead][]Feral Charge - Bear()")
-	-- 	end
-	-- end
+	SLASH_SHRED1                = "/shred"
+	SlashCmdList["SHRED"]       = function(msg)
+		if not ni.player.buff(spells.CatForm.id) then
+			ni.spell.cast(spells.CatForm.id)
+		else
+			ni.player.lookat("target")
+			if ni.unit.isbehind("player", "target")
+					and (GetComboPoints("player", "target") < 5
+						or ni.player.buff(spells.ClearCast.id))
+			then
+				ni.spell.cast(spells.Shred.id)
+				ni.player.lookat("target")
+			elseif not ni.unit.isbehind("player", "target")
+					and GetComboPoints("player", "target") < 5
+					and ni.player:powerraw("energy") >= 45 then
+				ni.player.lookat("target")
+				ni.spell.cast(spells.Manglecat.id, "target")
+			end
+		end
+	end
+
+	SLASH_CHARGES1              = "/charges"
+	SlashCmdList["CHARGES"]     = function(msg)
+		if ni.spell.cd(spells.Charge.id) == 0
+		then
+			if not ni.player.buff(spells.BearForm.id)
+			then
+				ni.spell.cast(spells.BearForm.id)
+			else
+				ni.player.lookat("mouseover")
+				ni.spell.cast(spells.Charge.id, "mouseover")
+			end
+		end
+	end
+
+	SLASH_STOPGASTING1          = "/stopgasting"
+	SlashCmdList["STOPGASTING"] = function()
+		ni.rotation.delay(1)
+	end
+
 
 	SLASH_HEAL1 = "/heal"
 	SlashCmdList["HEAL"] = function(msg)
@@ -250,124 +149,138 @@ if wotlk then
 		end
 		return false
 	end
+	local t, p = "target", "player"
+	local cat = ni.player.buff(spells.CatForm.id)
+	local bear = ni.player.buff(spells.BearForm.id)
+	local savagertimer = ni.player.buffremaining(spells.SavageRoar.id)
+	local riptimer = ni.unit.debuffremaining("target", "49800", "player")
 
-	SLASH_BEAR1 = "/bear"
-	SlashCmdList["BEAR"] = function(msg)
-		ni.player.runtext("/cast !Dire Bear Form(Shapeshift)")
-	end
+	local Cache = {
+		targets = nil,
+		curchannel = nil,
+		iscasting = nil,
+		moving = ni.player.ismoving(),
+		enemies = ni.unit.enemiesinrange(p, 25),
+		riptimer = ni.unit.debuffremaining("target", spells.Rip.id, "player"),
+		savagertimer = ni.player.buffremaining(spells.SavageRoar.id),
+		cat = ni.player.buff(spells.CatForm.id),
+		bear = ni.player.buff(spells.BearForm.id)
 
-	SLASH_CAT1 = "/cat"
-	SlashCmdList["CAT"] = function(msg)
-		ni.player.runtext("/cast !Cat Form(Shapeshift)")
-	end
-
+	}
 	local queue = {
-		--buffs
-		"cache",
+		"Cache",
+		-- "Test",
 		"GOTW",
 		"Thorns",
-		"Pounce",
+		-- "Pounce",
 		"INVI",
 		"Pause Rotation",
-		"Catform",
+		"Rejuvenation",
+		-- "Catform",
 		"Start Attack",
 		"Auto Target",
-		"Barkskin",
-		"Survival",
-		"Tigers Fury",
-		"Interrupter",
-		"FeralCharge",
-		"Berserkfear",
-		"Antireflect",
-		"Cycloneinterupt",
-		"CycloneFocus",
-		"Swipesnakes",
-		"Faerie fire",
-		"Antislow",
-		"DispelHEX",
-		"AbolishPoison",
-		"Ferocious Bite1",
-		"Ferocious Bite2",
-		"Shreadcc",
-		"Shred100",
-		"Rake",
-		"Shredauto",
-		"SavageRoar",
-		"Rip",
+		"Moonfire",
+		-- "Barkskin",
+		-- "Survival",
+		-- "Tigers Fury",
+		-- "Berserk",
+		-- "Bombs",
+		-- "Interrupter",
+		-- "FeralCharge",
+		-- "Berserkfear",
+		-- "Antireflect",
+		-- "Cycloneinterupt",
+		-- "CycloneFocus",
+		-- "Swipe",
+		-- "Antislow",
+		-- "DispelHEX",
+		-- "AbolishPoison",
+		-- "Ferocious Bite",
+		-- "Ferocious Bite1",
+		-- "Ferocious Bite2",
+		-- "Shreadcc",
+		-- "Faerie fire",
+		-- "WILD",
+		-- "Shred100",
+		-- "SavageRoar",
+		-- "Ingrediente Secreto",
+		-- "MangleDebuff",
+		-- "Rake",
+		-- "Shredauto",
+		-- "Rip",
 		--bear
-		"FrenziedRegeneration",
-		"MangleBear",
-		"Demoralazing",
-		"Enrage",
-		"FaerieFirebear",
-		"Maul",
-		"Lacerate",
-		"Laceratestack",
-		"InervateHealer",
-		"Hibernate",
+		-- "FrenziedRegeneration",
+		-- "Maul",
+		-- "SwipeBear",
+		-- "MangleBear",
+		-- -- "Demoralazing",
+		-- "Enrage",
+		-- "FaerieFirebear",
+		-- "Lacerate",
+		-- "Laceratestack",
+		-- "InervateHealer",
+		-- "Hibernate",
 	}
 
 
 
 	local abilities = {
-		-- ["cache"] function ()
-		--     local enemies = ni.unit.enemiesinrange("player", 25)
-		--     local target = enemies[i].guid
-		--     local name = enemies[i].name
-		--     local distance = enemies[i].distance
-		-- end
-		-- local enemies = ni.unit.enemiesinrange("player", 25)
-		-- local target = enemies[i].guid
-		-- local name = enemies[i].name
-		-- local distance = enemies[i].distance
+		["Cache"] = function()
+			Cache.moving = ni.player.ismoving()
+			Cache.curchannel = UnitChannelInfo(p)
+			Cache.enemies = ni.unit.enemiesinrange(p, 25)
+			Cache.iscasting = UnitCastingInfo(p)
+			Cache.riptimer = ni.unit.debuffremaining("target", spells.Rip.id, "player")
+			Cache.cat = ni.player.buff(spells.CatForm.id)
+			Cache.bear = ni.player.buff(spells.BearForm.id)
+		end,
 
 		["Pounce"] = function()
 			if ni.spell.available(spells.Pounce.id)
-					and ni.unit.buff("player", spells.Prowl.id, "player") then
+					and UnitCanAttack("player", "target")
+					and ni.unit.buff("player", spells.Prowl.id, "player")
+			then
 				ni.spell.cast(spells.Pounce.id)
 			end
 		end,
 
 		["Pause Rotation"] = function()
-			local _, enabled = GetSetting("getSetting_Pause")
-			if enabled then
-				if IsMounted()
-						or UnitIsDeadOrGhost("player")
-						or not UnitAffectingCombat("player")
-						or ni.unit.buff("player", "Drink") then
-					return true;
-				end
+			if IsMounted()
+					or UnitIsDeadOrGhost("player")
+					or not UnitAffectingCombat("player")
+					or ni.unit.buff("player", "Drink") then
+				return true;
 			end
 		end,
-
 		["Catform"] = function()
-			local _, enabled = GetSetting("getSetting_CatForm")
-			if enabled and ni.spell.available(spells.CatForm.id) then
-				if not IsMounted()
-						and not ni.player.buff(spells.CatForm.id) and not ni.player.buff(spells.BearForm.id) then
+			if enables["CatForm"] and not IsMounted()
+			then
+				if not Cache.cat
+						and not Cache.bear
+						and ni.player.hp() > 85
+				then
 					ni.spell.cast(spells.CatForm.id)
 				end
 			end
 		end,
 
+
 		["INVI"] = function()
-			local _, enabled = GetSetting("getSetting_Invi")
-			if enabled then
-				if ni.spell.available(spells.Prowl.id)
-						and not UnitAffectingCombat("player")
-						and ni.unit.buff("player", spells.CatForm.id, "player")
-						and not ni.unit.buff("player", spells.Prowl.id, "player") then
-					ni.spell.cast(spells.Prowl.id)
-				end
+			if ni.spell.available(spells.Prowl.id)
+					and not UnitAffectingCombat("player")
+					and Cache.cat
+					and not ni.unit.buff("player", spells.Prowl.id, "player")
+			then
+				ni.spell.cast(spells.Prowl.id)
 			end
 		end,
 
 		["Auto Target"] = function()
 			if UnitAffectingCombat("player")
-					and ((ni.unit.exists("target")
-							and UnitIsDeadOrGhost("target")
-							and not UnitCanAttack("player", "target"))
-						or not ni.unit.exists("target")) then
+					and not ni.unit.exists("target")
+					and not UnitIsDeadOrGhost("target")
+					and not UnitCanAttack("player", "target")
+			then
 				ni.player.runtext("/targetenemy")
 				return true;
 			end
@@ -378,12 +291,59 @@ if wotlk then
 					and UnitCanAttack("player", "target")
 					and not UnitIsDeadOrGhost("target")
 					and UnitAffectingCombat("player")
-					and ni.unit.buff("player", spells.CatForm.id, "player")
-					and not ni.unit.buff("player", spells.Prowl.id, "player")
+					-- and (cat
+					-- 	or bear)
+					-- and not ni.unit.buff("player", spells.Prowl.id)
 					and not IsCurrentSpell(6603) then
 				ni.spell.cast(6603)
 			end
 		end,
+		["Rejuvenation"] = function()
+			if UnitAffectingCombat("player")
+					and ni.spell.available("Rejuvenation")
+					and ni.player.hp() < 70
+					and ni.player.power("mana") > 30
+					and not ni.player.buff("Rejuvenation")
+			then
+				ni.spell.cast("Rejuvenation", "player")
+			end
+		end,
+		["GOTW"] = function()
+			if ni.player.power("mana") > 60 -- mana
+					and ni.spell.available("Mark of the Wild")
+
+					and not ni.player.buff("Mark of the Wild")
+			then
+				ni.spell.cast("Mark of the Wild", "player")
+			end
+		end,
+
+		["Thorns"] = function()
+			if ni.player.power("mana") > 60 -- mana
+					and ni.spell.available("Thorns")
+					and not ni.player.buff("Thorns")
+			then
+				ni.spell.cast("Thorns", "player")
+			end
+		end,
+		["Moonfire"] = function()
+			if UnitAffectingCombat("player") and ni.spell.available("Moonfire") then
+				local enemies = ni.unit.enemiesinrange("player", 40)
+				for i = 1, #enemies do
+					local target = enemies[i].guid
+					if ni.unit.hp(target) > 6
+							-- and ni.unit.exists(target.."target")
+							and ni.unit.debuffremaining(target, "Moonfire", "player") < 0.5
+							and (ni.unit.threat("player", target) ~= -1) -- Suponiendo que `thread` se refiere a una función que retorna el aggro
+					then
+						-- ni.player.lookat(target)
+						ni.spell.cast("Moonfire", target)
+					end
+				end
+			end
+		end,
+
+
 
 		["Barkskin"] = function()
 			if ni.spell.available(spells.Barkskin.id)
@@ -402,7 +362,7 @@ if wotlk then
 		end,
 
 		["Shreadcc"] = function()
-			if ni.spell.available(spells.Shred.id)
+			if cat
 					and ni.unit.buffremaining("player", spells.ClearCast.id, "player") >= 1
 					and ni.unit.isbehind("player", "target")
 			then
@@ -411,30 +371,62 @@ if wotlk then
 		end,
 
 		["Shred100"] = function()
-			if ni.spell.available(spells.Shred.id)
-					and ni.player.powerraw("energy") >= 99
-					and ni.unit.isbehind("player", "target") then
+			if Cache.cat
+					and ni.spell.available(spells.Shred.id)
+					and ni.player:powerraw("energy") >= 99
+					and Cache.riptimer >= 3
+					and ni.unit.isbehind("player", "target")
+			then
 				ni.spell.cast(spells.Shred.id)
 			end
 		end,
 
 		["Tigers Fury"] = function()
-			if ni.player.buff(spells.CatForm.id)
-					and ni.spell.available(spells.TigersFury.id)
-					and ni.player:power() < 35 then
+			if cat
+					and ni.spell.cd(spells.TigersFury.id) == 0
+					and ni.player.powerraw() < 35 then
 				ni.spell.cast(spells.TigersFury.id)
+			end
+		end,
+		["Berserk"] = function()
+			if ni.vars.combat.cd
+					and ni.spell.cd(spells.Berserk.id) == 0
+			then
+				if cat
+						and ni.unit.isboss(t)
+						and ni.player.buffremaining(spells.TigersFury.id) > 4
+						and ni.player.powerraw() > 80
+				then
+					ni.spell.cast(spells.Berserk.id)
+					ni.player.useitem(40211)
+					ni.player.runtext("/use 10")
+				end
 			end
 		end,
 
 		["Faerie fire"] = function()
 			if ni.player.buff(spells.CatForm.id)
 					and ni.spell.available(spells.FaerieFire.id)
-					and not ni.unit.buff("target", spells.FaerieFire.id, "player")
-					and ni.player.power() < 17 then
+					and not ni.unit.debuff(t, spells.FaerieFire.id)
+					and ni.player:power() < 17
+			then
+				print("fuego ferico")
 				ni.spell.cast(spells.FaerieFire.id, "target")
 				return true;
 			end
 		end,
+		["switchweapon"] = function()
+			local itemLink = GetInventoryItemLink("player", 16)
+			local enchantId = itemLink and itemLink:match("Hitem:%d+:(%d+)")
+			if enchantId == 33790
+					and ni.player.buff(59626)
+			then
+				print("SSSASAS")
+				ni.player.runtext("/equip Fin del viaje")
+			end
+		end,
+
+
 		["Rake"] = function()
 			if ni.spell.available(spells.Rake.id)
 					and GetComboPoints("player", "target") < 5
@@ -442,6 +434,18 @@ if wotlk then
 				ni.spell.cast(spells.Rake.id)
 			end
 		end,
+		["MangleDebuff"] = function()
+			if cat
+					and ni.spell.available(spells.Manglecat.id)
+					and not ni.unit.debuff(t, spells.Manglecat.id)
+					and not ni.unit.debuff(t, 48563)
+					and not ni.unit.debuff(t, 46856)
+					and not ni.unit.debuff(t, 46857)
+					and not ni.unit.debuff(t, 55218) then
+				ni.spell.cast(spells.Manglecat.id)
+			end
+		end,
+
 
 		-- ["InervateHealer"] = function()
 		-- 	for i = 1, #ni.members do
@@ -453,18 +457,75 @@ if wotlk then
 		-- end,
 
 		["Interrupter"] = function()
-			if ni.spell.available(spells.Maim.id)
-					and GetComboPoints("player", "target") >= 1
-					and ni.unit.iscasting("target")
-					and ni.drtracker.get("target", "Controlled stuns") > 0
-					and (ni.unit.castingpercent("target") >= 80
-						or ni.unit.ischanneling("target")) then
-				ni.spell.cast(spells.Maim.id)
+			if enables["Interrupts"]
+			then
+				for i = 1, #Cache.enemies do
+					local target = Cache.enemies[i].guid
+					local name = Cache.enemies[i].name
+					local distance = Cache.enemies[i].distance
+					if (ni.unit.iscasting(target)
+								or ni.unit.ischanneling(target))
+					then
+						if Cache.bear
+						then
+							if distance >= 8
+									and ni.spell.cd(spells.Charge.id) == 0
+									and (ni.unit.castingpercent(target) >= 70
+										or ni.unit.ischanneling(target))
+									and ni.spell.valid(target, spells.Charge.id, false, true)
+							then
+								ni.player.lookat(target)
+								ni.spell.cast(spells.Charge.id, target)
+								print("charge" .. name)
+							else
+								if distance <= 4
+										and ni.spell.cd(spells.Bash.id) == 0
+										and (ni.unit.castingpercent(target) >= 50
+											or ni.unit.ischanneling(target))
+								then
+									ni.player.lookat(target)
+									ni.spell.cast(spells.Bash.id, target)
+								else
+									if ni.spell.cd(20549) == 0
+											and distance <= 8
+											and (ni.unit.castingpercent(target) >= 50
+												or ni.unit.ischanneling(target))
+									then
+										ni.player.stopmoving()
+										ni.spell.cast(20549)
+									end
+								end
+							end
+						else
+							if Cache.cat
+							then
+								if GetComboPoints("player", target) > 1
+										and ni.spell.cd(spells.Maim.id) == 0
+										and ni.drtracker.get(target, "Controlled Stuns") > 0
+										and (ni.unit.castingpercent(target) >= 90
+											or ni.unit.ischanneling(target))
+										and distance <= 4
+								then
+									ni.spell.cast(spells.Maim.id, target)
+								else
+									if ni.spell.cd(20549) == 0
+											and distance <= 8
+											and (ni.unit.castingpercent(target) >= 50
+												or ni.unit.ischanneling(target))
+									then
+										ni.player.stopmoving()
+										ni.spell.cast(20549)
+									end
+								end
+							end
+						end
+					end
+				end
 			end
 		end,
+
 		["Cycloneinterupt"] = function()
-			local _, enabled = GetSetting("getSetting_CycloneInterupt")
-			if enabled then
+			if enables["CycloneInterupt"] then
 				if ni.player.buff(spells.InstantCast.id) then
 					local enemies = ni.unit.enemiesinrange("player", 20)
 					for i = 1, #enemies do
@@ -484,8 +545,8 @@ if wotlk then
 			end
 		end,
 		["CycloneFocus"] = function()
-			local _, enabled = GetSetting("getSetting_CycloneFocus")
-			if enabled then
+			if enables["CycloneFocus"]
+			then
 				if ni.player.buff(spells.InstantCast.id)
 						and ni.unit.exists("focus")
 						and not ni.unit.isstunned("focus")
@@ -494,14 +555,14 @@ if wotlk then
 						and ni.drtracker.get("focus", "Cyclone") > 0
 						and ni.spell.valid("focus", spells.Cyclone.id, false, true)
 				then
-					ni.spell.cast(spells.Cyclone.id, "socus")
+					print("cyclone on focus")
+					ni.spell.cast(spells.Cyclone.id, "focus")
 				end
 			end
 		end,
 
 		["FeralCharge"] = function()
-			local _, enabled = GetSetting("getSetting_ChargeBear")
-			if enabled then
+			if enables["ChargeBear"] then
 				if ni.spell.cd(spells.Charge.id) == 0
 						and not ni.player.buff(spells.Prowl.id) then
 					local enemies = ni.unit.enemiesinrange("player", 25)
@@ -525,18 +586,46 @@ if wotlk then
 				end
 			end
 		end,
-		["Swipesnakes"] = function()
-			local enemies = ni.unit.enemiesinrange("player", 7)
-			if ni.player.buff(spells.CatForm.id)
-					and #enemies > 4 then
-				ni.spell.cast(62078)
+		["Swipe"] = function()
+			if ni.vars.combat.aoe then
+				local enemies = ni.unit.enemiesinrange("player", 8)
+				if ni.player.buff(spells.CatForm.id)
+						and Cache.savagertimer > 2
+						and #enemies >= 3 then
+					ni.spell.cast(62078)
+				end
 			end
 		end,
+
+		["Bombs"] = function()
+			if enables["Bombs"]
+			then
+				if ni.player.hasitem(42641) --Sapper
+						and ni.player.itemcd(42641) == 0
+				then
+					if ni.unit.inmelee(p, t)
+							and UnitCanAttack("player", "target")
+							and ni.player.hp() > 40
+					then
+						ni.player.useitem(42641)
+					end
+				else
+					if ni.player.hasitem(41119) --Sarobomb
+							and UnitCanAttack("player", "target")
+							and ni.player.itemcd(41119) == 0
+					then
+						ni.player.useitem(41119)
+						ni.player.clickat(t)
+					end
+				end
+			end
+		end,
+
 		["Berserkfear"] = function()
-			local _, enabled = GetSetting("getSetting_BerserkFear")
-			if enabled then
+			if enables["BerserkFear"] then
 				local fears = { 10890, 20511, 6215, 17928 }
-				if ni.spell.cd(spells.Berserk.id) == 0 then
+				if ni.spell.cd(spells.Berserk.id) == 0
+						and cat then
 					for d = 1, #fears do
 						if ni.player.debuff(fears[d]) then
 							ni.spell.cast(spells.Berserk.id)
@@ -545,10 +634,19 @@ if wotlk then
 				end
 			end
 		end,
+		["Ferocious Bite"] = function()
+			if ni.spell.available(spells.FerociusBite.id)
+					and GetComboPoints("player", "target") == 5
+					and Cache.savagertimer >= 8
+					and Cache.riptimer >= 10 then
+				ni.spell.cast(spells.FerociusBite.id)
+			end
+		end,
 
 		["Ferocious Bite1"] = function()
 			if ni.spell.available(spells.FerociusBite.id)
 					and ni.unit.hp("target") < 30
+					and not ni.unit.isboss(t)
 					and GetComboPoints("player", "target") >= 4 then
 				ni.spell.cast(spells.FerociusBite.id)
 				return true;
@@ -558,6 +656,7 @@ if wotlk then
 		["Ferocious Bite2"] = function()
 			if ni.spell.available(spells.FerociusBite.id)
 					and ni.unit.hp("target") < 20
+					and not ni.unit.isboss(t)
 					and GetComboPoints("player", "target") >= 3 then
 				ni.spell.cast(spells.FerociusBite.id)
 				return true;
@@ -608,16 +707,16 @@ if wotlk then
 			end
 		end,
 		["Shredauto"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
-						and GetComboPoints("player", "target") < 5 then
+						and GetComboPoints("player", "target") < 5
+				then
 					if ni.unit.isbehind("player", "target")
-							and ni.spell.available(spells.Shred.id)
+					-- and IsUsableSpell(spells.Shred.id)
 					then
 						ni.spell.cast(spells.Shred.id, "target")
 					elseif ni.spell.available(spells.Manglecat.id)
-							and ni.player.powerraw("energy") >= 50
+							and ni.player:powerraw("energy") >= 50
 					then
 						ni.spell.cast(spells.Manglecat.id, "target")
 					end
@@ -626,21 +725,66 @@ if wotlk then
 		end,
 
 		["SavageRoar"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
-						and not ni.player.buff(spells.SavageRoar.id)
-						and GetComboPoints("player", "target") > 0
+						and Cache.savagertimer == 0
+						and GetComboPoints("player", "target") > 1
 				then
 					ni.spell.cast(spells.SavageRoar.id, "target")
 				end
 			end
 		end,
+		["Ingrediente Secreto"] = function()
+			if enables["Automated"] then
+				if cat then
+					if ni.spell.available(spells.SavageRoar.id)
+							and GetComboPoints("player", "target") >= 2
+							and Cache.savagertimer <= 6                                       -- this is savage
+							and ni.unit.debuffremaining("target", spells.Rip.id, "player") <= 8 -- this is rip
+							and ni.unit.debuffremaining("target", spells.Rip.id, "player") >= 4 then -- rip
+						ni.spell.cast(spells.SavageRoar.id, "target")
+						return true;
+					end
+				end
+			end
+		end,
+
+		-- ["Test"] = function()
+		-- 	if enables["CCBuff"] then
+		-- 		if ni.spell.available(48470)
+		-- 				-- and ni.player:power(3) < 20 -- energy
+		-- 				and ni.player.power("mana") > 40 -- mana
+		-- 		then
+		-- 			print("cholo")
+		-- 		end
+		-- 	end
+		-- end,
+		["WILD"] = function()
+			if enables["CCBuff"] then
+				if ni.spell.available(spells.CatForm.id)
+						-- and not ni.spell.gcd()	
+						and ni.player:power(3) < 30
+						and ni.spell.cd(spells.TigersFury.id) > 1
+						-- and not ni.player.buff(53909)
+						-- and not ni.player.buff(54758)
+						and not ni.player.buff(50334, "EXACT") --Berserk
+						and not ni.player.buff(16870)    -- Clear casting
+						-- and GetComboPoints("player", "target") < 5
+						and ni.player.power("mana") >= 40
+				then
+					ni.player.runtext("/use !cat form")
+					-- ni.spell.cast(spells.CatForm.id)
+					-- print("Shapshift")
+					-- ni.player.runtext("/stopattack")
+					return true;
+				end
+			end
+		end,
+
 		["Rip"] = function()
-			local _, enabled = GetSetting("getSetting_Automated")
-			if enabled then
+			if enables["Automated"] then
 				if ni.player.buff(spells.CatForm.id)
-						and not ni.unit.debuff("target", spells.Rip.id)
+						and not ni.unit.debuff(t, spells.Rip.id, p)
 						and GetComboPoints("player", "target") > 4
 				then
 					ni.spell.cast(spells.Rip.id, "target")
@@ -648,7 +792,17 @@ if wotlk then
 			end
 		end,
 
-
+		["SwipeBear"] = function()
+			if ni.vars.combat.aoe then
+				local enemies = ni.unit.enemiesinrange("player", 8)
+				if ni.player.buff(spells.BearForm.id)
+						and ni.player:power("rage") > 10
+						and #enemies > 2
+				then
+					ni.spell.cast(spells.SwipeBear.id)
+				end
+			end
+		end,
 
 		["FrenziedRegeneration"] = function()
 			if ni.player.buff(spells.BearForm.id)
@@ -665,25 +819,32 @@ if wotlk then
 			end
 		end,
 		["Demoralazing"] = function()
-			if ni.player.buff(spells.BearForm.id)
-					and not ni.unit.debuff("target", spells.Demoralazing.id, "player")
+			if Cache.bear
+					and UnitCanAttack("player", "target")
 					and ni.unit.inmelee("player", "target")
 					and ni.spell.available(spells.Demoralazing.id)
+					and not ni.unit.debuff(t, spells.Demoralazing.id)
+					and not ni.unit.debuff(t, 62102)
+					and not ni.unit.debuff(t, 16862)
+					and not ni.unit.debuff(t, 702)
+					and not ni.unit.debuff(t, 18179)
+					and not ni.unit.debuff(t, 67)
+					and not ni.unit.debuff(t, 12879)
 			then
 				ni.spell.cast(spells.Demoralazing.id)
 			end
 		end,
 		["Maul"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.Maul.id)
-					and ni.player.power() > 50
+					and ni.player:power("rage") > 10
 					and not IsCurrentSpell(spells.Maul.id)
 			then
 				ni.spell.cast(spells.Maul.id)
 			end
 		end,
 		["Lacerate"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.Lacerate.id)
 					and ni.unit.debuffremaining("target", spells.Lacerate.id, "player") <= 3 then
 				ni.spell.cast(spells.Lacerate.id, "target")
@@ -691,14 +852,14 @@ if wotlk then
 		end,
 
 		["Laceratestack"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.Lacerate.id)
 					and ni.unit.debuffstacks("target", spells.Lacerate.id, "player") < 5 then
 				ni.spell.cast(spells.Lacerate.id, "target")
 			end
 		end,
 		["FaerieFirebear"] = function()
-			if ni.player.buff(spells.BearForm.id)
+			if Cache.bear
 					and ni.spell.available(spells.FaerieFire.id)
 					and ni.unit.exists("target")
 					and UnitCanAttack("player", "target")
@@ -712,7 +873,7 @@ if wotlk then
 
 	}
 
-	ni.bootstrap.profile("Feral pvp", queue, abilities, onload, onunload)
+	ni.bootstrap.profile("Dalvae Druid classic", queue, abilities, onload, onunload)
 end
 
 -- #showtooltip Feral Charge
@@ -723,11 +884,12 @@ end
 -- TOdO
 -----------------------------------------------------------------
 --Gui
+-- Mejorar el shred behind, todavia hay bosses donde lanza mangle
+-- Mejorar el clearcasting, hay errores cuando hay 5 puntos de combo
+-- Crear la rotacion de Burst y GG
 -- Mejorar Feral Charge, hacer un interrupter
 -- Auto matar snakes.
 -- Auto sacar venenos cuando este en 50% o menos
--- Auto cyclone focus.
 -- Tranquility
--- Fully automated rotation
 --
 --

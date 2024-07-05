@@ -156,7 +156,7 @@ if d == 30300 and e == 80 and a then
         ni.GUI.DestroyFrame("sp")
     end
     local u = {
-        "Window",
+        
         "AutoTarget",
         "Universal pause",
         "Inner Fire",

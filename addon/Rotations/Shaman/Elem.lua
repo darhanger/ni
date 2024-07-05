@@ -273,7 +273,7 @@ if d == 30300 and a then
     local G = {
         "Cache",
         "Universal pause",
-        "Window",
+        
         "AutoTarget",
         "Enchant Weapon",
         "Shield",

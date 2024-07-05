@@ -244,7 +244,7 @@ if c == 30300 and b then
         Summonpet = GetSpellInfo(46584)
     }
     local N = {
-        "Window",
+        
         "Pause",
         "Use Presence",
         "Combat specific Pause",
