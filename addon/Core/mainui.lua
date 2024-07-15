@@ -1,8 +1,11 @@
 local ru = ni.vars.locale == "ruRU" or false;
+local build = ni.vars.build;
+local playerclass = select(2, UnitClass("player"));
 local main_ui = {};
 local Localization = {
 	Assistant = "Rotation Assistant",
-	Support = "By support DarhangeR",
+	Support = "Supporting by DarhangeR",
+	Expansion = "",
 	Primary = "Select primary rotation:",
 	Secondary = "Select secondary rotation:",
 	GenericProfile = "Select generic rotation:",
@@ -157,6 +160,23 @@ if ru then
 	Localization.MidleClick = "|cffC0C0C0Cредний щелчок:|r Открыть сервер Discord."	
 end;
 
+local classIcons = {
+	["DEATHKNIGHT"] = "Interface\\Icons\\spell_deathknight_classicon",
+	["DRUID"]       = "Interface\\Icons\\ability_druid_maul",
+	["HUNTER"]      = "Interface\\Icons\\inv_weapon_bow_07",
+	["MAGE"]        = "Interface\\Icons\\inv_staff_13",
+	["MONK"]     	= "Interface\\Icons\\classicon_monk",
+	["PALADIN"]     = "Interface\\Icons\\ability_thunderbolt",
+	["PRIEST"]      = "Interface\\Icons\\inv_staff_30",
+	["ROGUE"]       = "Interface\\Icons\\inv_throwingknife_04",
+	["SHAMAN"]      = "Interface\\Icons\\spell_nature_bloodlust",
+	["WARLOCK"]     = "Interface\\Icons\\spell_nature_drowsy",
+	["WARRIOR"]     = "Interface\\Icons\\inv_sword_27",
+};
+local ClassIcon = classIcons[playerclass];
+
+--- Initialize Icon and UI ---
+
 local ui = {
 	icon = {
 		x = 75.70,
@@ -188,6 +208,7 @@ local function moveIcon(self)
 	ni.vars.ui.icon.y = centerY;
 end;
 local r, g, b, a, slid = .3,.3,.3,.75, 15;
+local mr, mg, mb = 0.2, 0.7, 1;
 local uiScale = GetCVar("uiScale") or 1;
 local backdrop = {
 	bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
@@ -213,12 +234,36 @@ frame:SetScript("OnMouseUp", function()
     frame:StopMovingOrSizing();
 end);
 frame:SetWidth(320);
-frame:SetHeight(300);
+frame:SetHeight(320);
 frame:SetBackdrop(backdrop);
 frame:SetPoint(ni.vars.ui.main.point, WorldFrame, ni.vars.ui.main.relativePoint, ni.vars.ui.main.x, ni.vars.ui.main.y);
 frame:SetBackdropColor(.1,.1,.1, 1);
 frame:SetBackdropBorderColor(r,g,b,a);
 frame:Hide();
+
+local profiles = {};
+local function GetFilename(file)
+    return file:match("^.*\\(.*).lua$") or file:match("^.*\\(.*).enc$") or file:match("^.*\\(.*).out$") or file;
+end;
+if build == 30300 then
+	Expansion = "Wrath of the Lich King Mode"
+	mr, mg, mb = 0.2, 0.7, 1;
+	profiles = ni.functions.getprofilesfor(playerclass.."\\wrath");
+elseif build == 40300 then
+	mr, mg, mb = 1.00, 0.49, 0.04;
+	Expansion = "Cataclysm Mode"
+	profiles = ni.functions.getprofilesfor(playerclass.."\\cata");
+elseif build > 40300 then
+	mr, mg, mb = 0.00, 1.00, 0.60;
+	Expansion = "Mists of Pandaria Mode"
+	profiles = ni.functions.getprofilesfor(playerclass.."\\mop");
+end;
+tinsert(profiles, 1, Localization.None);
+local generic_profiles = ni.functions.getprofilesfor("Generic") or { };
+tinsert(generic_profiles, 1, Localization.None);
+
+--- Draw UI Elements ---
+
 local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)
 	local textran = ni.utils.generaterandomname();	
 	local text = CreateFrame("frame", textran, frame);
@@ -234,126 +279,226 @@ local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)
 	for i= 1, math.random(1,255) do pad = pad .. "\124r" end
 	text.text:SetText(pad .. settext);
 	text.text:SetTextColor(r, g, b, a);
+	
 	return text;
 end;
-local title = CreateText(frame, Localization.Assistant, 0, -8, 0.2, 0.7, 1, 1);
-local title2 = CreateText(frame, Localization.Support, 0, -25, 0.2, 0.7, 1, 1);
-local primary_text = CreateText(frame, Localization.Primary, 0, -50, 0.1, 0.5, 0.8, 1);
-local secondary_text = CreateText(frame, Localization.Secondary, 0, -100, 0.1, 0.5, 0.8, 1);
-local generic_text = CreateText(frame, Localization.GenericProfile, 0, -150, 0.1, 0.5, 0.8, 1);
-local function GetFilename(file)
-	return file:match("^.*\\(.*).lua$") or file:match("^.*\\(.*).enc$") or file:match("^.*\\(.*).out$") or file
+
+local function CreateMainButton(frame, width, height, text, offset_x, offset_y, gray, func)
+	local butDesign, al = "UIPanelButtonTemplate", 1;
+	if gray then
+		butDesign, al = "UIPanelButtonGrayTemplate", .7;
+	end
+	local button = CreateFrame("BUTTON", nil, frame, butDesign);
+	button:SetWidth(width);
+	button:SetHeight(height);
+	button:SetText(text);
+	button:SetPoint("BOTTOM", frame, offset_x, offset_y);
+	button:SetAlpha(al);
+	button:SetScript("OnClick", func);
+
+	return button;
 end;
-local playerclass = select(2, UnitClass("player"))
-local profiles = ni.functions.getprofilesfor(select(2, UnitClass("player"))) or { };
-tinsert(profiles, 1, Localization.None);
-local generic_profiles = ni.functions.getprofilesfor("Generic") or { };
-tinsert(generic_profiles, 1, Localization.None);
 
-local ddm_name = ni.utils.generaterandomname();
-local dropdownmenu = CreateFrame("frame", ddm_name, frame, "UIDropDownMenuTemplate");
-dropdownmenu:ClearAllPoints();
-dropdownmenu:SetPoint("TOP", 0, -70);
-dropdownmenu:Show();
-local primary = Localization.None;
-local primaryIndex = 1;
-UIDropDownMenu_Initialize(dropdownmenu, function(self, level)
-	local info = UIDropDownMenu_CreateInfo();
-	local index = 0;
-	for k, v in ipairs(profiles) do
-		index = index + 1;
-		local file = GetFilename(v);
-		local checked = false;
-		if ni.vars.profiles.primary == file then
-			primary = file;
-			primaryIndex = index;
-			checked = true;
-		end
-		info.text = file;
-		info.value = file;
-		info.checked = checked;
-		info.func = function(self)
-			UIDropDownMenu_SetSelectedID(dropdownmenu, self:GetID());
-			ni.vars.profiles.primary = self:GetText();
-		end;
-		UIDropDownMenu_AddButton(info, level);
-	end
-end);
-UIDropDownMenu_SetWidth(dropdownmenu, 150);
-UIDropDownMenu_SetButtonWidth(dropdownmenu, 174);
-UIDropDownMenu_JustifyText(dropdownmenu, "CENTER");	
-UIDropDownMenu_SetSelectedID(dropdownmenu, primaryIndex);
-UIDropDownMenu_SetText(dropdownmenu, primary);
-local ddm2_name = ni.utils.generaterandomname();
-local dropdownmenu2 = CreateFrame("frame", ddm2_name, frame, "UIDropDownMenuTemplate");
-dropdownmenu2:ClearAllPoints();
-dropdownmenu2:SetPoint("TOP", 0, -120);
-dropdownmenu2:Show();
-local secondary = Localization.None;
-local secondaryIndex = 1;
-UIDropDownMenu_Initialize(dropdownmenu2, function(self, level)
-	local info = UIDropDownMenu_CreateInfo();
-	local index = 0;
-	for k, v in ipairs(profiles) do
-		index = index + 1;
-		local file = GetFilename(v);
-		local checked = false;
-		if ni.vars.profiles.secondary == file then
-			secondary = file;
-			secondaryIndex = index;
-			checked = true;
-		end
-		info.text = file;
-		info.value = file;
-		info.checked = checked;
-		info.func = function(self)
-			UIDropDownMenu_SetSelectedID(dropdownmenu2, self:GetID());
-			ni.vars.profiles.secondary = self:GetText();
-		end;
-		UIDropDownMenu_AddButton(info, level);
-	end
-end);
+local function CreateDropDownText(frame, settext, offset_x, offset_y, position, tooltipText, width)
+	position = position or "CENTER";
+	local text = CreateFrame("frame", nil, frame);
+	text:ClearAllPoints();
+	text:SetHeight(20);
+	text:SetWidth(width or 150);
+	text:SetPoint("TOP", frame, offset_x, offset_y);
+	text.text = text:CreateFontString(nil, "BACKGROUND", "GameFontNormal");
+	text.text:SetAllPoints();
+	text.text:SetJustifyH(position);
+	text.text:SetJustifyV("MIDDLE");
+	text.text:SetWordWrap(false);
+	local pad = ""
+    for i = 1, random(1, 255) do pad = pad .. "\124r" end
+	text.text:SetText(pad..settext);
+    if tooltipText then
+		text:EnableMouse(true);
+        text:SetScript("OnEnter", function(self)
+			local tooltip = GameTooltip;
+			tooltip:Hide();	
+            tooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT");
+			tooltip:ClearLines();
+			tooltip:AddLine(tooltipText);
+            tooltip:Show();
+        end);
+        text:SetScript("OnLeave", function(self)
+			local tooltip = GameTooltip;
+			tooltip:ClearLines();
+			tooltip:Hide();
+        end);
+    end	
+	return text;
+end;
 
-UIDropDownMenu_SetWidth(dropdownmenu2, 150);
-UIDropDownMenu_SetButtonWidth(dropdownmenu2, 174);
-UIDropDownMenu_JustifyText(dropdownmenu2, "CENTER");	
-UIDropDownMenu_SetSelectedID(dropdownmenu2, secondaryIndex);
-UIDropDownMenu_SetText(dropdownmenu2, secondary);
--- end;
-local ddm3_name = ni.utils.generaterandomname();
-local dropdownmenu3 = CreateFrame("frame", ddm3_name, frame, "UIDropDownMenuTemplate");
-dropdownmenu3:ClearAllPoints();
-dropdownmenu3:SetPoint("TOP", 0, -170);
-dropdownmenu3:Show();
-local generic = Localization.None;
-local genericIndex = 1;
-UIDropDownMenu_Initialize(dropdownmenu3, function(self, level)
-	local info = UIDropDownMenu_CreateInfo();
-	local index = 0;
-	for k, v in ipairs(generic_profiles) do
-		index = index + 1;
-		local file = GetFilename(v);
-		local checked = false;
-		if ni.vars.profiles.generic == file then
-			generic = file;
-			genericIndex = index;
-			checked = true;
+local function CreateKeyDropDown(frame, keys, offset_x, offset_y, var, wdh)
+	local name = ni.utils.generaterandomname();
+	local dropdown = CreateFrame("frame", name, frame, "UIDropDownMenuTemplate");
+	dropdown:ClearAllPoints();
+	dropdown:SetPoint("TOP", frame, offset_x, offset_y);
+	dropdown:Show();	
+	local set = Localization.None;
+	local setIndex = 1;
+	UIDropDownMenu_Initialize(dropdown, function(self, level)
+		local info = UIDropDownMenu_CreateInfo();
+		local index = 0;
+		for k, v in pairs(keys) do
+			index = index + 1;
+			local checked = false;
+			if ni.vars.hotkeys[var] == v then
+				set = v;
+				setIndex = index;
+				checked = true;
+			end
+			info.text = v;
+			info.value = v;
+			info.checked = checked;
+			info.func = function(self)
+				UIDropDownMenu_SetSelectedID(dropdown, self:GetID());
+				ni.vars.hotkeys[var] = self:GetText();
+			end
+			UIDropDownMenu_AddButton(info, level);
 		end
-		info.text = file;
-		info.value = file;
-		info.checked = checked;
-		info.func = function(self)
-			UIDropDownMenu_SetSelectedID(dropdownmenu3, self:GetID());
-			ni.vars.profiles.generic = self:GetText();
-		end;
-		UIDropDownMenu_AddButton(info, level);
-	end
-end);
-UIDropDownMenu_SetWidth(dropdownmenu3, 150);
-UIDropDownMenu_SetButtonWidth(dropdownmenu3, 215);
-UIDropDownMenu_JustifyText(dropdownmenu3, "CENTER");	
-UIDropDownMenu_SetSelectedID(dropdownmenu3, genericIndex);
-UIDropDownMenu_SetText(dropdownmenu3, generic);
+	end);
+	UIDropDownMenu_SetWidth(dropdown, wdh);
+	UIDropDownMenu_SetButtonWidth(dropdown, wdh);
+	UIDropDownMenu_JustifyText(dropdown, "CENTER");
+	UIDropDownMenu_SetSelectedID(dropdown, setIndex);
+	UIDropDownMenu_SetText(dropdown, set);	
+
+	return dropdown;
+end;
+
+local function InitializeDropdownMenu(dropdown, profiles, profileType)
+    local selected = Localization.None;
+    local selectedIndex = 1;
+    UIDropDownMenu_Initialize(dropdown, function(self, level)
+        local info = UIDropDownMenu_CreateInfo();
+        local index = 0;
+        for k, v in ipairs(profiles) do
+            index = index + 1;
+            local file = GetFilename(v);
+            local checked = ni.vars.profiles[profileType] == file;
+            if checked then
+                selected = file;
+                selectedIndex = index;
+            end
+            info.text = file;
+            info.value = file;
+            info.checked = checked;
+            info.func = function(self)
+                UIDropDownMenu_SetSelectedID(dropdown, self:GetID());
+                ni.vars.profiles[profileType] = self:GetText();
+            end
+            UIDropDownMenu_AddButton(info, level);
+        end
+    end)
+    UIDropDownMenu_SetWidth(dropdown, 160);
+    UIDropDownMenu_SetButtonWidth(dropdown, 140);
+    UIDropDownMenu_JustifyText(dropdown, "CENTER");
+    UIDropDownMenu_SetSelectedID(dropdown, selectedIndex);
+    UIDropDownMenu_SetText(dropdown, selected);
+end;
+
+local function CreateDropdown(frame, yOffset, profiles, profileType)
+	local nm = ni.utils.generaterandomname();
+    local dropdown = CreateFrame("frame", nm, frame, "UIDropDownMenuTemplate");
+    dropdown:ClearAllPoints();
+    dropdown:SetPoint("TOP", 0, yOffset);
+    dropdown:Show();
+    InitializeDropdownMenu(dropdown, profiles, profileType);
+end;
+
+local function CreateConfigurableEditBox(frame, offsetX, offsetY, variable, text)
+    local edit = CreateFrame("EditBox", nil, frame);
+    edit:SetHeight(20);
+    edit:SetWidth(120);
+    edit:SetPoint("TOP", frame, offsetX, offsetY);
+    edit:SetFontObject("GameFontHighlight");
+    edit:SetAutoFocus(false);
+    edit:SetJustifyH("CENTER");
+    edit:SetJustifyV("CENTER");
+    edit:EnableMouse(true);
+    edit:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+    })
+    edit:SetBackdropColor(0, 0, 0, 0.5)
+    edit:SetBackdropBorderColor(0.8, 0.8, 0.8, 0.5)
+    edit:SetScript("OnEnterPressed", function(self)
+        ni.vars[variable] = self:GetText() or "";
+        self:ClearFocus();
+    end)
+    edit:SetScript("OnEscapePressed", function(self)
+        self:SetText(ni.vars[variable] or "");
+        self:ClearFocus();
+    end)
+    edit:SetText(ni.vars[variable] or "");
+    edit:Show();
+
+    return edit;
+end;
+
+local function CreateEditBox(frame, offset_x, offset_y, var)
+	local name = ni.utils.generaterandomname();
+	local edit = CreateFrame("EditBox", name, frame);
+	edit:SetHeight(20)
+	edit:SetWidth(124);
+	edit:SetPoint("TOP", frame, offset_x, offset_y)
+	edit:SetFontObject("GameFontHighlight");
+	edit:SetAutoFocus(false);
+	edit:SetJustifyH("CENTER");
+	edit:SetJustifyV("CENTER");
+	edit:EnableMouse(true);
+	edit:SetBackdrop({
+		bgFile = "Interface/Buttons/WHITE8X8",
+		edgeFile = "Interface/Buttons/WHITE8X8",
+		edgeSize = 1,
+	});
+	edit:SetBackdropColor(0,0,0,0.5);
+	edit:SetBackdropBorderColor(0.8, 0.8, 0.8, 0.5);
+	edit:SetScript("OnEnterPressed", function(self)
+		ni.vars.units[var] = self:GetText() or "";
+		self:ClearFocus();
+	end);
+	edit:SetScript("OnEscapePressed", function(self)
+		self:SetText(ni.vars.units[var]);
+		self:ClearFocus();
+	end);
+	edit:SetText(ni.vars.units[var]);
+	edit:Show();
+	return edit;
+end
+
+local function CreateCheckBox(frame, offset_x, offset_y, checked, func, value)
+	local name = ni.utils.generaterandomname();
+	local check = CreateFrame("CheckButton", name, frame, "OptionsBaseCheckButtonTemplate");
+	check:SetPoint("TOP", offset_x, offset_y);
+	check:SetSize(26, 26);
+	check:SetChecked(checked);
+	check:SetHitRectInsets(0,0,0,0);
+	check:SetScript("OnClick", function(self)
+		func(self);
+	end);
+	check.value = value;
+	return check;
+end;
+
+local title = CreateText(frame, Localization.Assistant, 0, -8, mr, mg, mb, 1);
+local title2 = CreateText(frame, Localization.Support, 0, -25, mr, mg, mb, 1);
+local title3 = CreateText(frame, Expansion, 0, -42, mr, mg, mb, 1);
+local primary_text = CreateText(frame, Localization.Primary, 0, -65, 0.1, 0.5, 0.8, 1);
+local secondary_text = CreateText(frame, Localization.Secondary, 0, -115, 0.1, 0.5, 0.8, 1);
+local generic_text = CreateText(frame, Localization.GenericProfile, 0, -165, 0.1, 0.5, 0.8, 1);
+
+local primaryDropdown = CreateDropdown(frame, -85, profiles, "primary");
+local secondaryDropdown = CreateDropdown(frame, -135, profiles, "secondary");
+local genericDropdown = CreateDropdown(frame, -185, generic_profiles, "generic");
+
+--- Draw UI Frames ---
 
 local msetran = ni.utils.generaterandomname();
 local mainsettings = CreateFrame("frame", msetran, frame);
@@ -403,53 +548,23 @@ creaturesettings:SetBackdropColor(.1,.1,.1, 1);
 creaturesettings:SetBackdropBorderColor(r,g,b,a);
 creaturesettings:Hide();
 
-local function CreateMainButton(frame, width, height, text, offset_x, offset_y, func)
-	local butran = ni.utils.generaterandomname();
-	local button = CreateFrame("BUTTON", butran, frame, "UIPanelButtonTemplate");
-	button:SetWidth(width);
-	button:SetHeight(height);
-	button:SetText(text);
-	button:SetPoint("BOTTOM", frame, offset_x, offset_y);
-	button:SetAlpha(1);
-	button:SetScript("OnClick", func);
-	return button;
-end;
+--- Draw Maine Buttons ---
 
-local function CreateClassButton(frame, width, height, text, offset_x, offset_y)
-	local classran = ni.utils.generaterandomname();
-	local classbutton = CreateFrame("BUTTON", classran, frame, "UIPanelButtonTemplate");
-	classbutton:SetWidth(width);
-	classbutton:SetHeight(height);
-	classbutton:SetText(text);
-	classbutton:SetPoint("BOTTOM", frame, offset_x, offset_y);
-	return classbutton;
-end;
-
-local function CreateClassButton2(frame, width, height, text, offset_x, offset_y)
-	local classran2 = ni.utils.generaterandomname();
-	local classbutton2 = CreateFrame("BUTTON", classran2, frame, "UIPanelButtonGrayTemplate");
-	classbutton2:SetWidth(width);
-	classbutton2:SetHeight(height);
-	classbutton2:SetText(text);
-	classbutton2:SetPoint("BOTTOM", frame, offset_x, offset_y);
-	return classbutton2;
-end;
-
-CreateMainButton(frame, 137, 22, Localization.Rotation, -68, 61, function()
+CreateMainButton(frame, 137, 22, Localization.Rotation, -68, 61, false, function()
 	if settings:IsShown() then
 		settings:Hide();
 	else
 		settings:Show();
 	end
 end);
-CreateMainButton(frame, 137, 22, Localization.MainSettings, 68, 61, function()
+CreateMainButton(frame, 137, 22, Localization.MainSettings, 68, 61, false, function()
 	if mainsettings:IsShown() then
 		mainsettings:Hide();
 	else
 		mainsettings:Show();
 	end
 end);
-CreateMainButton(frame, 137, 22, Localization.ResourceTrack, -68, 35, function()
+CreateMainButton(frame, 137, 22, Localization.ResourceTrack, -68, 35, false, function()
 	if resourcesettings:IsShown() then
 		resourcesettings:Hide();
 	else
@@ -459,7 +574,7 @@ CreateMainButton(frame, 137, 22, Localization.ResourceTrack, -68, 35, function()
 		resourcesettings:Show();
 	end
 end);
-CreateMainButton(frame, 137, 22, Localization.CreatureTrack, 68, 35, function()
+CreateMainButton(frame, 137, 22, Localization.CreatureTrack, 68, 35, false, function()
 	if creaturesettings:IsShown() then
 		creaturesettings:Hide();
 	else
@@ -469,110 +584,14 @@ CreateMainButton(frame, 137, 22, Localization.CreatureTrack, 68, 35, function()
 		creaturesettings:Show();
 	end
 end);
-CreateMainButton(frame, 62, 22, Localization.Close, 0, 10, function()
+CreateMainButton(frame, 62, 22, Localization.Close, 0, 10, false, function()
 	if frame:IsShown() then
 		frame:Hide();
 	end
 end);
 
-local function CreateDropDownText(frame, settext, offset_x, offset_y, position)
-	local name = ni.utils.generaterandomname();
-	position = position or "CENTER";
-	local text = CreateFrame("frame", name, frame);
-	text:ClearAllPoints();
-	text:SetHeight(20);
-	text:SetWidth(200);
-	text:SetPoint("TOP", frame, offset_x, offset_y);
-	text.text = text:CreateFontString(nil, "BACKGROUND", "GameFontNormal");
-	text.text:SetAllPoints();
-	text.text:SetJustifyH(position);
-	text.text:SetJustifyV("MIDDLE");
-	text.text:SetText(settext);
-	return text;
-end;
+--- Resource Tracking Menu ---
 
-local function CreateKeyDropDown(frame, keys, offset_x, offset_y, var)
-	local name = ni.utils.generaterandomname();
-	local dropdown = CreateFrame("frame", name, frame, "UIDropDownMenuTemplate");
-	dropdown:ClearAllPoints();
-	dropdown:SetPoint("TOP", frame, offset_x, offset_y);
-	dropdown:Show();
-	local set = Localization.None;
-	local setIndex = 1;
-	UIDropDownMenu_Initialize(dropdown, function(self, level)
-		local info = UIDropDownMenu_CreateInfo();
-		local index = 0;
-		local build = ni.vars.build;
-		for k, v in pairs(keys) do
-			index = index + 1;
-			local checked = false;
-			if ni.vars.hotkeys[var] == v then
-				set = v;
-				setIndex = index;
-				checked = true;
-			end
-			info.text = v;
-			info.value = v;
-			info.checked = checked;
-			info.func = function(self)
-				UIDropDownMenu_SetSelectedID(dropdown, self:GetID());
-				ni.vars.hotkeys[var] = self:GetText();
-			end
-			UIDropDownMenu_AddButton(info, level);
-		end
-	end);
-	UIDropDownMenu_SetWidth(dropdown, 100);
-	UIDropDownMenu_SetButtonWidth(dropdown, 124);
-	UIDropDownMenu_JustifyText(dropdown, "CENTER");
-	UIDropDownMenu_SetSelectedID(dropdown, setIndex);
-	UIDropDownMenu_SetText(dropdown, set);
-	return dropdown
-end;
-
-local function CreateEditBox(frame, offset_x, offset_y, var)
-	local name = ni.utils.generaterandomname();
-	local edit = CreateFrame("EditBox", name, frame);
-	edit:SetHeight(20)
-	edit:SetWidth(124);
-	edit:SetPoint("TOP", frame, offset_x, offset_y)
-	edit:SetFontObject("GameFontHighlight");
-	edit:SetAutoFocus(false);
-	edit:SetJustifyH("CENTER");
-	edit:SetJustifyV("CENTER");
-	edit:EnableMouse(true);
-	edit:SetBackdrop({
-		bgFile = "Interface/Buttons/WHITE8X8",
-		edgeFile = "Interface/Buttons/WHITE8X8",
-		edgeSize = 1,
-	});
-	edit:SetBackdropColor(0,0,0,0.5);
-	edit:SetBackdropBorderColor(0.8, 0.8, 0.8, 0.5);
-	edit:SetScript("OnEnterPressed", function(self)
-		ni.vars.units[var] = self:GetText() or "";
-		self:ClearFocus();
-	end);
-	edit:SetScript("OnEscapePressed", function(self)
-		self:SetText(ni.vars.units[var]);
-		self:ClearFocus();
-	end);
-	edit:SetText(ni.vars.units[var]);
-	edit:Show();
-	return edit;
-end
-
-local function CreateCheckBox(frame, offset_x, offset_y, checked, func, value)
-	local name = ni.utils.generaterandomname();
-	local check = CreateFrame("CheckButton", name, frame, "OptionsBaseCheckButtonTemplate");
-	check:SetPoint("TOP", offset_x, offset_y);
-	check:SetSize(26, 26);
-	check:SetChecked(checked);
-	check:SetHitRectInsets(0,0,0,0);
-	check:SetScript("OnClick", function(self)
-		func(self);
-	end);
-	check.value = value;
-	return check;
-end;
 local bitwise = {};
 function bitwise.hasbit(x, p)
 	return x % (p + p) >= p;
@@ -583,8 +602,8 @@ end;
 function bitwise.clearbit(x, p)
 	return bitwise.hasbit(x, p) and x - p or x;
 end;
---Resource tracking menu
-CreateText(resourcesettings, Localization.Resource, 0, -8, 0.2, 0.7, 1, 1, "CENTER");
+
+CreateText(resourcesettings, Localization.Resource, 0, -8, mr, mg, mb, 1, "CENTER");
 local currentresources = ni.vars.currentresources or 0;
 ni.functions.setresourcetracking(currentresources);
 local boxes = {
@@ -635,14 +654,14 @@ local function checkbox_clicked(self)
 	end
 	update_boxes(currentresources);
 end;
-CreateDropDownText(resourcesettings, Localization.None, -15, -28, "LEFT")
+CreateDropDownText(resourcesettings, Localization.None, -40, -28, "LEFT")
 boxes.resource_none = CreateCheckBox(resourcesettings, -130, -26, currentresources == 0, function(self)
 	if self:GetChecked() then
 		currentresources = 0;
 	end
 	update_boxes(currentresources);
 end, 0);
-CreateDropDownText(resourcesettings, Localization.All, -15, -48, "LEFT")
+CreateDropDownText(resourcesettings, Localization.All, -40, -48, "LEFT")
 boxes.resource_all = CreateCheckBox(resourcesettings, -130, -46, currentresources == -1, function(self)
 	if self:GetChecked() then
 		currentresources = -1;
@@ -651,51 +670,52 @@ boxes.resource_all = CreateCheckBox(resourcesettings, -130, -46, currentresource
 	end
 	update_boxes(currentresources);
 end, -1);
-CreateDropDownText(resourcesettings, Localization.Lockpicking, -15, -68, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Lockpicking, -40, -68, "LEFT")
 boxes.resource_lockpicking = CreateCheckBox(resourcesettings, -130, -66, bitwise.hasbit(currentresources, 0x1), checkbox_clicked, 0x1);
-CreateDropDownText(resourcesettings, Localization.Herbs, -15, -88, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Herbs, -40, -88, "LEFT")
 boxes.resource_herbs = CreateCheckBox(resourcesettings, -130, -86, bitwise.hasbit(currentresources, 0x2), checkbox_clicked, 0x2);
-CreateDropDownText(resourcesettings, Localization.Minerals, -15, -108, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Minerals, -40, -108, "LEFT")
 boxes.resource_minerals = CreateCheckBox(resourcesettings, -130, -106, bitwise.hasbit(currentresources, 0x4), checkbox_clicked, 0x4);
-CreateDropDownText(resourcesettings, Localization.DisarmTrap, -15, -128, "LEFT")
+CreateDropDownText(resourcesettings, Localization.DisarmTrap, -40, -128, "LEFT")
 boxes.resource_disarmtrap = CreateCheckBox(resourcesettings, -130, -126, bitwise.hasbit(currentresources, 0x8), checkbox_clicked, 0x8);
-CreateDropDownText(resourcesettings, Localization.Open, -15, -148, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Open, -40, -148, "LEFT")
 boxes.resource_open = CreateCheckBox(resourcesettings, -130, -146, bitwise.hasbit(currentresources, 0x10), checkbox_clicked, 0x10);
-CreateDropDownText(resourcesettings, Localization.Treasure, -15, -168, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Treasure, -40, -168, "LEFT")
 boxes.resource_treasure = CreateCheckBox(resourcesettings, -130, -166, bitwise.hasbit(currentresources, 0x20), checkbox_clicked, 0x20);
-CreateDropDownText(resourcesettings, Localization.CloseTrack, -15, -188, "LEFT")
+CreateDropDownText(resourcesettings, Localization.CloseTrack, -40, -188, "LEFT")
 boxes.resource_close = CreateCheckBox(resourcesettings, -130, -186, bitwise.hasbit(currentresources, 0x80), checkbox_clicked, 0x80);
-CreateDropDownText(resourcesettings, Localization.ArmTrap, -15, -208, "LEFT")
+CreateDropDownText(resourcesettings, Localization.ArmTrap, -40, -208, "LEFT")
 boxes.resource_armtrap = CreateCheckBox(resourcesettings, -130, -206, bitwise.hasbit(currentresources, 0x100), checkbox_clicked, 0x100);
-CreateDropDownText(resourcesettings, Localization.QuickOpen, -15, -228, "LEFT")
+CreateDropDownText(resourcesettings, Localization.QuickOpen, -40, -228, "LEFT")
 boxes.resource_quickopen = CreateCheckBox(resourcesettings, -130, -226, bitwise.hasbit(currentresources, 0x200), checkbox_clicked, 0x200);
-CreateDropDownText(resourcesettings, Localization.CalcifiedElvenGems, -15, -248, "LEFT")
+CreateDropDownText(resourcesettings, Localization.CalcifiedElvenGems, -40, -248, "LEFT")
 boxes.resource_calcifiedelvengems = CreateCheckBox(resourcesettings, -130, -246, bitwise.hasbit(currentresources, 0x40), checkbox_clicked, 0x40);
-CreateDropDownText(resourcesettings, Localization.QuickClose, 130, -28, "LEFT")
+CreateDropDownText(resourcesettings, Localization.QuickClose, 105, -28, "LEFT")
 boxes.resource_quickclose = CreateCheckBox(resourcesettings, 15, -26, bitwise.hasbit(currentresources, 0x400), checkbox_clicked, 0x400);
-CreateDropDownText(resourcesettings, Localization.OpenTinkering, 130, -48, "LEFT")
+CreateDropDownText(resourcesettings, Localization.OpenTinkering, 105, -48, "LEFT")
 boxes.resource_opentinkering = CreateCheckBox(resourcesettings, 15, -46, bitwise.hasbit(currentresources, 0x800), checkbox_clicked, 0x800);
-CreateDropDownText(resourcesettings, Localization.OpenKneeling, 130, -68, "LEFT")
+CreateDropDownText(resourcesettings, Localization.OpenKneeling, 105, -68, "LEFT")
 boxes.resource_openkneeling = CreateCheckBox(resourcesettings, 15, -66, bitwise.hasbit(currentresources, 0x1000), checkbox_clicked, 0x1000);
-CreateDropDownText(resourcesettings, Localization.OpenAttacking, 130, -88, "LEFT")
+CreateDropDownText(resourcesettings, Localization.OpenAttacking, 105, -88, "LEFT")
 boxes.resource_openattacking = CreateCheckBox(resourcesettings, 15, -86, bitwise.hasbit(currentresources, 0x2000), checkbox_clicked, 0x2000);
-CreateDropDownText(resourcesettings, Localization.Gahzridian, 130, -108, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Gahzridian, 105, -108, "LEFT")
 boxes.resource_gahzridian = CreateCheckBox(resourcesettings, 15, -106, bitwise.hasbit(currentresources, 0x4000), checkbox_clicked, 0x4000);
-CreateDropDownText(resourcesettings, Localization.Blasting, 130, -128, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Blasting, 105, -128, "LEFT")
 boxes.resource_blasting = CreateCheckBox(resourcesettings, 15, -126, bitwise.hasbit(currentresources, 0x8000), checkbox_clicked, 0x8000);
-CreateDropDownText(resourcesettings, Localization.PvPOpen, 130, -148, "LEFT")
+CreateDropDownText(resourcesettings, Localization.PvPOpen, 105, -148, "LEFT")
 boxes.resource_pvpopen = CreateCheckBox(resourcesettings, 15, -146, bitwise.hasbit(currentresources, 0x10000), checkbox_clicked, 0x10000);
-CreateDropDownText(resourcesettings, Localization.PvPClose, 130, -168, "LEFT")
+CreateDropDownText(resourcesettings, Localization.PvPClose, 105, -168, "LEFT")
 boxes.resource_pvpclose = CreateCheckBox(resourcesettings, 15, -166, bitwise.hasbit(currentresources, 0x20000), checkbox_clicked, 0x20000);
-CreateDropDownText(resourcesettings, Localization.Fishing, 130, -188, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Fishing, 105, -188, "LEFT")
 boxes.resource_fishing = CreateCheckBox(resourcesettings, 15, -186, bitwise.hasbit(currentresources, 0x40000), checkbox_clicked, 0x40000);
-CreateDropDownText(resourcesettings, Localization.Inscription, 130, -208, "LEFT")
+CreateDropDownText(resourcesettings, Localization.Inscription, 105, -208, "LEFT")
 boxes.resource_inscription = CreateCheckBox(resourcesettings, 15, -206, bitwise.hasbit(currentresources, 0x80000), checkbox_clicked, 0x80000);
-CreateDropDownText(resourcesettings, Localization.OpenFromVehicle, 130, -228, "LEFT")
+CreateDropDownText(resourcesettings, Localization.OpenFromVehicle, 105, -228, "LEFT")
 boxes.resource_openfromvehicle = CreateCheckBox(resourcesettings, 15, -226, bitwise.hasbit(currentresources, 0x100000), checkbox_clicked, 0x100000);
 
---Creature tracking menu
-CreateText(creaturesettings, Localization.CreatureTrackingToggles, 0, -8, 0.2, 0.7, 1, 1, "CENTER");
+--- NPC Tracking Menu ---
+
+CreateText(creaturesettings, Localization.CreatureTrackingToggles, 0, -8, mr, mg, mb, 1, "CENTER");
 local cboxes = {
 	none,
 	beasts,
@@ -738,14 +758,14 @@ local function checkbox_clickedc(self)
 	end
 	update_cboxes(currentcreatures);
 end;
-CreateDropDownText(creaturesettings, Localization.None, 8, -27, "LEFT")
+CreateDropDownText(creaturesettings, Localization.None, -15, -27, "LEFT")
 cboxes.none = CreateCheckBox(creaturesettings, -104, -25, currentcreatures == 0, function(self)
 	if self:GetChecked() then
 		currentcreatures = 0;
 	end
 	update_cboxes(currentcreatures);
 end, 0);
-CreateDropDownText(creaturesettings, Localization.All, 8, -47, "LEFT")
+CreateDropDownText(creaturesettings, Localization.All, -15, -47, "LEFT")
 cboxes.all = CreateCheckBox(creaturesettings, -104, -45, currentcreatures == -1, function(self)
 	if self:GetChecked() then
 		currentcreatures = -1;
@@ -754,33 +774,35 @@ cboxes.all = CreateCheckBox(creaturesettings, -104, -45, currentcreatures == -1,
 	end
 	update_cboxes(currentcreatures);
 end, -1);
-CreateDropDownText(creaturesettings, Localization.Beasts, 8, -67, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Beasts, -15, -67, "LEFT")
 cboxes.beasts = CreateCheckBox(creaturesettings, -104, -65, bitwise.hasbit(currentcreatures, 0x1), checkbox_clickedc, 0x1);
-CreateDropDownText(creaturesettings, Localization.Dragons, 8, -87, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Dragons, -15, -87, "LEFT")
 cboxes.dragons = CreateCheckBox(creaturesettings, -104, -85, bitwise.hasbit(currentcreatures, 0x2), checkbox_clickedc, 0x2);
-CreateDropDownText(creaturesettings, Localization.Demons, 8, -107, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Demons, -15, -107, "LEFT")
 cboxes.demons = CreateCheckBox(creaturesettings, -104, -105, bitwise.hasbit(currentcreatures, 0x4), checkbox_clickedc, 0x4);
-CreateDropDownText(creaturesettings, Localization.Elementals, 8, -127, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Elementals, -15, -127, "LEFT")
 cboxes.elementals = CreateCheckBox(creaturesettings, -104, -125, bitwise.hasbit(currentcreatures, 0x8), checkbox_clickedc, 0x8);
-CreateDropDownText(creaturesettings, Localization.Giants, 8, -147, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Giants, -15, -147, "LEFT")
 cboxes.giants = CreateCheckBox(creaturesettings, -104, -145, bitwise.hasbit(currentcreatures, 0x10), checkbox_clickedc, 0x10);
-CreateDropDownText(creaturesettings, Localization.Undead, 8, -167, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Undead, -15, -167, "LEFT")
 cboxes.undead = CreateCheckBox(creaturesettings, -104, -165, bitwise.hasbit(currentcreatures, 0x20), checkbox_clickedc, 0x20);
-CreateDropDownText(creaturesettings, Localization.Humanoids, 110, -27, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Humanoids, 85, -27, "LEFT")
 cboxes.humanoids = CreateCheckBox(creaturesettings, -2, -25, bitwise.hasbit(currentcreatures, 0x40), checkbox_clickedc, 0x40);
-CreateDropDownText(creaturesettings, Localization.Critters, 110, -47, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Critters, 85, -47, "LEFT")
 cboxes.critters = CreateCheckBox(creaturesettings, -2, -45, bitwise.hasbit(currentcreatures, 0x80), checkbox_clickedc, 0x80);
-CreateDropDownText(creaturesettings, Localization.Machines, 110, -67, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Machines, 85, -67, "LEFT")
 cboxes.machines = CreateCheckBox(creaturesettings, -2, -65, bitwise.hasbit(currentcreatures, 0x100), checkbox_clickedc, 0x100);
-CreateDropDownText(creaturesettings, Localization.Slimes, 110, -87, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Slimes, 85, -87, "LEFT")
 cboxes.slimes = CreateCheckBox(creaturesettings, -2, -85, bitwise.hasbit(currentcreatures, 0x200), checkbox_clickedc, 0x200);
-CreateDropDownText(creaturesettings, Localization.Totem, 110, -107, "LEFT")
+CreateDropDownText(creaturesettings, Localization.Totem, 85, -107, "LEFT")
 cboxes.totem = CreateCheckBox(creaturesettings, -2, -105, bitwise.hasbit(currentcreatures, 0x400), checkbox_clickedc, 0x400);
-CreateDropDownText(creaturesettings, Localization.NonCombatPet, 110, -127, "LEFT")
+CreateDropDownText(creaturesettings, Localization.NonCombatPet, 85, -127, "LEFT")
 cboxes.noncombatpet = CreateCheckBox(creaturesettings, -2, -125, bitwise.hasbit(currentcreatures, 0x800), checkbox_clickedc, 0x800);
-CreateDropDownText(creaturesettings, Localization.GasCloud, 110, -147, "LEFT")
+CreateDropDownText(creaturesettings, Localization.GasCloud, 85, -147, "LEFT")
 cboxes.gascloud = CreateCheckBox(creaturesettings, -2, -145, bitwise.hasbit(currentcreatures, 0x1000), checkbox_clickedc, 0x1000);
---Main Settings drop downs
+
+--- Main Settings Buttons / Dropdowns ---
+
 local keys = {
 	Localization.None,
 	"F1",
@@ -800,23 +822,23 @@ CreateText(mainsettings, Localization.Reload, 0, -7, 0.8, 0.1, 0.1, 1);
 CreateText(mainsettings, Localization.Global, 0, -22, 0.8, 0.1, 0.1, 1);
 
 CreateDropDownText(mainsettings, Localization.GUI, 0, -44);
-CreateKeyDropDown(mainsettings, keys, 0, -63, "gui");
+CreateKeyDropDown(mainsettings, keys, 0, -63, "gui", 75);
 
 CreateDropDownText(mainsettings, Localization.PrimaryKey, 0, -90);
-CreateKeyDropDown(mainsettings, keys, 0, -110, "primary");
+CreateKeyDropDown(mainsettings, keys, 0, -110, "primary", 75);
 
 CreateDropDownText(mainsettings, Localization.SecondaryKey, 0, -140);
-CreateKeyDropDown(mainsettings, keys, 0, -160, "secondary");
+CreateKeyDropDown(mainsettings, keys, 0, -160, "secondary", 75);
 
 CreateDropDownText(mainsettings, Localization.Generic, 0, -190);
-CreateKeyDropDown(mainsettings, keys, 0, -210, "generic");
+CreateKeyDropDown(mainsettings, keys, 0, -210, "generic", 75);
 
 CreateDropDownText(mainsettings, Localization.Interrupt, 0, -240);
-CreateKeyDropDown(mainsettings, keys, 0, -260, "interrupt");
+CreateKeyDropDown(mainsettings, keys, 0, -260, "interrupt", 75);
 
 CreateDropDownText(mainsettings, Localization.Follow, 0, -290);
-CreateEditBox(mainsettings, 0, -310, "follow");
-CreateKeyDropDown(mainsettings, keys, 0, -335, "follow");
+local followE = CreateConfigurableEditBox(mainsettings, 0, -310, "follow", ni.vars.units.follow);
+CreateKeyDropDown(mainsettings, keys, 0, -335, "follow", 75);
 CreateDropDownText(mainsettings, Localization.IsMelee, -10, -365); 
 CreateCheckBox(mainsettings, 45, -363, ni.vars.combat.melee, function(self)
 	if self:GetChecked() then
@@ -827,81 +849,24 @@ CreateCheckBox(mainsettings, 45, -363, ni.vars.combat.melee, function(self)
 end);
 
 CreateDropDownText(mainsettings, Localization.GlobalDev, 0, -400);
-local globran = ni.utils.generaterandomname();
-local globaledit = CreateFrame("EditBox", globran, mainsettings);
-globaledit:SetHeight(20)
-globaledit:SetWidth(124);
-globaledit:SetPoint("TOP", mainsettings, 0, -425)
-globaledit:SetFontObject("GameFontHighlight");
-globaledit:SetAutoFocus(false);
-globaledit:SetJustifyH("CENTER");
-globaledit:SetJustifyV("CENTER");
-globaledit:EnableMouse(true);
-globaledit:SetBackdrop({
-	bgFile = "Interface/Buttons/WHITE8X8",
-	edgeFile = "Interface/Buttons/WHITE8X8",
-	edgeSize = 1,
-});
-globaledit:SetBackdropColor(0,0,0,0.5);
-globaledit:SetBackdropBorderColor(0.8, 0.8, 0.8, 0.5);
-globaledit:SetScript("OnEnterPressed", function(self)
-	ni.vars.global = self:GetText() or "";
-	self:ClearFocus();
-end);
-globaledit:SetScript("OnEscapePressed", function(self)
-	self:SetText(ni.vars.global or "");
-	self:ClearFocus();
-end);
-globaledit:SetText(ni.vars.global or "");
-globaledit:Show();
+local globaledit = CreateConfigurableEditBox(mainsettings, 0, -425, "global", ni.vars.global)
 
 CreateText(mainsettings, Localization.Dev, 0, -385, 0.8, 0.1, 0.1, 1, "CENTER");
-
-local relran = ni.utils.generaterandomname();
-local reloadbutton = CreateFrame("BUTTON", relran, mainsettings, "UIPanelButtonTemplate");
-reloadbutton:SetWidth(97);
-reloadbutton:SetHeight(22);
-reloadbutton:SetText(Localization.ReloadDev);
-reloadbutton:SetPoint("BOTTOMLEFT", mainsettings, 13, 57);
-reloadbutton:SetAlpha(1);
-reloadbutton:SetScript("OnClick", function()
+CreateMainButton(mainsettings, 97, 22, Localization.ReloadDev, -50, 57, false, function()
 	ReloadUI();
 end);
-
-local consran = ni.utils.generaterandomname();
-local consolebutton = CreateFrame("BUTTON", consran, mainsettings, "UIPanelButtonTemplate");
-consolebutton:SetWidth(97);
-consolebutton:SetHeight(22);
-consolebutton:SetText(Localization.Console);
-consolebutton:SetPoint("BOTTOMRIGHT", mainsettings, -13, 57);
-consolebutton:SetAlpha(1);
-consolebutton:SetScript("OnClick", function()
-	message("\n\nUNAVAILABLE")
+CreateMainButton(mainsettings, 97, 22, Localization.Console, 50, 57, false, function()
+	message("\n\nUNAVAILABLE");
 end);
 
 CreateText(mainsettings, Localization.Contact, 0, -475, 0.8, 0.1, 0.1, 1, "CENTER");
-
-local dimran = ni.utils.generaterandomname();
-local dimbutton = CreateFrame("BUTTON", dimran, mainsettings, "UIPanelButtonTemplate");
-dimbutton:SetWidth(97);
-dimbutton:SetHeight(22);
-dimbutton:SetText("DISCORD");
-dimbutton:SetPoint("BOTTOMRIGHT", mainsettings, -13, 10);
-dimbutton:SetAlpha(1);
-dimbutton:SetScript("OnClick", function()
-	ni.functions.open("https://discord.gg/xBFKJc6QRr") 
+CreateMainButton(mainsettings, 97, 22, "DarhangeR", -50, 10, false, function()
+	ni.functions.open("https://discord.com/users/250267265285488641") ;
+end);
+CreateMainButton(mainsettings, 97, 22, "DISCORD", 50, 10, false, function()
+	ni.functions.open("https://discord.gg/xBFKJc6QRr");
 end);
 
-local darran = ni.utils.generaterandomname();
-local darbutton = CreateFrame("BUTTON", darran, mainsettings, "UIPanelButtonTemplate");
-darbutton:SetWidth(97);
-darbutton:SetHeight(22);
-darbutton:SetText("DarhangeR");
-darbutton:SetPoint("BOTTOMLEFT", mainsettings, 13, 10);
-darbutton:SetAlpha(1);
-darbutton:SetScript("OnClick", function()
-	ni.functions.open("https://discord.com/users/250267265285488641") 
-end);
 --Rotation Settings drop downs
 local mods = {
 	Localization.None,
@@ -912,7 +877,7 @@ local mods = {
 	"Right Control",
 	"Right Shift"
 };
-CreateDropDownText(settings, Localization.Coin, -15, -20); 
+CreateDropDownText(settings, Localization.Coin, -40, -20); 
 CreateCheckBox(settings, 50, -18, ni.vars.coin, function(self)
 	if self:GetChecked() then
 		ni.vars.coin = true;
@@ -948,19 +913,19 @@ slider:SetScript("OnValueChanged", function(self, value)
 end);
 
 CreateDropDownText(settings, Localization.AreaofEffectToggle, 0, -90);
-CreateKeyDropDown(settings, mods, 0, -110, "aoe");
+CreateKeyDropDown(settings, mods, 0, -110, "aoe", 100);
 
 CreateDropDownText(settings, Localization.PauseRotationModifier, 0, -138);
-CreateKeyDropDown(settings, mods, 0, -158, "pause");
+CreateKeyDropDown(settings, mods, 0, -158, "pause", 100);
 
 CreateDropDownText(settings, Localization.CDToggle, 0, -186);
-CreateKeyDropDown(settings, mods, 0, -206, "cd");
+CreateKeyDropDown(settings, mods, 0, -206, "cd", 100);
 
 CreateDropDownText(settings, Localization.CustomToggle, 0, -234);
-CreateKeyDropDown(settings, mods, 0, -254, "custom");
+CreateKeyDropDown(settings, mods, 0, -254, "custom", 100);
 
 CreateDropDownText(settings, Localization.MainTankOverride, 0, -282);
-CreateEditBox(settings, 0, -301, "mainTank");
+local mainTank = CreateConfigurableEditBox(settings, 0, -301, "mainTank", ni.vars.units.mainTank);
 CreateCheckBox(settings, -78, -299, ni.vars.units.mainTankEnabled, function(self)
 	if self:GetChecked() then
 		ni.vars.units.mainTankEnabled = true;
@@ -970,7 +935,7 @@ CreateCheckBox(settings, -78, -299, ni.vars.units.mainTankEnabled, function(self
 end);
 
 CreateDropDownText(settings, Localization.OffTankOverride, 0, -322);
-CreateEditBox(settings, 0, -341, "offTank");
+local offTank = CreateConfigurableEditBox(settings, 0, -341, "offTank", ni.vars.units.offTank);
 CreateCheckBox(settings, -78, -339, ni.vars.units.offTankEnabled, function(self)
 	if self:GetChecked() then
 		ni.vars.units.offTankEnabled = true;
@@ -989,11 +954,16 @@ local MiniMapLDB = ldb:NewDataObject(mmb_name, {
     RegisterForDrag = "LeftButton",
 });
 main_ui.minimap_toggle = function(bool)
-    if not bool then 
-        MiniMapLDB.icon = "Interface\\Icons\\achievement_character_orc_male"; -- When profiles off
-    else
-        MiniMapLDB.icon = "Interface\\Icons\\ability_warrior_endlessrage" -- When profiles on
-    end
+	if bool and ni.vars.profiles.enabled 
+	and ((ni.vars.hotkeys.primary and ni.vars.profiles.primary ~= Localization.None) 
+	or (ni.vars.hotkeys.secondary and ni.vars.profiles.secondary ~= Localization.None)) then
+		MiniMapLDB.icon = ClassIcon; -- Profile Enabled
+	elseif bool and ni.vars.profiles.genericenabled 
+	and (ni.vars.hotkeys.generic and ni.vars.profiles.generic ~= Localization.None) then
+		MiniMapLDB.icon = "Interface\\Icons\\trade_engineering"; -- Other icon when genericenabled is true and enabled is false
+	else
+		MiniMapLDB.icon = "Interface\\Icons\\achievement_character_orc_male"; -- Default icon when both are false
+	end
 end;
 main_ui.minimap_toggle(ni.vars.profiles.enabled or ni.vars.profiles.genericenabled)
 function MiniMapLDB:OnClick(button)
@@ -1015,7 +985,7 @@ function MiniMapLDB:OnDragStop()
     ni.vars.ui.iconPos = self.db.minimapPos
 end;
 function MiniMapLDB:OnTooltipShow()
-    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.65.1")
+    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.66")
     self:AddLine(" ")
     self:AddLine(Localization.LeftClick)
 	self:AddLine(Localization.RightClick)

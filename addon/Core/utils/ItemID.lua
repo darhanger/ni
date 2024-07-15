@@ -2,6 +2,7 @@
 --------------- Spell & Item ID ---------------
 -----------------------------------------------
 local ru = ni.vars.locale == "ruRU" or false;
+local build = ni.vars.build;
 local hooksecurefunc, select, UnitBuff, UnitDebuff, UnitAura, UnitGUID, GetGlyphSocketInfo, tonumber, strfind =
 	  hooksecurefunc, select, UnitBuff, UnitDebuff, UnitAura, UnitGUID, GetGlyphSocketInfo, tonumber, strfind
 local types = {
