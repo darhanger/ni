@@ -1,5 +1,5 @@
 local GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable = GetInventoryItemLink, strsplit, tonumber, format, GetGlyphSocketInfo, select, GetItemCount, GetInventoryItemID, GetItemSpell, GetItemCooldown, GetTime, GetContainerNumFreeSlots, GetContainerFreeSlots, GetItemIcon, GetSpellInfo, GetSpellCooldown, GetUnitSpeed, IsFalling, rawset, setmetatable
-local CurrentMovingTime, CurrentStationaryTime, ResetMovementTime = 0, 0, 0.5;
+local isMoving, startTime, startTime2 = 0, 0, false;
 local build = ni.vars.build;
 local player = {};
 player.moveto = function(...) --target/x,y,z
@@ -236,28 +236,29 @@ player.petcd = function(spell)
 		return 0
 	end
 end;
-player.registermovement = function(elapsed)
-	local speed = GetUnitSpeed("player");
-	if speed ~= 0 then
-		CurrentMovingTime = CurrentMovingTime + elapsed;
-		CurrentStationaryTime = 0;
-	else
-		if CurrentStationaryTime < ResetMovementTime then
-			CurrentStationaryTime = CurrentStationaryTime + elapsed;
-		elseif CurrentStationaryTime > ResetMovementTime then
-			CurrentMovingTime = 0;
-		end
-	end
-end;
 player.movingfor = function(duration)
-	local duration = duration or 1;
-	if CurrentMovingTime >= duration and not ni.unit.buff("player", 98767) then
-		return true;
-	end
-	return false;
+    duration = duration or 1;
+    local moving = ni.unit.ismoving("player");
+    if moving then
+        if startTime == 0 then
+            startTime = GetTime();
+        end
+        if (GetTime() - startTime) >= duration then
+            return true;
+        end
+    else
+        startTime = 0;
+    end
+    return false;
 end;
 player.getmovingtime = function()
-	return CurrentMovingTime;
+	local moving = ni.unit.ismoving("player");
+	if not moving then
+		startTime2 = GetTime();
+	else
+		return GetTime() - startTime2;
+	end
+    return 0;
 end;
 player.ismoving = function()
 	if ni.unit.ismoving("player") or IsFalling() then

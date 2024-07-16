@@ -491,7 +491,6 @@ frames.OnUpdate = function(self, elapsed)
 		end;
 
 		if ni.vars.profiles.enabled or ni.vars.profiles.genericenabled then
-			ni.player.registermovement(totalelapsed);
 			if ni.vars.profiles.delay > GetTime() then
 				return true;
 			end
