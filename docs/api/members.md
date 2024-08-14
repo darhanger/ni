@@ -344,6 +344,46 @@ for i = 1, #ni.members do
 end
 ```
 
+## buffstacks
+
+Arguments:
+
+- **buff** `name|id`
+- **filter** `EXACT|PLAYER` _optional_
+
+Returns: `boolean`
+
+Calculates the remaining time of the buff on allys in seconds.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:buffremaining(48441) < 3 then
+		-- This member has Rejuvenation for less than 3 seconds
+	end
+end
+```
+
+Note: If the `filter` argument is not specified, this function will return the first matching debuff it finds, regardless of its type.
+
+## debuffstacks
+
+Arguments:
+
+- **buff** `name|id`
+- **filter** `EXACT|PLAYER` _optional_
+
+Returns: `boolean`
+
+Calculates the remaining time of the debuff on allys in seconds.
+
+```lua
+for i = 1, #ni.members do
+	if ni.members[i]:buffremaining(1234) < 5 then
+		-- This member has spell of ID 1234 for less than 5 seconds
+	end
+end
+```
+
 Note: If the `filter` argument is not specified, this function will return the first matching debuff it finds, regardless of its type.
 
 ## dispel
@@ -360,30 +400,6 @@ This is the variable that returns true or false of the member accessed if you ca
 for i = 1, #ni.members do
 	if ni.members[i]:dispel() then
 		-- This member has a debuff that can be dispelled by you
-	end
-end
-```
-
-## cast
-
-Arguments:
-
-- **spell** `id|string`
-
-Returns: `void`
-
-Casts the specified spell on member.
-
-```lua
-for i = 1, #ni.members do
-	if ni.members[i]:dispel() then
-		return ni.members[i]:cast(988) -- Cast Dispel Magic on ally
-	end
-end
-
-for i = 1, #ni.members do
-	if ni.members[i]:buffstacks("Earth Shield") < 3 then
-		return ni.members[i]:cast("Earth Shield") -- Cast Earth Shield on ally
 	end
 end
 ```

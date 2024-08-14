@@ -4,6 +4,100 @@
 
 ---
 
+## id
+
+Arguments:
+
+- **spellname** `string`
+
+Returns: `number|nil`
+
+Converts spell's name into spell id. If spell doesn't exist returns nil.
+
+```lua
+local spellid = ni.spell.id("Life Tap") -- 57946
+```
+
+## cd
+
+Arguments:
+
+- **spell** `id|string`
+
+Returns: `number`
+
+Calculates specified spell's cooldown. If the spell is not on cooldown returns 0.
+
+```lua
+if not ni.spell.cd(47891) then
+  -- Shadow Ward is not on cooldown
+end
+```
+
+## gcd
+
+Arguments:
+
+Returns: `boolean`
+
+Checks if global cooldown is triggered.
+
+```lua
+if not ni.spell.gcd() then
+  -- Global cooldown is not active, we can do something
+end
+```
+
+## isqueued
+
+Returns: `boolean`
+
+Checks if a spell is currently queued for casting. The function considers whether spell queueing is enabled and the player's current casting status.
+
+### Returns:
+
+- `true` if a spell is queued or actively being cast.
+- `false` if no spell is queued or being cast.
+
+### Example:
+
+```lua
+if ni.spell.isqueued() then
+  -- A spell is currently queued or being cast
+else
+  -- No spell is queued or being cast
+end
+```
+
+## lastcast
+
+Arguments:
+
+- **spellid** `number|string`  
+- **sec** `number`  
+
+Returns: `boolean`
+
+Checks if the specified spell was cast within the last specified number of seconds.
+
+### Parameters:
+
+- `spellid`: The ID or name of the spell to check. If a name is provided, it is converted to the corresponding spell ID.
+- `sec`: The time window in seconds to check if the spell was cast within. If `sec` is greater than 0, the function checks if the spell was cast within that time frame. If `sec` is 0 or less, the function simply returns `true`.
+
+### Returns:
+
+- `true` if the spell was cast within the specified time window.
+- `false` if the spell was not cast within the specified time window.
+
+### Example:
+
+```lua
+if ni.spell.lastcast(12345, 5) then
+  -- The spell with ID 12345 was cast within the last 5 seconds
+end
+```
+
 ## available
 
 Arguments:
@@ -28,6 +122,19 @@ Checks if specified spell is available to use. Includes checks such as:
 if ni.spell.available("Fear") then
   -- Fear passess all the checks and is available
 end
+
+## casttime
+
+Arguments:
+
+- **spell** `id|string`
+
+Returns: `number`
+
+Calculates the cast time of specified spell.
+
+```lua
+local casttime = ni.spell.casttime("Immolate") -- 1.25
 ```
 
 ## cast
@@ -43,6 +150,7 @@ Casts the specified spell. If the target is provided it'll cast on that target, 
 
 ```lua
 ni.spell.cast("Shadow Bolt", "target")
+ni.spell.cast(12340, "target")
 ```
 
 ## delaycast
@@ -67,6 +175,37 @@ end
 if true then
 	ni.spell.delaycast("Shadow Bolt", "target", 1.5)
 end
+```
+
+## castspells
+
+Arguments:
+
+- **spell** `id|string`
+- **target** `token|guid`
+
+Returns: `void`
+
+Casts specified spells separated by pipe (`|`). If the target is provided it'll cast on that target, otherwise spells wll be casted on self. Does not work if spells more than one spell triggers global cooldown.
+
+```lua
+ni.spell.castspells("Heroic Strike|Bloodthirst", "target")
+```
+
+## castat
+
+Arguments:
+
+- **spell** `id|string`
+- **target** `token|guid|mouse`
+- **offset** `number`
+
+Returns: `void`
+
+Casts specified spell which required click on the ground (e.g. Death and Decay, Rain of Fire, Blizzard).
+
+```lua
+ni.spell.castat("Rain of Fire", "target")
 ```
 
 ## bestaoeloc
@@ -121,37 +260,6 @@ This function will cast the spell specified at the best location matching the re
 ni.spell.cast("Healing Rain", 36, 4, 5); --On a shaman this would cast healing rain at the best location within 36 yards of the player that has at least 5 friendlies to be hit by the heal
 ```
 
-## castat
-
-Arguments:
-
-- **spell** `id|string`
-- **target** `token|guid|mouse`
-- **offset** `number`
-
-Returns: `void`
-
-Casts specified spell which required click on the ground (e.g. Death and Decay, Rain of Fire, Blizzard).
-
-```lua
-ni.spell.castat("Rain of Fire", "target")
-```
-
-## castatqueue
-
-Arguments:
-
-- **spell** `id|string`
-- **target** `token|guid|mouse`
-
-Returns: `void`
-
-Queues a specified spell to be casted on the ground once it's available.
-
-```lua
-ni.spell.castatqueue("Blizzard", "target")
-```
-
 ## castqueue
 
 Arguments:
@@ -167,93 +275,19 @@ Queues a specified spell to be casted once it's available.
 ni.spell.castqueue("Fear", "target")
 ```
 
-## castspells
+## castatqueue
 
 Arguments:
 
 - **spell** `id|string`
-- **target** `token|guid`
+- **target** `token|guid|mouse`
 
 Returns: `void`
 
-Casts specified spells separated by pipe (`|`). If the target is provided it'll cast on that target, otherwise spells wll be casted on self. Does not work if spells more than one spell triggers global cooldown.
+Queues a specified spell to be casted on the ground once it's available.
 
 ```lua
-ni.spell.castspells("Heroic Strike|Bloodthirst", "target")
-```
-
-## casttime
-
-Arguments:
-
-- **spell** `id|string`
-
-Returns: `number`
-
-Calculates the cast time of specified spell.
-
-```lua
-local casttime = ni.spell.casttime("Immolate") -- 1.25
-```
-
-## cd
-
-Arguments:
-
-- **spell** `id|string`
-
-Returns: `number`
-
-Calculates specified spell's cooldown. If the spell is not on cooldown returns 0.
-
-```lua
-if not ni.spell.cd(47891) then
-  -- Shadow Ward is not on cooldown
-end
-```
-
-## gcd
-
-Arguments:
-
-Returns: `boolean`
-
-Checks if global cooldown is triggered.
-
-```lua
-if not ni.spell.gcd() then
-  -- Global cooldown is not active, we can do something
-end
-```
-
-## id
-
-Arguments:
-
-- **spellname** `string`
-
-Returns: `number|nil`
-
-Converts spell's name into spell id. If spell doesn't exist returns nil.
-
-```lua
-local spellid = ni.spell.id("Life Tap") -- 57946
-```
-
-## isinstant
-
-Arguments:
-
-- **spell** `string|id`
-
-Returns: `boolean`
-
-Checks if passed spell is instant cast.
-
-```lua
-if ni.spell.isinstant(57946) then
-  -- Life Tap is instant spell
-end
+ni.spell.castatqueue("Blizzard", "target")
 ```
 
 ## stopcasting
@@ -305,4 +339,96 @@ This functions ensures that a spell can be casted at specific target. It include
 if ni.spell.valid("Fear", "target") then
   -- Fear meets all of the critera to be valid
 end
+```
+
+## castinterrupt
+
+Arguments:
+
+- **t** `token|guid`
+
+Returns: `void`
+
+Interrupts the casting or channeling of a spell by casting an interrupt spell if one is available and off cooldown.
+
+### Example:
+
+```lua
+ni.spell.castinterrupt("target")
+-- Attempts to interrupt the spell being cast by the target, if an interrupt spell is available
+```
+
+## shouldinterrupt
+
+Arguments:
+
+- **t** `token|guid`
+- **p** `number` _optional_
+
+Returns: `boolean`
+
+Determines whether the player's spell should interrupt the casting or channeling of a spell on a target based on various conditions.
+
+### Parameters:
+
+- `t`: The target unit to check.
+- `p` (optional): The percentage of the cast time that must have elapsed before the interrupt is considered. If not provided, the default value is used from `spell.getpercent()`.
+
+### Returns:
+
+- `true` if the spell on the target should be interrupted.
+- `false` otherwise.
+
+### Example:
+
+```lua
+if ni.spell.shouldinterrupt("target") then
+  ni.spell.castinterrupt("target")
+  -- Interrupts the target's spell if the conditions are met
+end
+```
+
+## isinstant
+
+Arguments:
+
+- **spell** `string|id`
+
+Returns: `boolean`
+
+Checks if passed spell is instant cast.
+
+```lua
+if ni.spell.isinstant(57946) then
+  -- Life Tap is instant spell
+end
+```
+
+## icon
+
+Arguments:
+
+- **spell** `number|string`
+- **width** `number` _optional_
+- **height** `number` _optional_
+
+Returns: `string`
+
+Generates a string for the icon texture of a spell, formatted for use in the game's UI, with optional width and height specifications.
+
+### Parameters:
+
+- `spell`: The ID or name of the spell for which to get the icon. If a name is provided, it is converted to the corresponding spell ID.
+- `width` (optional): The width of the icon in pixels. Defaults to 25 if not provided.
+- `height` (optional): The height of the icon in pixels. Defaults to 25 if not provided.
+
+### Returns:
+
+- A formatted string representing the icon of the specified spell, suitable for use in the game's UI.
+
+### Example:
+
+```lua
+local iconString = ni.spell.icon(12345, 32, 32)
+-- Generates a string for the icon of the spell with ID 12345, with dimensions 32x32 pixels
 ```

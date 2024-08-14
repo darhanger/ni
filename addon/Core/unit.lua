@@ -899,21 +899,6 @@ end;
 unit.facing = function(t)
 	return ni.functions.facing(t);
 end;
-unit.hasheal = function(t)
-	if UnitExists(t) then
-		local _, class = UnitClass(t);
-		if class == "PALADIN" then
-			return true;
-		elseif class == "PRIEST" then
-			return true;
-		elseif class == "DRUID" then
-			return true;
-		elseif class == "SHAMAN" then
-			return true;
-		end
-		return false;
-	end
-end;
 local function UnitEvents(event, ...)	
 	if event == "UI_ERROR_MESSAGE" then
 		local errorMessage = ...;

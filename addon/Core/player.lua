@@ -52,7 +52,7 @@ player.getspec = function()
 		for tab = 1, NumTalentTabs do
 			if ni.vars.build == 30300 then
 				name, icontexture, points, specName = GetTalentTabInfo(tab, p);
-			elseif ni.vars.build < 50400 then
+		elseif ni.vars.build < 50400 then
 				specID, name, description, icontexture, points, specName = GetTalentTabInfo(tab, p);
 			end
 			if points > maxPoints then
@@ -215,9 +215,6 @@ player.cancelbuff = function(spellid)
 	end
 	return false;
 end;
-player.itemicon = function(itemid, width, height)
-    return "\124T"..(GetItemIcon(itemid) or select(3, GetSpellInfo(24720)))..":"..(height or 25)..":"..(width or 25).."\124t"	
-end;	
 player.itemcd = function(item)
 	local start, duration, enable = GetItemCooldown(item)
 	if (start > 0 and duration > 0) then
@@ -272,6 +269,9 @@ player.guid = function()
 		return p.guid;
 	end
 	return p and p.guid or UnitGUID("player");
+end;
+player.itemicon = function(itemid, width, height)
+    return "\124T"..(GetItemIcon(itemid) or select(3, GetSpellInfo(24720)))..":"..(height or 25)..":"..(width or 25).."\124t"	
 end;
 
 setmetatable(

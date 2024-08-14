@@ -32,6 +32,30 @@ if ni.rune.deathrunes() == 4 then
 end
 ```
 
+## cd
+
+Arguments:
+
+- **r** `number`
+
+Returns: `(number, number)`
+
+Checks the cooldown status of runes of a specific type and returns the number of runes on cooldown and the number of runes off cooldown.
+
+### Returns:
+
+- `runesoncd`: The number of runes of the specified type that are currently on cooldown.
+- `runesoffcd`: The number of runes of the specified type that are not on cooldown.
+
+### Example:
+
+```lua
+local runesoncd, runesoffcd = ni.rune.cd(1) -- Check cooldown status for Blood runes
+if runesoncd > 0 then
+  -- Some Blood runes are on cooldown
+end
+```
+
 ## bloodrunecd
 
 Arguments:

@@ -173,12 +173,12 @@ function memberssetup:create(unit, guid, subgroup)
 	setmetatable(o, memberssetup)
 	
 	function o:istank()
-		return (o.class == "WARRIOR" and o:aura(71))
+		return o.role == "TANK"
+		or (o.class == "WARRIOR" and o:aura(71))
 		or (o.class == "DRUID" and o:auras("9634||5487"))
 		or (o.class == "PALADIN" and o:aura(25780) and ni.power.currentraw(o.unit, 0) < 14000)
 		or (o.class == "DEATHKNIGHT" and o:aura(48263))
-		or (o:aura(57339) or o:aura(57340))
-		or o.role == "TANK" or false;	
+		or (o:aura(57339) or (o:aura(57340) and ni.power.currentraw(o.unit, 0) < 14000)) or false;	
 	end;
 	if wotlk then
 		function o:ishealer()
@@ -230,9 +230,15 @@ function memberssetup:create(unit, guid, subgroup)
 	end;
 	function o:buffstacks(buff, filter)
 		return ni.unit.buffstacks(o.unit, buff, filter) or 0;
-	end;	
+	end;
 	function o:debuffstacks(debuff, filter)
 		return ni.unit.debuffstacks(o.unit, debuff, filter) or 0;
+	end;
+	function o:buffremaining(buff, filter)
+		return ni.unit.buffremaining(o.unit, buff, filter);
+	end;
+	function o:debuffremaining(debuff, filter)
+		return ni.unit.debuffremaining(o.unit, debuff, filter);
 	end;
 	function o:dispel()
 		return ni.healing.candispel(o.unit) or false;
@@ -434,19 +440,20 @@ function memberssetup:create(unit, guid, subgroup)
 	return o;
 end;
 
+local inrange, inrangebelow, inrangewithbuff, inrangewithdebufftype, inrangewithbufftype, inrangewithoutbuff, inrangewithbuffbelow, inrangewithoutbuffbelow, inrangewithdebuff, inrangewithdebuffbelow, inrangewithoutdebuff, inrangewithoutdebuffbelow, tsubgroup, subgroupbelow, subgroupbelow2 = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {};
 memberssetup.set = function()
 	function members.updatemembers()
 		wipe(_cache)
-		for _,o in ipairs(members) do
-			o:updatemember()
+		for _, o in ipairs(members) do
+			o:updatemember();
 		end
 	end;
 	function members.reset()
 		ni.C_Timer.After(0, function()
-			wipe(members)
-			aux_roster = ni.utils.deepcopytable(roster)
-			wipe(roster)
-			memberssetup.set()
+			wipe(members);
+			aux_roster = ni.utils.deepcopytable(roster);
+			wipe(roster);
+			memberssetup.set();
 		end)
 	end;
 	function members.sort()
@@ -484,190 +491,194 @@ memberssetup.set = function()
 		return n > 0 and average/n or 0;
 	end;
 	function members.inrange(unit, distance)
-		local tmp = {};
-		if type(unit) ~= "string" then return tmp end
+		wipe(inrange)
+		if type(unit) ~= "string" then return inrange end
 		for _,o in ipairs(members) do
 			if not UnitIsUnit(o.unit, unit) then
 				local unitdistance = ni.unit.distance(o.unit, unit) or 999;
 				if unitdistance <= distance then
-					tmp[#tmp + 1] = o;
+					inrange[#inrange + 1] = o;
 				end
 			end
 		end
-		return tmp;
+		return inrange;
 	end;
 	function members.inrangebelow(unit, distance, hp)
-		local tmp = {};
+		wipe(inrangebelow)
 		for _,o in ipairs(members.inrange(unit, distance)) do
 			local aux = o:hp()
-			if aux < hp then
-				local idx = #tmp + 1
-				tmp[idx] = o;
-				tmp[idx].aux = aux;
+			if aux <= hp then
+				local idx = #inrangebelow + 1
+				inrangebelow[idx] = o;
+				inrangebelow[idx].aux = aux;
 			end
 		end
-		if #tmp > 1 then
-			sort(tmp, function(a,b) return a.aux < b.aux end)
+		if #inrangebelow > 1 then
+			sort(inrangebelow, function(a,b) return a.aux < b.aux end)
 		end
-		return tmp;
+		return inrangebelow;
 	end;
 	function members.inrangewithbuff(unit, distance, buff, filter)
-		local tmp = {};
+		wipe(inrangewithbuff)
 		for _,o in ipairs(members.inrange(unit, distance)) do
 			if o:buff(buff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithbuff[#inrangewithbuff + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithbuff;
 	end;
 	function members.inrangewithdebufftype(unit, distance, str)
-        local tmp = {};
+        wipe(inrangewithdebufftype)
         for _,o in ipairs(members.inrange(unit, distance)) do
             if o:debufftype(str) then
-                tmp[#tmp + 1] = o;
+                inrangewithdebufftype[#inrangewithdebufftype + 1] = o;
             end
         end
-        return tmp;
+        return inrangewithdebufftype;
     end;
 	function members.inrangewithbufftype(unit, distance, str)
-        local tmp = {};
+        wipe(inrangewithbufftype)
         for _,o in ipairs(members.inrange(unit, distance)) do
             if o:bufftype(str) then
-                tmp[#tmp + 1] = o;
+                inrangewithbufftype[#inrangewithbufftype + 1] = o;
             end
         end
-        return tmp;
+        return inrangewithbufftype;
     end;
 	function members.inrangewithoutbuff(unit, distance, buff, filter)
-		local tmp = {};
+		wipe(inrangewithoutbuff)
 		for _,o in ipairs(members.inrange(unit, distance)) do
 			if not o:buff(buff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithoutbuff[#inrangewithoutbuff + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithoutbuff;
 	end;
 	function members.inrangewithbuffbelow(unit, distance, buff, hp, filter)
-		local tmp = {};
+		wipe(inrangewithbuffbelow)
 		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
 			if o:buff(buff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithbuffbelow[#inrangewithbuffbelow + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithbuffbelow;
 	end;
 	function members.inrangewithoutbuffbelow(unit, distance, buff, hp, filter)
-		local tmp = {};
+		wipe(inrangewithoutbuffbelow)
 		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
 			if not o:buff(buff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithoutbuffbelow[#inrangewithoutbuffbelow + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithoutbuffbelow;
 	end;
 	function members.inrangewithdebuff(unit, distance, debuff, filter)
-		local tmp = {};
+		wipe(inrangewithdebuff)
 		for _,o in ipairs(members.inrange(unit, distance)) do
 			if o:debuff(debuff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithdebuff[#inrangewithdebuff + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithdebuff;
 	end;
 	function members.inrangewithdebuffbelow(unit, distance, debuff, hp, filter)
-		local tmp = {};
+		wipe(inrangewithdebuffbelow)
 		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
 			if o:debuff(debuff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithdebuffbelow[#inrangewithdebuffbelow + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithdebuffbelow;
 	end;
 	function members.inrangewithoutdebuff(unit, distance, debuff, filter)
-		local tmp = {};
+		wipe(inrangewithoutdebuff)
 		for _,o in ipairs(members.inrange(unit, distance)) do
 			if not o:debuff(debuff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithoutdebuff[#inrangewithoutdebuff + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithoutdebuff;
 	end;
 	function members.inrangewithoutdebuffbelow(unit, distance, debuff, hp, filter)
-		local tmp = {};
+		wipe(inrangewithoutdebuffbelow)
 		for _,o in ipairs(members.inrangebelow(unit, distance, hp)) do
 			if not o:debuff(debuff, filter) then
-				tmp[#tmp + 1] = o;
+				inrangewithoutdebuffbelow[#inrangewithoutdebuffbelow + 1] = o;
 			end
 		end
-		return tmp;
+		return inrangewithoutdebuffbelow;
 	end;
 	function members.tsubgroup()
-		local temp = {};
+		wipe(tsubgroup)
 		for _,o in ipairs(members) do
-			if not tContains(temp, o.subgroup) then
-				tinsert(temp, o.subgroup)
+			if not tContains(tsubgroup, o.subgroup) then
+				tinsert(tsubgroup, o.subgroup)
 			end
 		end
-		return temp;
+		return tsubgroup;
 	end	
     function members.subgroupbelow(percent, radius, owngroup)
-        local total, temp, temp2, aux = 0, {}, {}
+        local total, aux = 0
+		wipe(subgroupbelow)
+		wipe(subgroupbelow2)
         if owngroup then
-            aux = members.inrange("player", 0)[1]
-            owngroup = aux and aux.subgroup
+            aux = members.inrange("player", 0)[1];
+            owngroup = aux and aux.subgroup;
         end
-        for _,group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
-            for _,o in ipairs(members) do
+        for _, group in ipairs(owngroup and {owngroup} or members.tsubgroup()) do
+            for _, o in ipairs(members) do
                 if o.subgroup == group and o:range()
                   and o:hp() < percent and o:los() then
-                    total = 1
+                    total = 1;
                     for _,o2 in ipairs(members) do
-                        if o.guid ~= o2.guid
-                          and o2.subgroup == group
-                          and o2:hp() < percent
-                          and ni.unit.distance(o.unit, o2.unit) <= radius
-                          and ni.unit.los(o.unit, o2.unit) then
-                            total = total + 1
+                        if o.guid ~= o2.guid and o2.subgroup == group
+                        and o2:hp() < percent and ni.unit.distance(o.unit, o2.unit) <= radius
+                        and ni.unit.los(o.unit, o2.unit) then
+                            total = total + 1;
                         end
                     end
                 end
-                o.near = total
-                temp[#temp + 1] = o
+                o.near = total;
+                subgroupbelow[#subgroupbelow + 1] = o;
             end
-            table.sort( temp, function(a,b) return (a.near > b.near) or (a.near == b.near and a:hp() < b:hp()) end )
-            if temp[1] then
-                temp2[#temp2 + 1] = temp[1]
+            sort(subgroupbelow, function(a,b) return (a.near > b.near) or (a.near == b.near and a:hp() < b:hp()) end);
+            if subgroupbelow[1] then
+                subgroupbelow2[#subgroupbelow2 + 1] = subgroupbelow[1];
             end
         end
-        table.sort( temp2, function(a,b) return (a.near > b.near) or (a.near == b.near and a:hp() < b:hp()) end )
-        if temp2[1] then
-            return temp2[1].near, temp2[1]
+        sort(subgroupbelow2, function(a,b) return (a.near > b.near) or (a.near == b.near and a:hp() < b:hp()) end);
+        if subgroupbelow2[1] then
+            return subgroupbelow2[1].near, subgroupbelow2[1];
         else
-            return 0
+            return 0;
         end
     end;	
 	function members.addcustom(unit, guid)
 		if type(unit) == "string" then
+			local getGUID = ni.objectmanager.objectGUID(unit);
 			local groupMember = memberssetup:create(unit, guid or UnitGUID(unit));
 			if groupMember then
 				members[#members + 1] = groupMember;
-				members:updatemembers()
+				members:updatemembers();
 			end
 		end
 	end;
-	function members.removecustom(unit)
-		if type(unit) == "string" then
+	function members.removecustom(identifier, isName)
+		if type(identifier) == "string" then
 			for i, o in ipairs(members) do
-				if o.unit == unit then
+				if (isName and o.name == identifier and UnitIsUnit(identifier, o.unit)) 
+				or (not isName and o.unit == identifier) then
 					roster[o.guid] = nil;
-					tremove(members, i)
-					members:updatemembers()
+					tremove(members, i);
+					members:updatemembers();
+					break;
 				end
 			end
 		end
-	end
+	end;
 	members()
 end;
+
 memberssetup.set()
 addCache(members)
 

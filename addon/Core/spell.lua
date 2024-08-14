@@ -329,7 +329,7 @@ spell.castinterrupt = function(t)
 	end
 end;
 spell.getpercent = function()
-	return random(20, 75)
+	return random(20, 75);
 end;
 spell.shouldinterrupt = function(t, p)
 	local InterruptPercent = p or spell.getpercent()
