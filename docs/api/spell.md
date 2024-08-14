@@ -76,7 +76,7 @@ Returns: `boolean`
 
 Checks if the specified spell was cast within the last specified number of seconds.
 
-### Parameters:
+Parameters:
 
 - `spellid`: The ID or name of the spell to check. If a name is provided, it is converted to the corresponding spell ID.
 - `sec`: The time window in seconds to check if the spell was cast within. If `sec` is greater than 0, the function checks if the spell was cast within that time frame. If `sec` is 0 or less, the function simply returns `true`.
@@ -359,7 +359,7 @@ Returns: `boolean`
 
 Determines whether the player's spell should interrupt the casting or channeling of a spell on a target based on various conditions.
 
-### Parameters:
+Parameters:
 
 - `t`: The target unit to check.
 - `p` (optional): The percentage of the cast time that must have elapsed before the interrupt is considered. If not provided, the default value is used from `spell.getpercent()`.
@@ -402,7 +402,7 @@ Returns: `string`
 
 Generates a string for the icon texture of a spell, formatted for use in the game's UI, with optional width and height specifications.
 
-### Parameters:
+Parameters:
 
 - `spell`: The ID or name of the spell for which to get the icon. If a name is provided, it is converted to the corresponding spell ID.
 - `width` (optional): The width of the icon in pixels. Defaults to 25 if not provided.
