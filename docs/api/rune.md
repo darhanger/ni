@@ -42,12 +42,9 @@ Returns: `(number, number)`
 
 Checks the cooldown status of runes of a specific type and returns the number of runes on cooldown and the number of runes off cooldown.
 
-### Returns:
 
 - `runesoncd`: The number of runes of the specified type that are currently on cooldown.
 - `runesoffcd`: The number of runes of the specified type that are not on cooldown.
-
-### Example:
 
 ```lua
 local runesoncd, runesoffcd = ni.rune.cd(1) -- Check cooldown status for Blood runes

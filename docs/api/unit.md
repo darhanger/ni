@@ -27,8 +27,6 @@ A table mapping numeric creature type IDs to their corresponding creature type n
 | 12  | NonCombatPet   |
 | 13  | GasCloud       |
 
-### Example:
-
 ```lua
 local creatureTypeID = 3
 local creatureTypeName = creaturetypes[creatureTypeID]
@@ -61,8 +59,6 @@ Returns: `number`
 
 Calculates the amount of time a unit has been stationary since the last movement.
 
-### Example:
-
 ```lua
 local timeStopped = ni.unit.movingtime("target")
 print("Time the target has been stationary: " .. timeStopped .. " seconds.")
@@ -77,8 +73,6 @@ Arguments:
 Returns: `boolean`
 
 Checks if the specified unit is currently in combat.
-
-### Example:
 
 ```lua
 if ni.unit.incombat("target") then
@@ -97,8 +91,6 @@ Returns: `boolean`
 
 Checks if the first unit can attack the second unit.
 
-### Example:
-
 ```lua
 if ni.unit.canattack("player", "target") then
   print("The player can attack the target.")
@@ -115,8 +107,6 @@ Arguments:
 Returns: `boolean`
 
 Checks if the first unit can assist the second unit.
-
-### Example:
 
 ```lua
 if ni.unit.canassist("player", "target") then
@@ -135,8 +125,6 @@ Returns: `boolean`
 
 Checks if the first unit is an enemy of the second unit.
 
-### Example:
-
 ```lua
 if ni.unit.isenemy("player", "target") then
   print("The player considers the target an enemy.")
@@ -152,8 +140,6 @@ Arguments:
 Returns: `boolean`
 
 Checks if the specified unit is dead or a ghost.
-
-### Example:
 
 ```lua
 if ni.unit.unitisdead("target") then
@@ -187,8 +173,6 @@ Arguments:
 Returns: `boolean`
 
 Checks if the first unit is the same as the second unit.
-
-### Example:
 
 ```lua
 if ni.unit.isunit("player", "target") then
@@ -436,8 +420,6 @@ Returns: `string`
 
 Retrieves the last 5 characters of the GUID for a given unit.
 
-### Example:
-
 ```lua
 local shortGuid = ni.unit.shortguid("target")
 print("Short GUID of the target: " .. shortGuid)
@@ -598,8 +580,6 @@ Returns: `number`
 
 Calculates the percentage of completion for a unit's current casting spell.
 
-### Example:
-
 ```lua
 local castingPercent = ni.unit.castingpercent("target")
 print("Casting percentage of the target: " .. castingPercent .. "%")
@@ -614,8 +594,6 @@ Arguments:
 Returns: `number`
 
 Calculates the percentage of completion for a unit's current channeled spell.
-
-### Example:
 
 ```lua
 local channelingPercent = ni.unit.channelpercent("target")
@@ -739,8 +717,6 @@ Returns: `number|boolean`
 
 Returns the remaining time of a buff on a unit based on the buff type.
 
-### Example:
-
 ```lua
 local remainingTime = ni.unit.bufftypetimer("target", "Magic")
 print("Remaining time of Magic buff: " .. remainingTime .. " seconds")
@@ -776,8 +752,6 @@ Returns: `number`
 
 Returns the remaining duration of a specific buff on a unit.
 
-### Example:
-
 ```lua
 local remainingDuration = ni.unit.bufftimer("target", 12345)
 print("Remaining duration of buff: " .. remainingDuration .. " seconds")
@@ -812,8 +786,6 @@ Arguments:
 Returns: `number`
 
 Returns the duration of a specific buff on a unit.
-
-### Example:
 
 ```lua
 local buffDuration = ni.unit.buffduration("target", 12345)
@@ -897,8 +869,6 @@ Returns: `number|boolean`
 
 Returns the remaining time of a buff on a unit based on the buff type.
 
-### Example:
-
 ```lua
 local remainingTime = ni.unit.debufftypetimer("target", "Magic")
 print("Remaining time of Magic buff: " .. remainingTime .. " seconds")
@@ -933,8 +903,6 @@ Arguments:
 Returns: `number`
 
 Returns the remaining duration of a specific buff on a unit.
-
-### Example:
 
 ```lua
 local remainingDuration = ni.unit.debufftimer("target", 1234)
@@ -971,8 +939,6 @@ Returns: `number`
 
 Returns the duration of a specific buff on a unit.
 
-### Example:
-
 ```lua
 local debuffDuration = ni.unit.debuffduration("target", 1234)
 print("Duration of buff: " .. debuffDuration .. " seconds")
@@ -987,8 +953,6 @@ Arguments:
 Returns: `boolean`
 
 Checks if the target has any stealable buffs.
-
-### Example:
 
 ```lua
 local canSteal = ni.unit.spellstealable("target")
@@ -1065,8 +1029,6 @@ Returns: `number`
 
 Calculates the squared distance between two units.
 
-### Example:
-
 ```lua
 local distanceSquared = ni.unit.distancesqr("player", "target")
 print("Squared distance between player and target:", distanceSquared)
@@ -1137,8 +1099,6 @@ Arguments:
 Returns: `table`
 
 Returns a table of all enemies within a specified range of the given unit that have a specific buff type. Each enemy has `guid`, `name`, and `distance` properties.
-
-### Example:
 
 ```lua
 local enemies = ni.unit.enemiesinrangewithbufftype("player", 30, "Magic")
@@ -1234,8 +1194,6 @@ Returns: `guid|nil`
 
 Returns the GUID of the target of the specified unit. If the unit does not exist, the function returns `nil`.
 
-### Example:
-
 ```lua
 local target = ni.unit.target("player")
 if target then
@@ -1254,8 +1212,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the specified unit’s target is one of the player's allies. Otherwise, returns `nil` if the unit does not have a target or the target is not an ally.
-
-### Example:
 
 ```lua
 if ni.unit.incombatwithme("player") then
@@ -1292,8 +1248,6 @@ Returns: `table`
 
 Returns the flags associated with the specified unit. 
 
-### Example:
-
 ```lua
 local flags = ni.unit.flags("target")
 print(flags)
@@ -1309,8 +1263,6 @@ Returns: `table`
 
 Returns the dynamic flags associated with the specified unit.
 
-### Example:
-
 ```lua
 local dynamicFlags = ni.unit.dynamicflags("target")
 print(dynamicFlags)
@@ -1325,8 +1277,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is tapped by all threat list, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.istappedbyallthreatlist("target") then
@@ -1344,8 +1294,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is lootable, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.islootable("target") then
     print("The unit is lootable.")
@@ -1361,8 +1309,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is tagged by the player, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.istaggedbyme("target") then
@@ -1380,8 +1326,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is tagged by another player, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.istaggedbyother("target") then
     print("The unit is tagged by another player.")
@@ -1397,8 +1341,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if actions can be performed on the unit, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.canperformaction("target") then
@@ -1416,8 +1358,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is confused, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.isconfused("target") then
     print("The unit is confused.")
@@ -1433,8 +1373,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is not affected by bleed effects, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.notbleed("target") then
@@ -1452,8 +1390,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is disarmed, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.isdisarmed("target") then
     print("The unit is disarmed.")
@@ -1469,8 +1405,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is fleeing, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.isfleeing("target") then
@@ -1488,8 +1422,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is currently looting, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.islooting("target") then
     print("The unit is looting.")
@@ -1505,8 +1437,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is mounted, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.ismounted("target") then
@@ -1524,8 +1454,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is not attackable, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.isnotattackable("target") then
     print("The unit is not attackable.")
@@ -1541,8 +1469,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is not selectable, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.isnotselectable("target") then
@@ -1560,8 +1486,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is pacified, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.ispacified("target") then
     print("The unit is pacified.")
@@ -1577,8 +1501,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is a pet in combat, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.ispetinombat("target") then
@@ -1596,8 +1518,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is player-controlled, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.isplayercontrolled("target") then
     print("The unit is player-controlled.")
@@ -1613,8 +1533,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is possessed, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.ispossessed("target") then
@@ -1632,8 +1550,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is in preparation mode, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.ispreparation("target") then
     print("The unit is in preparation mode.")
@@ -1649,8 +1565,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is PvP flagged, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.ispvpflagged("target") then
@@ -1668,8 +1582,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is silenced, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.issilenced("target") then
     print("The unit is silenced.")
@@ -1685,8 +1597,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is skinnable, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.isskinnable("target") then
@@ -1704,8 +1614,6 @@ Returns: `boolean`
 
 Returns `true` if the unit is stunned, otherwise `false`.
 
-### Example:
-
 ```lua
 if ni.unit.isstunned("target") then
     print("The unit is stunned.")
@@ -1721,8 +1629,6 @@ Arguments:
 Returns: `boolean`
 
 Returns `true` if the unit is immune to effects, otherwise `false`.
-
-### Example:
 
 ```lua
 if ni.unit.isimmune("target") then

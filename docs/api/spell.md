@@ -54,12 +54,8 @@ Returns: `boolean`
 
 Checks if a spell is currently queued for casting. The function considers whether spell queueing is enabled and the player's current casting status.
 
-### Returns:
-
 - `true` if a spell is queued or actively being cast.
 - `false` if no spell is queued or being cast.
-
-### Example:
 
 ```lua
 if ni.spell.isqueued() then
@@ -85,12 +81,8 @@ Checks if the specified spell was cast within the last specified number of secon
 - `spellid`: The ID or name of the spell to check. If a name is provided, it is converted to the corresponding spell ID.
 - `sec`: The time window in seconds to check if the spell was cast within. If `sec` is greater than 0, the function checks if the spell was cast within that time frame. If `sec` is 0 or less, the function simply returns `true`.
 
-### Returns:
-
 - `true` if the spell was cast within the specified time window.
 - `false` if the spell was not cast within the specified time window.
-
-### Example:
 
 ```lua
 if ni.spell.lastcast(12345, 5) then
@@ -351,8 +343,6 @@ Returns: `void`
 
 Interrupts the casting or channeling of a spell by casting an interrupt spell if one is available and off cooldown.
 
-### Example:
-
 ```lua
 ni.spell.castinterrupt("target")
 -- Attempts to interrupt the spell being cast by the target, if an interrupt spell is available
@@ -374,12 +364,8 @@ Determines whether the player's spell should interrupt the casting or channeling
 - `t`: The target unit to check.
 - `p` (optional): The percentage of the cast time that must have elapsed before the interrupt is considered. If not provided, the default value is used from `spell.getpercent()`.
 
-### Returns:
-
 - `true` if the spell on the target should be interrupted.
 - `false` otherwise.
-
-### Example:
 
 ```lua
 if ni.spell.shouldinterrupt("target") then
@@ -422,11 +408,7 @@ Generates a string for the icon texture of a spell, formatted for use in the gam
 - `width` (optional): The width of the icon in pixels. Defaults to 25 if not provided.
 - `height` (optional): The height of the icon in pixels. Defaults to 25 if not provided.
 
-### Returns:
-
 - A formatted string representing the icon of the specified spell, suitable for use in the game's UI.
-
-### Example:
 
 ```lua
 local iconString = ni.spell.icon(12345, 32, 32)
