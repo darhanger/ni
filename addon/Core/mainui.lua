@@ -411,7 +411,15 @@ local function CreateDropdown(frame, yOffset, profiles, profileType)
     InitializeDropdownMenu(dropdown, profiles, profileType);
 end;
 
-local function CreateConfigurableEditBox(frame, offsetX, offsetY, variable, text)
+local function CreateConfigurableEditBox(frame, offsetX, offsetY, var)
+    local tab, key
+    if strfind(var, "%.") then
+        tab, key = strmatch(var, "^(%w+)%.(%w+)$");
+        ni.vars[tab] = ni.vars[tab] or {};
+    else
+        tab = nil;
+        key = var;
+    end
     local edit = CreateFrame("EditBox", nil, frame);
     edit:SetHeight(20);
     edit:SetWidth(120);
@@ -429,14 +437,26 @@ local function CreateConfigurableEditBox(frame, offsetX, offsetY, variable, text
     edit:SetBackdropColor(0, 0, 0, 0.5)
     edit:SetBackdropBorderColor(0.8, 0.8, 0.8, 0.5)
     edit:SetScript("OnEnterPressed", function(self)
-        ni.vars[variable] = self:GetText() or "";
+        if tab then
+            ni.vars[tab][key] = self:GetText() or "";
+        else
+            ni.vars[key] = self:GetText() or "";
+        end
         self:ClearFocus();
     end)
     edit:SetScript("OnEscapePressed", function(self)
-        self:SetText(ni.vars[variable] or "");
+        if tab then
+            self:SetText(ni.vars[tab][key] or "");
+        else
+            self:SetText(ni.vars[key] or "");
+        end
         self:ClearFocus();
     end)
-    edit:SetText(ni.vars[variable] or "");
+    if tab then
+        edit:SetText(ni.vars[tab][key] or "");
+    else
+        edit:SetText(ni.vars[key] or "");
+    end
     edit:Show();
 
     return edit;
@@ -837,7 +857,7 @@ CreateDropDownText(mainsettings, Localization.Interrupt, 0, -240);
 CreateKeyDropDown(mainsettings, keys, 0, -260, "interrupt", 75);
 
 CreateDropDownText(mainsettings, Localization.Follow, 0, -290);
-local followE = CreateConfigurableEditBox(mainsettings, 0, -310, "follow", ni.vars.units.follow);
+local followE = CreateConfigurableEditBox(mainsettings, 0, -310, "units.follow");
 CreateKeyDropDown(mainsettings, keys, 0, -335, "follow", 75);
 CreateDropDownText(mainsettings, Localization.IsMelee, -10, -365); 
 CreateCheckBox(mainsettings, 45, -363, ni.vars.combat.melee, function(self)
@@ -849,7 +869,7 @@ CreateCheckBox(mainsettings, 45, -363, ni.vars.combat.melee, function(self)
 end);
 
 CreateDropDownText(mainsettings, Localization.GlobalDev, 0, -400);
-local globaledit = CreateConfigurableEditBox(mainsettings, 0, -425, "global", ni.vars.global)
+local globaledit = CreateConfigurableEditBox(mainsettings, 0, -425, "global")
 
 CreateText(mainsettings, Localization.Dev, 0, -385, 0.8, 0.1, 0.1, 1, "CENTER");
 CreateMainButton(mainsettings, 97, 22, Localization.ReloadDev, -50, 57, false, function()
@@ -925,7 +945,7 @@ CreateDropDownText(settings, Localization.CustomToggle, 0, -234);
 CreateKeyDropDown(settings, mods, 0, -254, "custom", 100);
 
 CreateDropDownText(settings, Localization.MainTankOverride, 0, -282);
-local mainTank = CreateConfigurableEditBox(settings, 0, -301, "mainTank", ni.vars.units.mainTank);
+local mainTank = CreateConfigurableEditBox(settings, 0, -301, "units.mainTank");
 CreateCheckBox(settings, -78, -299, ni.vars.units.mainTankEnabled, function(self)
 	if self:GetChecked() then
 		ni.vars.units.mainTankEnabled = true;
@@ -935,7 +955,7 @@ CreateCheckBox(settings, -78, -299, ni.vars.units.mainTankEnabled, function(self
 end);
 
 CreateDropDownText(settings, Localization.OffTankOverride, 0, -322);
-local offTank = CreateConfigurableEditBox(settings, 0, -341, "offTank", ni.vars.units.offTank);
+local offTank = CreateConfigurableEditBox(settings, 0, -341, "units.offTank");
 CreateCheckBox(settings, -78, -339, ni.vars.units.offTankEnabled, function(self)
 	if self:GetChecked() then
 		ni.vars.units.offTankEnabled = true;

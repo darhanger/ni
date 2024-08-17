@@ -436,7 +436,6 @@ frames.OnUpdate = function(self, elapsed)
 		if ni.player.incombat() and (GetTime() - lastEvent >= 1) then
 			CombatLogClearEntries();
 	    end		
-		
 		if ni.vars.units.followEnabled and ni.vars.units.follow ~= nil and ni.vars.units.follow ~= "" then
 			if UnitExists(ni.vars.units.follow) or ni.objectmanager.contains(ni.vars.units.follow) then
 				local unit = ni.vars.units.follow;
@@ -476,7 +475,7 @@ frames.OnUpdate = function(self, elapsed)
 				end
 				
 				if not ni.unit.unitisdead(uGUID) then
-					if not UnitCastingInfo(pla) and not UnitChannelInfo(pla) 
+					if not UnitCastingInfo("player") and not UnitChannelInfo("player") 
 					and distance ~= nil and distance > dnc and distance < 45
 					and GetTime() - lastclick > tonumber(format("%.1f", mtime)) then
 						ni.player.moveto(uGUID);
