@@ -884,7 +884,7 @@ CreateMainButton(mainsettings, 97, 22, "DarhangeR", -50, 10, false, function()
 	ni.functions.open("https://discord.com/users/250267265285488641") ;
 end);
 CreateMainButton(mainsettings, 97, 22, "DISCORD", 50, 10, false, function()
-	ni.functions.open("https://discord.gg/xBFKJc6QRr");
+	ni.functions.open("https://discord.gg/ZKFkvrzaU4");
 end);
 
 --Rotation Settings drop downs

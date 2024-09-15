@@ -25,5 +25,5 @@
 	<img src="_media/darhanger.png" alt="PvE Icon">PvE Profiles</a>
   - <a href="https://discord.gg/4FC8rwy">
 	<img src="_media/pvp.png" alt="PvP Icon">PvP Profiles</a>
-  - <a href="https://discord.gg/xBFKJc6QRr">
+  - <a href="https://discord.gg/ZKFkvrzaU4">
 	<img src="_media/server.png" alt="Server Icon">Project Server</a>
