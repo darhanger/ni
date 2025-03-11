@@ -7,8 +7,8 @@
 
 Profile Framework for **World of Warcraft** and its older expansions.
 
-![Lua](https://img.shields.io/badge/Lua-2C2D72?style=flat-squaree&logo=lua&logoColor=white)
-![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=flat-squaree&logo=c%2B%2B&logoColor=white)
+![Lua](https://img.shields.io/badge/Lua-2C2D72?style=flat-square&logo=lua&logoColor=white)
+![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=flat-square&logo=c%2B%2B&logoColor=white)
 [![License](https://img.shields.io/github/license/darhanger/ni?style=flat-square)](https://github.com/darhanger/ni/blob/main/License) 
 
 </div>
