@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD004 MD033 -->
 <div align="center">
 
-# ni (v2) Legacy
+# ni (v2) Legacy (Permamently archived & closed)
 
 <img src="_media/logo.png" alt="ni (v2)">
 
@@ -35,7 +35,7 @@ See the [Quick start](https://darhanger.github.io/ni/#/getting-started/quickstar
 
 ## 📊 Stats
 
-* Last Stable Release: [![Last Release](https://img.shields.io/github/v/release/darhanger/ni?style=flat-square)](https://github.com/darhanger/ni/releases/tag/0.0.67)
-* Stable Release Downloads: [![GitHub Last Download](https://img.shields.io/github/downloads/darhanger/ni/0.0.67/total?style=flat-square)](https://github.com/darhanger/ni/releases/tag/0.0.67)
+* Last Stable Release: [![Last Release](https://img.shields.io/github/v/release/darhanger/ni?style=flat-square)](https://github.com/darhanger/ni/releases/tag/0.0.68)
+* Stable Release Downloads: [![GitHub Last Download](https://img.shields.io/github/downloads/darhanger/ni/0.0.68/total?style=flat-square)](https://github.com/darhanger/ni/releases/tag/0.0.68)
 * Project Downloads Total: [![GitHub All Releases](https://img.shields.io/github/downloads/darhanger/ni/total?style=flat-square)](https://github.com/darhanger/ni/releases)
 * Static code analysis grade: [![Codacy Badge](https://img.shields.io/codacy/grade/6e14e7d474454cdea9cac32b677c4912?style=flat-square)](https://app.codacy.com/gh/darhanger/ni/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)

@@ -350,7 +350,7 @@ local function OnLoad()
         end
     end)
 	ni.listener:call("PLAYER_ENTERING_WORLD");
-	ni.combatlog.registerhandler("Cata_Enhancement_DarhangeR", CombatEventCatcher);
+	ni.combatlog.registerhandler("Cata_Enhancement_DarhangeR", {"COMBAT_LOG_EVENT_UNFILTERED"}, CombatEventCatcher);
 	ni.GUI.AddFrame("Cata_Enhancement_DarhangeR", items);
 end;
 -- Unload GUI / Wipe Cache -- 

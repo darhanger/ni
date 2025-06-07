@@ -54,29 +54,10 @@ local items = {
 	{ type = "entry", text = ni.player.itemicon(57192, 22, 22).." Mana Potion", tooltip = "Use Mana Potions (if you have) when player |cff0082FFMP|r < %.", enabled = true, value = 25, min = 15, max = 65, step = 1, width = 40, key = "manapotionuse" },
 };
 -- Get Setting from GUI -- 
-local function GetSetting(name)
-	for k, v in ipairs(items) do
-		if v.type == "entry"
-		and v.key ~= nil
-		and v.key == name then
-			return v.value, v.enabled;
-		end
-		if v.type == "dropdown"
-		and v.key ~= nil
-		and v.key == name then
-			for k2, v2 in pairs(v.menu) do
-				if v2.selected then
-					return v2.value;
-				end
-			end
-		end
-		if v.type == "input"
-		and v.key ~= nil
-		and v.key == name then
-			return v.value;
-		end
-	end
+local function ui(name)
+    return ni.bootstrap.getseting(name, items)
 end;
+
 local ZoneText = GetZoneText();
 local InstanceName, InstanceType = GetInstanceInfo();
 -- Local functions for profile --
@@ -298,16 +279,6 @@ FrostRune = 0,
 UnholyRune = 0,
 DeathRune = 0,
 };
--- Combat Event --
-local function CombatEventCatcher(event, ...)
-	-- local pGUID = UnitGUID("player");
-    -- local target, castGUID, spellID = ...
-	-- if event == "UNIT_SPELLCAST_SUCCEEDED" then
-		-- local ptr = ni.memory.objectpointer(sourceGUID)
-		-- local destGUID = ni.memory.read("uint64", ptr, 0xA70)
-		-- print(spellID)
-	-- end
-end;
 -- Update Cache Events --
 local update_cache = {
     "PLAYER_ENTERING_WORLD",
@@ -330,15 +301,17 @@ local function OnLoad()
         end
     end)
 	ni.listener:call("PLAYER_ENTERING_WORLD");
-	ni.combatlog.registerhandler("Cata_Blood_DarhangeR", CombatEventCatcher);
 	ni.GUI.AddFrame("Cata_Blood_DarhangeR", items);
 end;
 -- Unload GUI / Wipe Cache -- 
 local function OnUnLoad()
 	ni.listener:remove("update_cache", update_cache);
-	ni.combatlog.unregisterhandler("Cata_Blood_DarhangeR");
 	ni.GUI.DestroyFrame("Cata_Blood_DarhangeR");
 end;
+
+-- Local Tables --
+local hpot = { 57191, 43569, 40087, 41166, 33447, 39671, 22829, 33934, 28100, 13446, 3928, 1710, 929, 4596, 858, 118 };
+
 -- Rotation Priorities --
 local queue = {
 	"Cache",
@@ -408,26 +381,21 @@ local abilities = {
 	end,
 -----------------------------------
 	["Universal Pause"] = function()
-		local value = GetSetting("Debug");
     	SLASH_PPAUSE1 = "/ppause"
 		SlashCmdList.PPAUSE = function()
 			ni.spell.stopcasting()
-			ni.rotation.delay(value);
+			ni.rotation.delay(ui("Debug")[1]);
 		end	
-		if IsMounted()
-		or UnitInVehicle("player")
-		or UnitIsDeadOrGhost("player")
-		or UnitChannelInfo("player")
-		or UnitCastingInfo("player")
-		or ni.player.islooting() then
+		if IsMounted() or UnitInVehicle("player")
+		or UnitIsDeadOrGhost("player") or UnitChannelInfo("player")
+		or UnitCastingInfo("player") or ni.player.islooting() then
 			return true;
 		end
-		ni.vars.debug = select(2, GetSetting("Debug"));
+		ni.vars.debug = ui("Debug")[2];
 	end,
 -----------------------------------	
 	["AutoTarget"] = function()
-		local _, enabled = GetSetting("AutoAttack");
-		if not enabled then
+		if not ui("AutoAttack")[2] then
 			return false;
 		end
 		if cache.PlayerCombat then
@@ -452,7 +420,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Use Presence"] = function()
-		local presence = GetSetting("Presence");
+		local presence = unpack(ui("Presence"));
 		if presence == 0 then 
 			return false;
 		end		
@@ -464,9 +432,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Bone Shield"] = function()
-		local _, enabled = GetSetting("boneshield");
-		if not enabled
-		or playerBuff(spells.BoneShield) 
+		if not ui("boneshield")[2] or playerBuff(spells.BoneShield) 
 		or not UsableSilence(spells.BoneShield) then
 			return false;
 		end
@@ -475,8 +441,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Horn of Winter"] = function()
-		local _, enabled = GetSetting("AutoBuff");
-		if not enabled
+		if not ui("AutoBuff")[2]
 		or playerBuff(spells.HornOfWinter) then 
 			return false;
 		end
@@ -487,13 +452,12 @@ local abilities = {
 	end,
 -----------------------------------
 	["Healthstone (Use)"] = function()
-		local hpVal, enabled = GetSetting("healthstoneuse");
-		if not enabled then
+		if not ui("healthstoneuse")[2] then
 			return false;
 		end
 		if not cache.PlayerControled
 		and cache.PlayerCombat
-		and playerHP() <= hpVal then
+		and playerHP() <= ui("healthstoneuse")[1] then
 			if playerItemR(5512) then
 				playerUseIt(5512)
 				return true;
@@ -502,14 +466,12 @@ local abilities = {
 	end,
 -----------------------------------	
 	["Heal Potions (Use)"] = function()
-		local hpVal, enabled = GetSetting("healpotionuse");
-		if not enabled then
+		if not ui("healpotionuse")[2] then
 			return false;
 		end
-		local hpot = { 57191, 43569, 40087, 41166, 33447, 39671, 22829, 33934, 28100, 13446, 3928, 1710, 929, 4596, 858, 118 };
 		if not cache.PlayerControled
 		and cache.PlayerCombat
-		and playerHP() <= hpVal then
+		and playerHP() <= ui("healpotionuse")[1] then
 			for i = 1, #hpot do
 			local a = hpot[i];
 				if playerItemR(a) then
@@ -533,10 +495,9 @@ local abilities = {
 		if not UsableSilence(spells.DarkCommand) then
 			return false;
 		end
-		local _, DC = GetSetting("dark");
 		local AgroSpells = "56222||49576";		
 		if CombatStart(5) 
-		and (PlayerInDungeon() or DC) then
+		and (PlayerInDungeon() or ui("dark")[2]) then
 		local enemies = playerEnemies(30);
 			for i = 1, #enemies do
 			local threatUnit = enemies[i].guid;
@@ -557,9 +518,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Death Grip (Ally)"] = function()
-		local _, Grip = GetSetting("grip");
-		if not Grip
-		or not UsableSilence(spells.DeathGrip) then
+		if not ui("grip")[2] or not UsableSilence(spells.DeathGrip) then
 			return false;
 		end
 		local AgroSpells = "56222||49576";	
@@ -584,9 +543,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Empower Rune Weapon"] = function()
-		local _, enabled = GetSetting("emprower");
-		if not enabled
-		or not UsableSilence(spells.EmpowerRuneWeapon) 
+		if not ui("emprower")[2] or not UsableSilence(spells.EmpowerRuneWeapon) 
 		or not cache.GetRange then
 			return false;
 		end
@@ -600,8 +557,7 @@ local abilities = {
 	end,
 -----------------------------------	
 	["Mind Freeze (Interrupt)"] = function()
-		local _, enabled = GetSetting("autointerrupt");
-		if not enabled
+		if not ui("autointerrupt")[2]
 		or not UsableSilence(spells.MindFreeze) then
 			return false;
 		end
@@ -617,12 +573,11 @@ local abilities = {
 	end,
 -----------------------------------
 	["Rune Tap"] = function()
-		local hpVal, enabled = GetSetting("runetap");
-		if not enabled 
+		if not ui("runetap")[2] 
 		or not cache.PlayerCombat then
 			return false;
 		end
-		if ni.player.hp() <= hpVal then
+		if ni.player.hp() <= ui("runetap")[1] then
 			if (cache.BloodRune >= 1 or cache.DeathRune >= 1)
 			and UsableSilence(spells.RuneTap) then 
 				spellCast(spells.RuneTap)
@@ -639,13 +594,12 @@ local abilities = {
 	end,
 -----------------------------------
 	["Icebound Fortitude"] = function()
-		local hpVal, enabled = GetSetting("iceboundfort");
-		if not enabled
+		if not ui("iceboundfort")[2]
 		or not cache.PlayerCombat
 		or not UsableSilence(spells.IceboundFortitude) then
 			return false;
 		end
-		if ni.player.hp() <= hpVal
+		if ni.player.hp() <= ui("iceboundfort")[1]
 		and not playerBuff(spells.IceboundFortitude) then
 			spellCast(spells.IceboundFortitude)
 			return true;
@@ -653,14 +607,13 @@ local abilities = {
 	end,
 -----------------------------------
 	["Vampiric Blood"] = function()
-		local hpVal, enabled = GetSetting("vampblood");
-		if not enabled
+		if not ui("vampblood")[2]
 		or not cache.PlayerCombat
 		or not UsableStun(spells.VampiricBlood) then
 			return false;
 		end
 		if cache.BloodRune >= 1 or cache.DeathRune >= 1 then
-			if ni.player.hp() <= hpVal		 
+			if ni.player.hp() <= ui("vampblood")[1]		 
 			and not playerBuff(spells.VampiricBlood) then
 				spellCast(spells.VampiricBlood)
 				return true;
@@ -669,13 +622,11 @@ local abilities = {
 	end,	
 -----------------------------------
 	["Death Pact"] = function()
-		local hpVal, enabled = GetSetting("pact");
-		if not enabled
-		or not cache.PlayerCombat
+		if not ui("pact")[2] or not cache.PlayerCombat
 		or not UsableSilence(spells.DeathPact) then
 			return false;
 		end
-		if ni.player.hp() <= hpVal
+		if ni.player.hp() <= ui("pact")[1]
 		and ni.power.currentraw("player", 6) >= 40 then
 			if UsableSilence(spells.RaiseDead) then
 				spellCast(spells.RaiseDead)			
@@ -751,9 +702,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Pestilence (AoE)"] = function()
-		local _, enabled = GetSetting("pestiAoE");
-		if not enabled
-		or not cache.GetRange then
+		if not ui("pestiAoE")[2] or not cache.GetRange then
 			return false;
 		end
 		local frost_fever = spells.FrostFever;
@@ -778,8 +727,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Blood Boil"] = function()
-		if not cache.GetRange 
-		or not UsableStun(spells.BloodBoil) then
+		if not cache.GetRange or not UsableStun(spells.BloodBoil) then
 			return false;
 		end
 		local count, enabled = GetSetting("boil");
@@ -800,8 +748,7 @@ local abilities = {
 	end,
 -----------------------------------
 	["Heart Strike"] = function()
-		if not UsableStun(spells.HeartStrike) 
-		or not cache.GetRange then
+		if not UsableStun(spells.HeartStrike) or not cache.GetRange then
 			return false;
 		end
 		local count, enabled = GetSetting("boil");
@@ -830,8 +777,7 @@ local abilities = {
 		if not cache.GetRange then
 			return false;
 		end
-		local hpVal = GetSetting("pact");
-		if ni.player.hp() > hpVal
+		if ni.player.hp() > ui("pact")[1]
 		and UsableStun(spells.RuneStrike) then			
 			spellCast(spells.RuneStrike, "target")
 			return true;
