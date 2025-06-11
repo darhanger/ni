@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD004 MD033 -->
 <div align="center">
 
-# ni (v2) Legacy (Permanently archived & closed)
+# ni (v2) Legacy (Permamently archived & closed)
 
 <img src="_media/logo.png" alt="ni (v2)">
 
