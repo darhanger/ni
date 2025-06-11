@@ -53,66 +53,23 @@ local drtracker_events = function(self, event, ...)
 		ni.drtracker.wipeall()
 	end
 end;
----ICD Tracker
-local icdevents = {
-	["SPELL_AURA_APPLIED"] = true
-};
-local icdtracker = {};
-icdtracker.timers = {};
-icdtracker.set = function(item, icd)
-	icdtracker.timers[item] = {
-		icd = icd,
-		time = 0
-	}
-end;
-icdtracker.get = function(item)
-	if icdtracker.timers[item] then
-		local remaining = icdtracker.timers[item].time - GetTime();
-		if remaining < 1 then
-			return 0;
-		end
-		return remaining;
-	end
-	return -1;
-end;
-local icdtracker_events = function(self, event, ...)
-	local timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType
-	if ni.vars.build == 30300 then
-		timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = ...
-	elseif ni.vars.build >= 40300 then
-		local arg = {...}
-		timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType = 
-		arg[1], arg[2], arg[4], arg[5], arg[6], arg[8], arg[9], arg[10], arg[12], arg[13], arg[14], arg[15];
-	end
-	if not icdevents[eventType] then
-		return
-	end
-	if sourceGUID == UnitGUID("player") and auraType == "BUFF" then
-		for k, v in pairs(icdtracker.timers) do
-			if spellName == k then
-				icdtracker.timers[k].time = GetTime() + v.icd
-			end
-		end
-	end
-end;
--------------
 
 local lastclick, totalelapsed, lastEvent, objectPulse = 0, 0, 0, 0;
 local instanceType
 
-local maul, cleave, heroicstrike, runestrike, raptorstrike, shadowcleave = GetSpellInfo(6807), GetSpellInfo(845), GetSpellInfo(78), GetSpellInfo(56815), GetSpellInfo(2973), GetSpellInfo(50581);
+local ignoreSpells = {
+    [GetSpellInfo(6807)] = true,  -- maul
+    [GetSpellInfo(845)] = true,   -- cleave
+    [GetSpellInfo(78)] = true,    -- heroicstrike
+    [GetSpellInfo(56815)] = true, -- runestrike
+    [GetSpellInfo(2973)] = true,  -- raptorstrike
+    [GetSpellInfo(50581)] = true, -- shadowcleave
+};
 
 local function isspelltoignore(spellname)
-	if spellname == maul
-	 or spellname == cleave
-	 or spellname == heroicstrike
-	 or spellname == raptorstrike
-	 or spellname == runestrike 
-	 or spellname == shadowcleave then
-		return true;
-	end
-	return false;
+    return ignoreSpells[spellname] or false;
 end;
+
 local events = {};
 local delays = {};
 local frames = {};
@@ -148,9 +105,8 @@ frames.notification.texture = frames.notification:CreateTexture()
 frames.notification.texture:SetAllPoints()
 frames.notification.texture:SetTexture(0, 0, 0, .50)
 function frames.notification:message(message)
-	local pad = ""
-	for i = 1, random(1, 255) do pad = pad .. "\124r" end
-	self.text:SetText(pad .. message)
+	local pad = ni.utils.padding(random(1, 350));
+	self.text:SetText(pad..message)
 	self:Show()
 end
 local spellqhol = ni.utils.generaterandomname();
@@ -223,17 +179,13 @@ local function FadeOut(frame, duration)
     end)
 end;
 function frames.floatingtext:message(message, fadeTime)
-	fadeTime = fadeTime or 2.5; 
-    local pad = "";
-    for i = 1, random(1, 255) do pad = pad .. "\124r" end
-    if not delStuff then    
-        self.text:SetText(pad .. message);
-        self:SetAlpha(1);
-        self.text:SetAlpha(1);
-        FadeOut(self, fadeTime);
-    else
-        ni.utils.print(pad .. message);
-    end
+	fadeTime = fadeTime or 2.5;
+    local pad = ni.utils.padding(random(1, 150));
+
+	self.text:SetText(pad .. message);
+	self:SetAlpha(1);
+	self.text:SetAlpha(1);
+	FadeOut(self, fadeTime);
 end;
 
 local keyevents = {};
@@ -264,16 +216,112 @@ local function ranvalue(minimum, maximum)
     return random()*(maximum-minimum) + minimum;
 end;
 
-local casting_events = function(self, event, ...)
-	if event == "COMBAT_LOG_EVENT_UNFILTERED" or event == "COMBAT_LOG_EVENT" then
+ni.functions.registercallback(keyevents, OnKeyHandler);
+
+
+local startCastEvents = {
+	["UNIT_SPELLCAST_SENT"] = true,
+	["UNIT_SPELLCAST_CHANNEL_START"] = true
+};
+local spellCastEvents = {
+	["UNIT_SPELLCAST_SUCCEEDED"] = true,
+	["UNIT_SPELLCAST_FAILED"] = true,
+	["UNIT_SPELLCAST_FAILED_QUIET"] = true,
+	["UNIT_SPELLCAST_INTERRUPTED"] = true,
+	["UNIT_SPELLCAST_CHANNEL_STOP"] = true,
+	["UNIT_SPELLCAST_STOP"] = true
+};
+local relevantEvents = {
+	["PARTY_MEMBERS_CHANGED"] = true,
+	["RAID_ROSTER_UPDATE"] = true,
+	["GROUP_ROSTER_UPDATE"] = true,
+	["PARTY_CONVERTED_TO_RAID"] = true,
+	["PLAYER_ENTERING_WORLD"] = true
+};
+local function handleCombatStart()
+	ni.vars.combat.counter = ni.vars.combat.counter + 1;
+	ni.vars.combat.started = true;
+	ni.vars.combat.time = GetTime();
+	ni.vars.combat.ended = 0;
+end;
+local function handleCombatEnd()
+	ni.vars.combat.started = false;
+	ni.vars.combat.time = 0;
+	ni.vars.combat.ended = GetTime();
+end;
+
+local eventsToRegister = {
+    -- 
+    "COMBAT_LOG_EVENT_UNFILTERED",
+    -- 
+    "PLAYER_LEAVING_WORLD",
+    -- 
+    "UNIT_SPELLCAST_SENT",
+    "UNIT_SPELLCAST_CHANNEL_START",
+    "UNIT_SPELLCAST_SUCCEEDED",
+    "UNIT_SPELLCAST_FAILED",
+    "UNIT_SPELLCAST_FAILED_QUIET",
+    "UNIT_SPELLCAST_INTERRUPTED",
+    "UNIT_SPELLCAST_CHANNEL_STOP",
+    "UNIT_SPELLCAST_STOP",
+    -- 
+    "ZONE_CHANGED_NEW_AREA",
+    -- 
+    "PLAYER_REGEN_DISABLED",
+    "PLAYER_REGEN_ENABLED",
+    -- 
+    "PARTY_MEMBERS_CHANGED",
+    "RAID_ROSTER_UPDATE",
+    "GROUP_ROSTER_UPDATE",
+    "PARTY_CONVERTED_TO_RAID",
+    "PLAYER_ENTERING_WORLD",
+};
+
+local PlayerName, PlayerRealm = UnitName("player"), GetRealmName();
+local filename = format("%s_%s.json", PlayerName, PlayerRealm);
+
+frames.main = CreateFrame("frame");
+for _, evt in ipairs(eventsToRegister) do
+    frames.main:RegisterEvent(evt);
+end;
+frames.OnEvent = function(self, event, ...)
+	if not ni.functionsregistered() then
+		return
+	end
+	for _, v in pairs(events) do
+		v(event, ...);
+	end
+	if event == "PLAYER_LEAVING_WORLD" then
+		ni.functions.freemaps();
+		ni.utils.savesetting(filename, ni.utils.json.encode(ni.vars));
+	end;
+	if event == "PLAYER_REGEN_DISABLED" then
+		ni.C_Timer.After(0, handleCombatStart);
+	elseif event == "PLAYER_REGEN_ENABLED" then
+		ni.C_Timer.After(0, handleCombatEnd);
+	end;
+	if startCastEvents[event] and not ni.vars.combat.casting then
+		local unit, spell = ...
+		if unit == "player" and not isspelltoignore(spell) then
+			ni.vars.combat.casting = true;
+		end
+	end;
+	if spellCastEvents[event] and ni.vars.combat.casting then
+		local unit, spell = ...
+		if unit == "player" and not isspelltoignore(spell) then
+			ni.vars.combat.casting = false;
+		end
+	end
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local subevent, source, dest, spellID, spellName
 		if ni.vars.build == 30300 then
 			_, subevent, _, source, _, _, dest, _, spellID, spellName = ...
 		elseif ni.vars.build >= 40300 then
 			local arg = {...}
 			subevent, source, dest, spellID, spellName = arg[2], arg[5], arg[9], arg[12], arg[13];
-		end	
-		if source == UnitName("player") then
+		end
+		lastEvent = GetTime();
+		if source == PlayerName then
 			if subevent == "SPELL_CAST_SUCCESS" or subevent == "SPELL_CAST_FAILED" and not isspelltoignore(spellName) then
 				if ni.vars.combat.casting then
 					ni.vars.combat.casting = false
@@ -281,58 +329,10 @@ local casting_events = function(self, event, ...)
 			end
 		end
 	end
-end;
-
-ni.functions.registercallback(keyevents, OnKeyHandler);
-frames.main = CreateFrame("frame");
-frames.main:RegisterAllEvents();
-frames.OnEvent = function(self, event, ...)
-	if not ni.functionsregistered() then
-		return
-	end
-	for _, v in pairs(events) do
-		v(event, ...);
-	end	
-	if event == "PLAYER_LEAVING_WORLD" then
-		ni.functions.freemaps();
-		ni.utils.savesetting(UnitName("player")..".json", ni.utils.json.encode(ni.vars));
-	end
-	if event == "PLAYER_REGEN_DISABLED" then
-		ni.vars.combat.counter = ni.vars.combat.counter + 1;
-		ni.vars.combat.started = true;
-		ni.vars.combat.time = GetTime();
-		ni.vars.combat.ended = 0;
-	end
-	if event == "PLAYER_REGEN_ENABLED" then
-		ni.vars.combat.started = false;
-		ni.vars.combat.time = 0;
-		ni.vars.combat.ended = GetTime();
-	end
-	if (event == "UNIT_SPELLCAST_SENT" or event == "UNIT_SPELLCAST_CHANNEL_START") and ni.vars.combat.casting == false then
-		local unit, spell = ...
-		if unit == "player" and not isspelltoignore(spell) then
-			ni.vars.combat.casting = true;
-		end
-	end
-	if (event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_FAILED_QUIET" 
-	or event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_STOP")
-	and ni.vars.combat.casting == true then
-		local unit, spell = ...
-		if unit == "player" and not isspelltoignore(spell) then
-			if ni.vars.combat.casting then
-				ni.vars.combat.casting = false;
-			end
-		end
-	end
-
-	casting_events(self, event, ...);
-	icdtracker_events(self, event, ...);
 	drtracker_events(self, event, ...);
-	
-	if (event == "PARTY_MEMBERS_CHANGED" or event == "RAID_ROSTER_UPDATE" or event == "GROUP_ROSTER_UPDATE" or event == "PARTY_CONVERTED_TO_RAID" or event == "ZONE_CHANGED" or event == "PLAYER_ENTERING_WORLD") then
+	if relevantEvents[event] then
 		ni.members.reset();
-	end
-	
+	end;
 	if event == "ZONE_CHANGED_NEW_AREA" then
 		if #ni.utils.name_for_func > 55 then
 			local numToDelete = math.min(15, #ni.utils.name_for_func);
@@ -345,14 +345,14 @@ frames.OnEvent = function(self, event, ...)
 			CombatLogClearEntries();
 		end
 		instanceType = type;
-	end	
+	end
 end;
 frames.OnUpdate = function(self, elapsed)
 	if not ni.functionsregistered() then
 		totalelapsed = 0;
 		return true;
 	end
-	if select(11, ni.player.debuff(9454)) == 9454 then
+	if ni.player.debuff(9454) then
 		return true;
 	end
 	local time = GetTime();
@@ -408,7 +408,7 @@ frames.OnUpdate = function(self, elapsed)
 		
 		if ni.objects then
 			local xtime = GetTime();
-			local tmp = ni.objectmanager.get() or {};
+			local tmp = ni.objectmanager.get();
 			for i = 1, #tmp do
 				local ob = ni.objects:new(tmp[i].guid, tmp[i].type, tmp[i].name);
 				if ob then
@@ -544,22 +544,58 @@ frames.OnUpdate = function(self, elapsed)
 	end
 end;
 
+local handlerRegistry = {};
+local eventCallbacks = {};
+local ProfileEventFrame = CreateFrame("Frame");
+
+ProfileEventFrame:SetScript("OnEvent", function(self, event, ...)
+    if eventCallbacks[event] then
+        for _, callback in pairs(eventCallbacks[event]) do
+            callback(event, ...);
+        end
+    end
+end);
+
 local combatlog = {
-	registerhandler = function(name, callback)
-		if not events[name] then
-			events[name] = callback;
-			return true;
-		end
-		return false;
-	end,
-	unregisterhandler = function(name)
-		if events[name] then
-			events[name] = nil;
-			return true;
-		end
-		return false;
-	end
+    registerhandler = function(profileName, events, callback)
+        if handlerRegistry[profileName] then return false end
+        
+        handlerRegistry[profileName] = {
+            events = events,
+            callback = callback
+        }
+        for _, event in ipairs(events) do
+            if not eventCallbacks[event] then
+                eventCallbacks[event] = {}
+                ProfileEventFrame:RegisterEvent(event);
+            end
+            tinsert(eventCallbacks[event], callback);
+        end
+        return true;
+    end,
+    
+    unregisterhandler = function(profileName)
+        local profile = handlerRegistry[profileName];
+        if not profile then return false end
+        
+        for _, event in ipairs(profile.events) do
+            if eventCallbacks[event] then
+                for i = #eventCallbacks[event], 1, -1 do
+                    if eventCallbacks[event][i] == profile.callback then
+                        tremove(eventCallbacks[event], i);
+                    end
+                end
+                if #eventCallbacks[event] == 0 then
+                    ProfileEventFrame:UnregisterEvent(event);
+                    eventCallbacks[event] = nil;
+                end
+            end
+        end
+        handlerRegistry[profileName] = nil;
+        return true;
+    end
 };
+
 local function delayfor(delay, callback)
 	if type(delay) ~= "number" or type(callback) ~= "function" then
 		return false;
@@ -568,4 +604,4 @@ local function delayfor(delay, callback)
 	return true;
 end;
 
-return frames, combatlog, delayfor, icdtracker, keyevents;
+return frames, combatlog, delayfor, keyevents;

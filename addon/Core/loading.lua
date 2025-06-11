@@ -1,6 +1,7 @@
 local fold = ni.functions.getbasefolder();
 local req = ni.require;
 local json = req(fold.."addon\\core\\json.lua");
+
 local function secureStuff(randomFunc)
     local safeFunctions = {
         "AttackTarget", "AssistUnit", "AcceptProposal", "AcceptResurrect", "AcceptTrade",
@@ -27,7 +28,7 @@ ni.loadstuff = function()
 		if type(content) == "string" then
 			if content:match('^{(.*)}$') then
 				return json.decode(content)
-			elseif content ~= "" then
+		elseif content ~= "" then
 				ni.C_Timer.After(3, function()
 					message("\nThe configuration file was reseted,\nbecause the file was corrupted!")
 				end)
@@ -35,9 +36,13 @@ ni.loadstuff = function()
 		end
 		return req(fold.."addon\\core\\vars.lua")
 	end
-	local pathFile = fold.."addon\\settings\\"..UnitName("player")..".json"
+
+	local PlayerName, PlayerRealm = UnitName("player"), GetRealmName();
+	local filename = format("%s_%s.json", PlayerName, PlayerRealm);
+	local pathFile = fold.."addon\\settings\\"..filename;
+
 	ni.vars = loadFileSettings(pathFile)
-	
+
 	-- ################################################################################
 	-- Put here all the ni.vars that are necessary to reset after the loadFileSettings
 	-- ################################################################################
@@ -77,7 +82,7 @@ ni.loadstuff = function()
 	ni.unit = req(fold.."addon\\core\\unit.lua");
 	ni.player = req(fold.."addon\\core\\player.lua");
 	ni.spell = req(fold.."addon\\core\\spell.lua");
-	ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = req(fold.."addon\\core\\frames.lua");
+	ni.frames, ni.combatlog, ni.delayfor, ni.events = req(fold.."addon\\core\\frames.lua");
 	
 	ni.power, ni.rune = req(fold.."addon\\core\\power.lua");
 	ni.healing, ni.tanks = req(fold.."addon\\core\\healing.lua");
@@ -216,7 +221,7 @@ ni.loadstuff = function()
 			end
 		end
 	end;
-	
+
 	local orig_GetSpellInfo = GetSpellInfo;
 	local spell_db = {};
 	function GetSpellInfo(spell)
@@ -234,15 +239,6 @@ ni.loadstuff = function()
 		else
 			return orig_GetSpellInfo(spell);
 		end
-	end;
-	
-	local old_UnitGUID = UnitGUID
-	function UnitGUID(unit)
-		local guid = old_UnitGUID(unit)
-		if not guid and (unit == "player" or unit == "0x0") then
-			return "0x0";
-		end
-		return guid;
 	end;
 
 	local _GetFramesRegisteredForEvent = GetFramesRegisteredForEvent;

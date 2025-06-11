@@ -166,47 +166,46 @@ local function onDragStop(self)
 end
 
 local function createButton(name, object, db)
-	local button = CreateFrame("Button", "LibDBIcon10_"..name, Minimap)
-	-- local button = CreateFrame("Button", nil, Minimap)
-	button.dataObject = object
-	button.db = db
+	local lvl = random(1, 7);
+	local button = CreateFrame("Button", name, Minimap);
+	button.dataObject = object;
+	button.db = db;
 	button:SetFrameStrata("MEDIUM")
-	button:SetWidth(31); button:SetHeight(31)
-	button:SetFrameLevel(8)
-	button:RegisterForClicks("anyUp")
-	button:RegisterForDrag(object.RegisterForDrag)
-	button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-	local overlay = button:CreateTexture(nil, "OVERLAY")
-	overlay:SetWidth(53); overlay:SetHeight(53)
-	overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-	overlay:SetPoint("TOPLEFT")
-	local icon = button:CreateTexture(nil, "BACKGROUND")
-	icon:SetWidth(20); icon:SetHeight(20)
-	icon:SetTexture(object.icon)
-	icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
-	-- icon:SetPoint("TOPLEFT", 7, -5)
-	icon:SetPoint("TOPLEFT", 7, -7)
-	button.icon = icon
+	button:SetWidth(32); button:SetHeight(32);
+	button:SetFrameLevel(lvl);
+	button:RegisterForClicks("anyUp");
+	button:RegisterForDrag(object.RegisterForDrag);
+	button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight");
+	local overlay = button:CreateTexture(nil, "OVERLAY");
+	overlay:SetWidth(54); overlay:SetHeight(54);
+	overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder");
+	overlay:SetPoint("TOPLEFT");
+	local icon = button:CreateTexture(nil, "BACKGROUND");
+	icon:SetWidth(18); icon:SetHeight(18);
+	icon:SetTexture(object.icon);
+	icon:SetTexCoord(0.05, 0.95, 0.05, 0.95);
+	icon:SetPoint("TOPLEFT", 7, -7);
+	button.icon = icon;
 
-	button:SetScript("OnEnter", onEnter)
-	button:SetScript("OnLeave", onLeave)
-	button:SetScript("OnClick", onClick)
-	button:SetScript("OnDragStart", onDragStart)
-	button:SetScript("OnDragStop", onDragStop)
-	button:SetScript("OnMouseDown", onMouseDown)
-	button:SetScript("OnMouseUp", onMouseUp)
+	button:SetScript("OnEnter", onEnter);
+	button:SetScript("OnLeave", onLeave);
+	button:SetScript("OnClick", onClick);
+	button:SetScript("OnDragStart", onDragStart);
+	button:SetScript("OnDragStop", onDragStop);
+	button:SetScript("OnMouseDown", onMouseDown);
+	button:SetScript("OnMouseUp", onMouseUp);
 
-	lib.objects[name] = button
+	lib.objects[name] = button;
 
 	if lib.loggedIn then
 		updatePosition(button)
 		if not db or not db.hide then
-			button:Show()
+			button:Show();
 		else
-			button:Hide()
+			button:Hide();
 		end
 	end
-end
+end;
 
 -- We could use a metatable.__index on lib.objects, but then we'd create
 -- the icons when checking things like :IsRegistered, which is not necessary.

@@ -150,11 +150,22 @@ end;
 utils.istable = function(f)
 	return type(f) == "table";
 end;
-utils.print = function(message)
-	local dap = ""
-	for i = 1, random(1, 255) do 
-		dap = dap.."\124r" 
+
+local getPadCache = {};
+utils.padding = function(count)
+	if not getPadCache[count] then
+		local pad = "";
+		for i = 1, count do
+			pad = pad.."\124r";
+		end
+		getPadCache[count] = pad;
 	end
+	return getPadCache[count];
+end;
+
+utils.print = function(message)
+	local dap = utils.padding(random(1, 255));
 	return print(dap..message);
 end;
+
 return mwcexports, utils;
