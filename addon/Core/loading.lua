@@ -77,7 +77,7 @@ ni.loadstuff = function()
 	ni.unit = req(fold.."addon\\core\\unit.lua");
 	ni.player = req(fold.."addon\\core\\player.lua");
 	ni.spell = req(fold.."addon\\core\\spell.lua");
-	ni.frames, ni.combatlog, ni.delayfor, ni.events = req(fold.."addon\\core\\frames.lua");
+	ni.frames, ni.combatlog, ni.delayfor, ni.icdtracker, ni.events = req(fold.."addon\\core\\frames.lua");
 	
 	ni.power, ni.rune = req(fold.."addon\\core\\power.lua");
 	ni.healing, ni.tanks = req(fold.."addon\\core\\healing.lua");
@@ -216,7 +216,7 @@ ni.loadstuff = function()
 			end
 		end
 	end;
-
+	
 	local orig_GetSpellInfo = GetSpellInfo;
 	local spell_db = {};
 	function GetSpellInfo(spell)
@@ -234,6 +234,15 @@ ni.loadstuff = function()
 		else
 			return orig_GetSpellInfo(spell);
 		end
+	end;
+	
+	local old_UnitGUID = UnitGUID
+	function UnitGUID(unit)
+		local guid = old_UnitGUID(unit)
+		if not guid and (unit == "player" or unit == "0x0") then
+			return "0x0";
+		end
+		return guid;
 	end;
 
 	local _GetFramesRegisteredForEvent = GetFramesRegisteredForEvent;

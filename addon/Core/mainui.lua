@@ -1,6 +1,6 @@
 local ru = ni.vars.locale == "ruRU" or false;
 local build = ni.vars.build;
-local _, playerclass = UnitClass("player");
+local playerclass = select(2, UnitClass("player"));
 local main_ui = {};
 local Localization = {
 	Assistant = "Rotation Assistant",
@@ -209,13 +209,15 @@ local function moveIcon(self)
 end;
 local r, g, b, a, slid = .3,.3,.3,.75, 15;
 local mr, mg, mb = 0.2, 0.7, 1;
+local uiScale = GetCVar("uiScale") or 1;
 local backdrop = {
 	bgFile = "Interface/Tooltips/UI-Tooltip-Background", 
 	edgeFile = "Interface/Buttons/WHITE8X8", 
 	tile = true, tileSize = 16, edgeSize = 3, 
 	insets = { left = 2, right = 2, top = 2, bottom = 2 }
 };
-main_ui.main = CreateFrame("frame", nil, UIParent);
+local mframeran = ni.utils.generaterandomname();
+main_ui.main = CreateFrame("frame", mframeran, UIParent);
 local frame = main_ui.main;
 frame:ClearAllPoints();
 frame:SetMovable(true);
@@ -241,7 +243,7 @@ frame:Hide();
 
 local profiles = {};
 local function GetFilename(file)
-    return file:match("^.*\\(.*).lua$") or file:match("^.*\\(.*).enc$") or file;
+    return file:match("^.*\\(.*).lua$") or file:match("^.*\\(.*).enc$") or file:match("^.*\\(.*).out$") or file;
 end;
 if build == 30300 then
 	Expansion = "Wrath of the Lich King Mode"
@@ -262,18 +264,20 @@ tinsert(generic_profiles, 1, Localization.None);
 
 --- Draw UI Elements ---
 
-local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)	
-	local text = CreateFrame("frame", nil, frame);
+local function CreateText(frame, settext, offset_x, offset_y, r, g, b, a)
+	local textran = ni.utils.generaterandomname();	
+	local text = CreateFrame("frame", textran, frame);
 	text:ClearAllPoints();
 	text:SetHeight(20);
-	text:SetWidth(220);
+	text:SetWidth(200);
 	text:SetPoint("TOP", frame, offset_x, offset_y);
 	text.text = text:CreateFontString(nil, "BACKGROUND", "GameFontNormal");
 	text.text:SetAllPoints();
 	text.text:SetJustifyH("CENTER");
 	text.text:SetJustifyV("MIDDLE");
-	local pad = ni.utils.padding(random(1, 255));
-	text.text:SetText(pad..settext);
+	local pad = ""
+	for i= 1, math.random(1,255) do pad = pad .. "\124r" end
+	text.text:SetText(pad .. settext);
 	text.text:SetTextColor(r, g, b, a);
 	
 	return text;
@@ -307,7 +311,8 @@ local function CreateDropDownText(frame, settext, offset_x, offset_y, position, 
 	text.text:SetJustifyH(position);
 	text.text:SetJustifyV("MIDDLE");
 	text.text:SetWordWrap(false);
-	local pad = ni.utils.padding(random(1, 350));
+	local pad = ""
+    for i = 1, random(1, 255) do pad = pad .. "\124r" end
 	text.text:SetText(pad..settext);
     if tooltipText then
 		text:EnableMouse(true);
@@ -329,8 +334,8 @@ local function CreateDropDownText(frame, settext, offset_x, offset_y, position, 
 end;
 
 local function CreateKeyDropDown(frame, keys, offset_x, offset_y, var, wdh)
-	local dropdownmenu = ni.utils.generaterandomname();
-	local dropdown = CreateFrame("frame", dropdownmenu, frame, "UIDropDownMenuTemplate");
+	local name = ni.utils.generaterandomname();
+	local dropdown = CreateFrame("frame", name, frame, "UIDropDownMenuTemplate");
 	dropdown:ClearAllPoints();
 	dropdown:SetPoint("TOP", frame, offset_x, offset_y);
 	dropdown:Show();	
@@ -458,7 +463,8 @@ local function CreateConfigurableEditBox(frame, offsetX, offsetY, var)
 end;
 
 local function CreateEditBox(frame, offset_x, offset_y, var)
-	local edit = CreateFrame("EditBox", nil, frame);
+	local name = ni.utils.generaterandomname();
+	local edit = CreateFrame("EditBox", name, frame);
 	edit:SetHeight(20)
 	edit:SetWidth(124);
 	edit:SetPoint("TOP", frame, offset_x, offset_y)
@@ -488,7 +494,8 @@ local function CreateEditBox(frame, offset_x, offset_y, var)
 end
 
 local function CreateCheckBox(frame, offset_x, offset_y, checked, func, value)
-	local check = CreateFrame("CheckButton", nil, frame, "OptionsBaseCheckButtonTemplate");
+	local name = ni.utils.generaterandomname();
+	local check = CreateFrame("CheckButton", name, frame, "OptionsBaseCheckButtonTemplate");
 	check:SetPoint("TOP", offset_x, offset_y);
 	check:SetSize(26, 26);
 	check:SetChecked(checked);
@@ -513,7 +520,8 @@ local genericDropdown = CreateDropdown(frame, -185, generic_profiles, "generic")
 
 --- Draw UI Frames ---
 
-local mainsettings = CreateFrame("frame", nil, frame);
+local msetran = ni.utils.generaterandomname();
+local mainsettings = CreateFrame("frame", msetran, frame);
 mainsettings:ClearAllPoints();
 mainsettings:SetWidth(220);
 mainsettings:SetHeight(530);
@@ -524,7 +532,8 @@ mainsettings:SetBackdropColor(.1,.1,.1, 1);
 mainsettings:SetBackdropBorderColor(r,g,b,a);
 mainsettings:Hide();
 
-local settings = CreateFrame("frame", nil, frame);
+local setran = ni.utils.generaterandomname();
+local settings = CreateFrame("frame", setran, frame);
 settings:ClearAllPoints();
 settings:SetWidth(200);
 settings:SetHeight(380);
@@ -535,7 +544,8 @@ settings:SetBackdropColor(.1,.1,.1, 1);
 settings:SetBackdropBorderColor(r,g,b,a);
 settings:Hide();
 
-local resourcesettings = CreateFrame("frame", nil, frame);
+local ressetran = ni.utils.generaterandomname();
+local resourcesettings = CreateFrame("frame", ressetran, frame);
 resourcesettings:ClearAllPoints();
 resourcesettings:SetWidth(320);
 resourcesettings:SetHeight(280);
@@ -546,7 +556,8 @@ resourcesettings:SetBackdropColor(.1,.1,.1, 1);
 resourcesettings:SetBackdropBorderColor(r,g,b,a);
 resourcesettings:Hide();
 
-local creaturesettings = CreateFrame("frame", nil, frame);
+local creatsetran = ni.utils.generaterandomname();
+local creaturesettings = CreateFrame("frame", creatsetran, frame);
 creaturesettings:ClearAllPoints();
 creaturesettings:SetWidth(320);
 creaturesettings:SetHeight(200);
@@ -830,22 +841,22 @@ local keys = {
 CreateText(mainsettings, Localization.Reload, 0, -7, 0.8, 0.1, 0.1, 1);
 CreateText(mainsettings, Localization.Global, 0, -22, 0.8, 0.1, 0.1, 1);
 
-CreateDropDownText(mainsettings, Localization.GUI, 0, -44, "CENTER", nil, 200);
+CreateDropDownText(mainsettings, Localization.GUI, 0, -44);
 CreateKeyDropDown(mainsettings, keys, 0, -63, "gui", 75);
 
-CreateDropDownText(mainsettings, Localization.PrimaryKey, 0, -90, "CENTER", nil, 200);
+CreateDropDownText(mainsettings, Localization.PrimaryKey, 0, -90);
 CreateKeyDropDown(mainsettings, keys, 0, -110, "primary", 75);
 
-CreateDropDownText(mainsettings, Localization.SecondaryKey, 0, -140, "CENTER", nil, 200);
+CreateDropDownText(mainsettings, Localization.SecondaryKey, 0, -140);
 CreateKeyDropDown(mainsettings, keys, 0, -160, "secondary", 75);
 
-CreateDropDownText(mainsettings, Localization.Generic, 0, -190, "CENTER", nil, 200);
+CreateDropDownText(mainsettings, Localization.Generic, 0, -190);
 CreateKeyDropDown(mainsettings, keys, 0, -210, "generic", 75);
 
-CreateDropDownText(mainsettings, Localization.Interrupt, 0, -240, "CENTER", nil, 200);
+CreateDropDownText(mainsettings, Localization.Interrupt, 0, -240);
 CreateKeyDropDown(mainsettings, keys, 0, -260, "interrupt", 75);
 
-CreateDropDownText(mainsettings, Localization.Follow, 0, -290, "CENTER", nil, 200);
+CreateDropDownText(mainsettings, Localization.Follow, 0, -290);
 local followE = CreateConfigurableEditBox(mainsettings, 0, -310, "units.follow");
 CreateKeyDropDown(mainsettings, keys, 0, -335, "follow", 75);
 CreateDropDownText(mainsettings, Localization.IsMelee, -10, -365); 
@@ -987,14 +998,14 @@ function MiniMapLDB:OnClick(button)
         ni.functions.open("https://github.com/darhanger/ni/releases")
     end 	
     if button == "MiddleButton" then
-        ni.functions.open("https://discord.gg/ZKFkvrzaU4")
+        ni.functions.open("https://discord.gg/xBFKJc6QRr")
     end        
 end;
 function MiniMapLDB:OnDragStop()
     ni.vars.ui.iconPos = self.db.minimapPos
 end;
 function MiniMapLDB:OnTooltipShow()
-    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.68")
+    self:AddLine("|c0000CED1"..Localization.Assistant.."  v0.0.67")
     self:AddLine(" ")
     self:AddLine(Localization.LeftClick)
 	self:AddLine(Localization.RightClick)

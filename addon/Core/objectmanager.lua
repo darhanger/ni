@@ -11,7 +11,6 @@ local objectmanager = {};
 objectmanager.get = function()
     return ni.functions.getom();
 end;
-
 objectmanager.contains = function(o)
     local tmp = UnitName(o);
     if tmp then
@@ -19,13 +18,13 @@ objectmanager.contains = function(o)
     end;
     for k, v in pairs(objects) do
         if not isFunction(k)
-        and (isString(k) and isTable(v)) then
-            if v.name == o then
-                return true;
-            end
-        end
-    end
-    return false;
+		and (isString(k) and isTable(v)) then
+			if v.name == o then
+				return true;
+			end
+		end
+	end
+	return false;
 end;
 objectmanager.objectGUID = function(o)
     if tonumber(o) then
@@ -37,19 +36,19 @@ objectmanager.objectGUID = function(o)
         end
         for k, v in pairs(objects) do
             if not isFunction(k)
-            and (isString(k) and isTable(v)) then
-                if v.name == o then
-                    return k;
-                end
-            end
-        end
-    end
+			and (isString(k) and isTable(v)) then
+				if v.name == o then
+					return k;
+				end
+			end
+		end
+	end
 end;
 objectmanager.objectCount = function()
     local totalCount = 0;
     for k, v in pairs(objects) do
         if not isFunction(k)
-        and (isString(k) and isTable(v)) then
+		and (isString(k) and isTable(v)) then
             if objectmanager.contains(v.name) then
                 totalCount = totalCount + 1;
             end
@@ -60,9 +59,9 @@ end;
 local objectsetup = {};
 objectsetup.cache = {};
 objectsetup.cache.__index = {
-    guid = 0,
-    name = unknown,
-    type = 0
+	guid = 0,
+	name = unknown,
+	type = 0
 };
 setmetatable(
     objects,
@@ -83,179 +82,152 @@ setmetatable(
     }
 );
 function objects:get(objguid, objtype, objname)
-    if objectsetup.cache[objguid] then
-        return objectsetup.cache[objguid];
-    else
-        return objects:create(objguid, objtype, objname);
-    end
+	if objectsetup.cache[objguid] then
+		return objectsetup.cache[objguid];
+	else
+		return objects:create(objguid, objtype, objname);
+	end
 end;
 function objects:create(objguid, objtype, objname)
-    local o = {};
-    setmetatable(o, objectsetup);
-    if objguid then
-        o.guid = objguid
-        o.name = objname
-        o.type = objtype
-    end;
-    local oGuid, oName, oType = o.guid, o.name, o.type;
-    function o:exists()
-        return uniExi(oGuid);
-    end;
-    function o:info()
-        local z = uniNewZ(oGuid);
-        local x, y, _, facing, unittype, target, height = uniInf(oGuid);
-        return x, y, z, facing, unittype, target, height;
-    end;
-    function o:hp()
-        return uniHP(oGuid);
-    end;
-    function o:power(t)
-        return uniPow(oGuid, t);
-    end;
-    function o:powermax(t)
-        return uniPowM(oGuid, t);
-    end;
-    function o:unit()
-        return oType == 3;
-    end
-    function o:player()
-        return oType == 4;
-    end;
-    function o:object()
-        return oType == 5;
-    end;
-    function o:id()
-        if oType == 3 then
-            return uniID(oGuid);
-        elseif oType == 5 and tonumber(oGuid) then
-            return tonumber(oGuid:sub(8, 12), 16);
-        end
-        return nil;
-    end;
-    function o:canattack(tar)
-        local t = true and tar or pla;
-        return uniAttack(t, oGuid);
-    end;
-    function o:canassist(tar)
-        local t = true and tar or pla;
-        return uniAssist(t, oGuid);
-    end;
-    function o:los(tar)
-        local t = true and tar or pla;
-        return uniLoS(oGuid, t);
-    end;
-    function o:cast(spell)
-        uniCast(spell, oGuid);
-    end;
-    function o:castat(spell)
-        local LoS = ni.player.los;
-        if LoS(oGuid) then
-            uniCastAt(spell, oGuid);
-        end
-    end;
-    function o:combat()
-        return uniCom(oGuid);
-    end;
-    function o:isbehind(tar, rev)
-        local t = true and tar or pla;
-        if rev then
-            return uniBeh(t, oGuid);
-        end
-        return uniBeh(oGuid, t);
-    end;
-    function o:isfacing(tar, rev)
-        local t = true and tar or pla;
-        if rev then
-            return uniFac(t, oGuid);
-        end
-        return uniFac(oGuid, t);
-    end;
-    function o:distance(tar)
-        local t = true and tar or pla;
-        return uniDis(oGuid, t);
-    end;
-    function o:range(tar)
-        local dist = o:distance(tar);
-        return (dist <= 60) and true or false;
-    end;
-    function o:creator()
-        return uniCreat(oGuid);
-    end;
-    function o:target()
-        local _, _, _, _, _, t = uniInf(oGuid);
-        return t;
-    end;
-    function o:location()
-        local z = uniNewZ(oGuid)
-        local x, y, _, r = uniInf(oGuid);
-        local t = {
-            x = x,
-            y = y,
-            z = z,
-            r = r
-        };
-        return t;
-    end;
-    function o:calculatettd()
+	local o = {};
+	setmetatable(o, objectsetup);
+	if objguid then
+		o.guid = objguid
+		o.name = objname
+		o.type = objtype
+	end;
+	local oGuid, oName, oType = o.guid, o.name, o.type;
+	function o:exists()
+		return uniExi(oGuid);
+	end;
+	function o:info()
+		local z = uniNewZ(oGuid);
+		local x, y, _, facing, unittype, target, height = uniInf(oGuid);
+		return x, y, z, facing, unittype, target, height;
+	end;
+	function o:hp()
+		return uniHP(oGuid);
+	end;
+	function o:power(t)
+		return uniPow(oGuid, t);
+	end;
+	function o:powermax(t)
+		return uniPowM(oGuid, t);
+	end;
+	function o:unit()
+		return oType == 3;
+	end
+	function o:player()
+		return oType == 4;
+	end;
+	function o:object()
+		return oType == 5;
+	end;
+	function o:id()
+		if oType == 3 then
+			return uniID(oGuid);
+		elseif oType == 5 and tonumber(oGuid) then
+			return tonumber(oGuid:sub(8, 12), 16);
+		end
+		return nil;
+	end;
+	function o:canattack(tar)
+		local t = true and tar or pla;
+		return uniAttack(t, oGuid);
+	end;
+	function o:canassist(tar)
+		local t = true and tar or pla;
+		return uniAssist(t, oGuid);
+	end;
+	function o:los(tar)
+		local t = true and tar or pla;
+		return uniLoS(oGuid, t);
+	end;
+	function o:cast(spell)
+		uniCast(spell, oGuid);
+	end;
+	function o:castat(spell)
+		local LoS = ni.player.los;
+		if LoS(oGuid) then
+			uniCastAt(spell, oGuid);
+		end
+	end;
+	function o:combat()
+		return uniCom(oGuid);
+	end;
+	function o:isbehind(tar, rev)
+		local t = true and tar or pla;
+		if rev then
+			return uniBeh(t, oGuid);
+		end
+		return uniBeh(oGuid, t);
+	end;
+	function o:isfacing(tar, rev)
+		local t = true and tar or pla;
+		if rev then
+			return uniFac(t, oGuid);
+		end
+		return uniFac(oGuid, t);
+	end;
+	function o:distance(tar)
+		local t = true and tar or pla;
+		return uniDis(oGuid, t);
+	end;
+	function o:range(tar)
+		local dist = o:distance(tar);
+		return (dist <= 60) and true or false;
+	end;
+	function o:creator()
+		return uniCreat(oGuid);
+	end;
+	function o:target()
+		local _, _, _, _, _, t = uniInf(oGuid);
+		return t;
+	end;
+	function o:location()
+		local z = uniNewZ(oGuid)
+		local x, y, _, r = uniInf(oGuid);
+		local t = {
+			x = x,
+			y = y,
+			z = z,
+			r = r
+		};
+		return t;
+	end;
+	function o:calculatettd()
 		return ni.ttd.calculate(o);
-    end;
-    function o:updateobject()
-        o.guid = oGuid;
-        o.name = (oName ~= unknown and oName ~= "UNKNOWNOBJECT") and oName or UnitName(oGuid);
-        o.type = oType;
-        o:calculatettd();
-    end;
-    
+	end;
+	function o:updateobject()
+		o.guid = oGuid;
+		o.name = (oName ~= unknown and oName ~= "UNKNOWNOBJECT") and oName or UnitName(oGuid);
+		o.type = oType;
+		o:calculatettd();
+	end;
+	
     objectsetup.cache[objguid] = o;
     return o;
 end;
 function objects:new(objguid, objtype, objname)
-    local dist = ni.unit.distance;
-    if objectsetup.cache[objguid] then
-        return false;
-    end    
-    if dist(pla, objguid) <= 90 then
-        return objects:create(objguid, objtype, objname);
-    end
+	if objectsetup.cache[objguid] then
+		return false
+	end
+	return objects:create(objguid, objtype, objname)
 end;
-
-local function round(num, idp)
-    local mult = 10^(idp or 0);
-    return floor(num * mult + 0.5) / mult;
-end;
-
-local function UpdateRate()
-    local FrameRate = floor(GetFramerate()) or 0;
-    if FrameRate >= 0 and FrameRate < 52 then
-        return round((60-FrameRate)/60, 2);
-    else
-        return round(math_random(6, 12)/100, 2);
-    end
-end;
-
 function objects:updateobjects()
-    local xtime = GetTime();
-    local objects = objects;
-    local cache = objectsetup.cache;
-    local currentRate = UpdateRate();
-
-    local isFunction = isFunction;
-    local isString = isString;
-    local isTable = isTable;
-
-    for GUID, object in pairs(objects) do
-        if not isFunction(GUID) and isString(GUID) and isTable(object) then
-            if not object.lastupdate or xtime >= (object.lastupdate + currentRate) then
-                object.lastupdate = xtime;
-                if not object:exists() then
-                    cache[GUID] = nil;
-                    objects[GUID] = nil;
-                else
-                    object:updateobject();
-                end
-            end
-        end
-    end
+	for k, v in pairs(objects) do
+		if type(k) ~= "function" and (type(k) == "string" and type(v) == "table") then
+			if v.lastupdate == nil or GetTime() >= (v.lastupdate + (random(1, 12) / 100)) then
+				v.lastupdate = GetTime()
+				if not v:exists() then
+					objectsetup.cache[k] = nil
+					objects[k] = nil
+				else
+					v:updateobject()
+				end
+			end
+		end
+	end
 end;
 
 return objects, objectmanager;

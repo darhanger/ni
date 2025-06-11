@@ -263,8 +263,9 @@ local function CreateText(frame, text)
 	local textran = ni.utils.generaterandomname();
 	local TextFrame = frame:CreateFontString(textran, "OVERLAY", "GameFontHighlight");
 	TextFrame:SetPoint("CENTER", 0, 0);
-	local pad = ni.utils.padding(random(1, 250));
-	TextFrame:SetText(pad..text);
+	local pad = ""
+	for i = 1, random(1,255) do pad = pad .. "\124r" end
+	TextFrame:SetText(pad .. text);
 	TextFrame:SetTextHeight(12);
 	TextFrame:SetJustifyH("CENTER");
 	TextFrame:SetJustifyV("CENTER");
